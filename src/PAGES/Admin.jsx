@@ -52,6 +52,10 @@ const Admin = () => {
   const [courseCategory, setCourseCategory] = useState('');
   const [courseStudents, setCourseStudents] = useState(0);
   const [courseRating, setCourseRating] = useState(0);
+  const [courseDescription, setCourseDescription] = useState('');
+  const [courseImageUrl, setCourseImageUrl] = useState('');
+  const [coursePrice, setCoursePrice] = useState(0);
+  const [courseInstructor, setCourseInstructor] = useState('');
 
   const [editingCourseId, setEditingCourseId] = useState(null);
   const [courseStatus, setCourseStatus] = useState('');
@@ -277,7 +281,7 @@ const Admin = () => {
       const { data, error } = await supabase
         .from('courses')
         .select(
-          'id, title, category, students, rating'
+          'id, title, category, students, rating, description, image_url, price, instructor'
         )
         .order('id', { ascending: false });
 
@@ -321,6 +325,10 @@ const Admin = () => {
         category: courseCategory.trim(),
         students: Number(courseStudents) || 0,
         rating: Number(courseRating) || 0,
+        description: courseDescription.trim(),
+        image_url: courseImageUrl.trim(),
+        price: Number(coursePrice) || 0,
+        instructor: courseInstructor.trim(),
       };
 
       let error;
@@ -408,6 +416,10 @@ const Admin = () => {
     setCourseCategory(course.category || '');
     setCourseStudents(course.students || 0);
     setCourseRating(course.rating || 0);
+    setCourseDescription(course.description || '');
+    setCourseImageUrl(course.image_url || '');
+    setCoursePrice(course.price || 0);
+    setCourseInstructor(course.instructor || '');
     setCourseStatus('');
 
     window.scrollTo({
@@ -425,6 +437,10 @@ const Admin = () => {
     setCourseCategory('');
     setCourseStudents(0);
     setCourseRating(0);
+    setCourseDescription('');
+    setCourseImageUrl('');
+    setCoursePrice(0);
+    setCourseInstructor('');
     setCourseStatus('');
   };
 
@@ -1095,7 +1111,109 @@ const Admin = () => {
                       borderRadius: '8px',
                     }}
                   />
+
+                  <input
+                    type="text"
+                    placeholder="Instructor Name"
+                    value={courseInstructor}
+                    onChange={(e) =>
+                      setCourseInstructor(
+                        e.target.value
+                      )
+                    }
+                    style={{
+                      padding: '14px',
+                      border:
+                        '1px solid #ddd',
+                      borderRadius: '8px',
+                    }}
+                  />
+
+                  <input
+                    type="number"
+                    placeholder="Price (0 = Free)"
+                    value={coursePrice}
+                    onChange={(e) =>
+                      setCoursePrice(
+                        e.target.value
+                      )
+                    }
+                    min="0"
+                    step="0.01"
+                    style={{
+                      padding: '14px',
+                      border:
+                        '1px solid #ddd',
+                      borderRadius: '8px',
+                    }}
+                  />
+
+                  <input
+                    type="url"
+                    placeholder="Image URL"
+                    value={courseImageUrl}
+                    onChange={(e) =>
+                      setCourseImageUrl(
+                        e.target.value
+                      )
+                    }
+                    style={{
+                      padding: '14px',
+                      border:
+                        '1px solid #ddd',
+                      borderRadius: '8px',
+                    }}
+                  />
                 </div>
+
+                <textarea
+                  placeholder="Course Description"
+                  value={courseDescription}
+                  onChange={(e) =>
+                    setCourseDescription(
+                      e.target.value
+                    )
+                  }
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '14px',
+                    border: '1px solid #ddd',
+                    borderRadius: '8px',
+                    marginTop: '15px',
+                    resize: 'vertical',
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit',
+                  }}
+                />
+
+                {courseImageUrl && (
+                  <div style={{ marginTop: '15px' }}>
+                    <p
+                      style={{
+                        fontSize: '0.85rem',
+                        color: '#888',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      Image Preview:
+                    </p>
+                    <img
+                      src={courseImageUrl}
+                      alt="Course preview"
+                      style={{
+                        maxWidth: '220px',
+                        maxHeight: '130px',
+                        borderRadius: '8px',
+                        border: '1px solid #ddd',
+                        objectFit: 'cover',
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
 
                 {courseStatus && (
                   <p
