@@ -1,4 +1,4 @@
-[7/23/2026 10:48 PM] Ah Mm: import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import '../App.css';
@@ -137,7 +137,7 @@ const Courses = () => {
 
   const [lessonProgress, setLessonProgress] =
     useState([]);
-[7/23/2026 10:48 PM] Ah Mm: // ============================================================
+// ============================================================
   // REVIEWS
   // ============================================================
 
@@ -317,7 +317,7 @@ const Courses = () => {
 
       if (error) {
         console.error(
-[7/23/2026 10:48 PM] Ah Mm: 'Enrollment check error:',
+'Enrollment check error:',
           error
         );
         return;
@@ -509,7 +509,7 @@ const Courses = () => {
 
         if (error.code === '23505') {
           setMessage(
-[7/23/2026 10:48 PM] Ah Mm: 'You are already enrolled in this course.'
+'You are already enrolled in this course.'
           );
 
           await checkEnrollment();
@@ -697,7 +697,7 @@ const Courses = () => {
         if (error) {
           throw error;
         }
-[7/23/2026 10:48 PM] Ah Mm: progressData = data;
+progressData = data;
       } else {
         const {
           data,
@@ -891,7 +891,7 @@ const Courses = () => {
   };
 
   // ============================================================
-[7/23/2026 10:48 PM] Ah Mm: // SUBMIT REVIEW
+// SUBMIT REVIEW
   // ============================================================
 
   const handleSubmitReview = async () => {
@@ -1090,7 +1090,7 @@ const Courses = () => {
 
   // ============================================================
   // COURSE DETAILS + LEARNING
-[7/23/2026 10:48 PM] Ah Mm: // ============================================================
+// ============================================================
 
   if (selected) {
     return (
@@ -1264,7 +1264,7 @@ const Courses = () => {
 
               <p
                 style={{
-[7/23/2026 10:48 PM] Ah Mm: color:
+color:
                     dm.text,
                   marginTop:
                     '5px',
@@ -1356,7 +1356,7 @@ const Courses = () => {
               >
                 <div
                   style={{
-                    width: ${calculatedProgress}%,
+                    width: `${calculatedProgress}%`,
                     height:
                       '100%',
                     background:
@@ -1424,7 +1424,7 @@ const Courses = () => {
                 }}
               >
                 <i
-[7/23/2026 10:48 PM] Ah Mm: className={
+className={
                     enrolling
                       ? 'fas fa-spinner fa-spin'
                       : 'fas fa-graduation-cap'
@@ -1572,7 +1572,7 @@ const Courses = () => {
                             lesson.id
                           }
                           onClick={() =>
-[7/23/2026 10:48 PM] Ah Mm: setSelectedLesson(
+setSelectedLesson(
                               lesson
                             )
                           }
@@ -1585,8 +1585,8 @@ const Courses = () => {
                               '14px',
                             border:
                               active
-                                ? 2px solid ${dm.heading}
-                                : 1px solid ${dm.cardBorder},
+                                ? `2px solid ${dm.heading}`
+                                : `1px solid ${dm.cardBorder}`,
                             borderRadius:
                               '10px',
                             background:
@@ -1684,7 +1684,7 @@ const Courses = () => {
                     className="fas fa-book-reader"
                     style={{
                       fontSize:
-[7/23/2026 10:48 PM] Ah Mm: '3rem',
+'3rem',
                       color:
                         dm.heading,
                     }}
@@ -1820,7 +1820,7 @@ const Courses = () => {
                     >
                       {
                         selectedLesson.content
-[7/23/2026 10:48 PM] Ah Mm: }
+}
                     </div>
                   )}
 
@@ -1835,7 +1835,7 @@ const Courses = () => {
                       flexWrap:
                         'wrap',
                       borderTop:
-                        1px solid ${dm.cardBorder},
+                        `1px solid ${dm.cardBorder}`,
                       paddingTop:
                         '20px',
                     }}
@@ -1857,7 +1857,7 @@ const Courses = () => {
                         padding:
                           '12px',
                         border:
-                          1px solid ${dm.cardBorder},
+                          `1px solid ${dm.cardBorder}`,
                         borderRadius:
                           '8px',
                         background:
@@ -1940,7 +1940,7 @@ const Courses = () => {
                       disabled={
                         lessons.findIndex(
                           (lesson) =>
-[7/23/2026 10:48 PM] Ah Mm: lesson.id ===
+lesson.id ===
                             selectedLesson.id
                         ) >=
                         lessons.length - 1
@@ -2046,7 +2046,7 @@ const Courses = () => {
                     padding:
                       '15px 0',
                     borderBottom:
-                      1px solid ${dm.cardBorder},
+                      `1px solid ${dm.cardBorder}`,
                   }}
                 >
                   <StarRating
@@ -2092,7 +2092,7 @@ const Courses = () => {
                 dm.shadow,
             }}
           >
-[7/23/2026 10:48 PM] Ah Mm: <h2
+<h2
               style={{
                 color:
                   dm.heading,
@@ -2159,7 +2159,7 @@ const Courses = () => {
                     borderRadius:
                       '8px',
                     border:
-                      1px solid ${dm.inputBorder},
+                      `1px solid ${dm.inputBorder}`,
                     fontSize:
                       '1rem',
                     marginTop:
@@ -2247,7 +2247,7 @@ const Courses = () => {
                   dm.heading,
               }}
             >
-[7/23/2026 10:48 PM] Ah Mm: Review Submitted! Thank you 🎉
+Review Submitted! Thank you 🎉
             </h3>
           </div>
         )}
@@ -2388,7 +2388,7 @@ const Courses = () => {
               borderRadius:
                 '10px',
               border:
-                2px solid ${dm.inputBorder},
+                `2px solid ${dm.inputBorder}`,
               fontSize:
                 '1rem',
               outline:
@@ -2434,11 +2434,11 @@ const Courses = () => {
                   borderRadius:
                     '20px',
                   border:
-                    2px solid ${dm.catBorder},
+                    `2px solid ${dm.catBorder}`,
                   background:
                     category ===
                     cat
-[7/23/2026 10:48 PM] Ah Mm: ? dm.catActiveBg
+? dm.catActiveBg
                       : 'transparent',
                   color:
                     category ===
@@ -2511,7 +2511,7 @@ const Courses = () => {
                   animation:
                     'courseCardEntrance 0.7s ease both',
                   animationDelay:
-                    ${index * 0.1}s,
+                    `${index * 0.1}s`,
                   cursor:
                     'pointer',
                 }}
@@ -2598,7 +2598,7 @@ const Courses = () => {
                         color:
                           '#f0a500',
                       }}
-[7/23/2026 10:48 PM] Ah Mm: />{' '}
+/>{' '}
                     {course.rating ||
                       '0'}
                   </span>
