@@ -10,14 +10,14 @@ const AdminRoute = ({ children }) => {
     const checkAdmin = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setIsAdmin(false); setLoading(false); return; }
-      
-      const { data } = await supabase
-        .from('admins')
-        .select('email')
-        .eq('email', user.email)
-        .single();
-      
-      setIsAdmin(!!data);
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('type')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      setIsAdmin(!error && profile?.type === 'admin');
       setLoading(false);
     };
     checkAdmin();
