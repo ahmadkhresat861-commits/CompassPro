@@ -61,6 +61,29 @@ const Admin = () => {
   const [courseStatus, setCourseStatus] = useState('');
 
   // =========================
+  // Lessons States
+  // =========================
+  const [courseOptions, setCourseOptions] = useState([]);
+  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [lessons, setLessons] = useState([]);
+  const [lessonsLoading, setLessonsLoading] = useState(false);
+
+  const [lessonTitle, setLessonTitle] = useState('');
+  const [lessonDescription, setLessonDescription] = useState('');
+  const [lessonContent, setLessonContent] = useState('');
+  const [lessonVideoUri, setLessonVideoUri] = useState('');
+  const [lessonOrder, setLessonOrder] = useState(1);
+
+  const [editingLessonId, setEditingLessonId] = useState(null);
+  const [lessonStatus, setLessonStatus] = useState('');
+
+  // =========================
+  // Enrollments States
+  // =========================
+  const [enrollments, setEnrollments] = useState([]);
+  const [enrollmentsLoading, setEnrollmentsLoading] = useState(false);
+
+  // =========================
   // Check Admin
   // =========================
   useEffect(() => {
@@ -72,7 +95,7 @@ const Admin = () => {
         } = await supabase.auth.getUser();
 
         if (authError || !user) {
-          navigate('/');
+          navigate('/login');
           return;
         }
 
@@ -445,6 +468,206 @@ const Admin = () => {
   };
 
   // =========================
+  // Fetch Course Options (for Lessons dropdown)
+  // =========================
+  const fetchCourseOptions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('id, title')
+        .order('title', { ascending: true });
+
+      if (error) throw error;
+
+      setCourseOptions(data || []);
+    } catch (error) {
+      console.error('Error fetching course options:', error);
+      setCourseOptions([]);
+    }
+  };
+
+  // =========================
+  // Fetch Lessons for Selected Course
+  // =========================
+  const fetchLessons = async (courseId) => {
+    if (!courseId) {
+      setLessons([]);
+      return;
+    }
+
+    setLessonsLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('lessons')
+        .select(
+          'id, course_id, title, description, content, lesson_order, video_uri'
+        )
+        .eq('course_id', courseId)
+        .order('lesson_order', { ascending: true });
+
+      if (error) throw error;
+
+      setLessons(data || []);
+    } catch (error) {
+      console.error('Error fetching lessons:', error);
+      alert('Failed to load lessons: ' + error.message);
+    } finally {
+      setLessonsLoading(false);
+    }
+  };
+
+  // =========================
+  // Add / Update Lesson
+  // =========================
+  const saveLesson = async (e) => {
+    e.preventDefault();
+
+    if (!selectedCourseId) {
+      setLessonStatus('Please select a course first.');
+      return;
+    }
+
+    if (!lessonTitle.trim()) {
+      setLessonStatus('Please enter a lesson title.');
+      return;
+    }
+
+    try {
+      const lessonData = {
+        course_id: selectedCourseId,
+        title: lessonTitle.trim(),
+        description: lessonDescription.trim(),
+        content: lessonContent.trim(),
+        video_uri: lessonVideoUri.trim(),
+        lesson_order: Number(lessonOrder) || 1,
+      };
+
+      let error;
+
+      if (editingLessonId) {
+        const result = await supabase
+          .from('lessons')
+          .update(lessonData)
+          .eq('id', editingLessonId);
+
+        error = result.error;
+      } else {
+        const result = await supabase
+          .from('lessons')
+          .insert([lessonData]);
+
+        error = result.error;
+      }
+
+      if (error) throw error;
+
+      setLessonStatus(
+        editingLessonId
+          ? 'Lesson updated successfully!'
+          : 'Lesson added successfully!'
+      );
+
+      resetLessonForm();
+      await fetchLessons(selectedCourseId);
+    } catch (error) {
+      console.error('Error saving lesson:', error);
+      setLessonStatus('Failed to save lesson: ' + error.message);
+    }
+  };
+
+  // =========================
+  // Delete Lesson
+  // =========================
+  const deleteLesson = async (id) => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this lesson?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const { error } = await supabase
+        .from('lessons')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setLessons((current) =>
+        current.filter((lesson) => lesson.id !== id)
+      );
+    } catch (error) {
+      console.error('Error deleting lesson:', error);
+      alert('Failed to delete lesson: ' + error.message);
+    }
+  };
+
+  // =========================
+  // Edit Lesson
+  // =========================
+  const editLesson = (lesson) => {
+    setEditingLessonId(lesson.id);
+    setLessonTitle(lesson.title || '');
+    setLessonDescription(lesson.description || '');
+    setLessonContent(lesson.content || '');
+    setLessonVideoUri(lesson.video_uri || '');
+    setLessonOrder(lesson.lesson_order || 1);
+    setLessonStatus('');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // =========================
+  // Reset Lesson Form
+  // =========================
+  const resetLessonForm = () => {
+    setEditingLessonId(null);
+    setLessonTitle('');
+    setLessonDescription('');
+    setLessonContent('');
+    setLessonVideoUri('');
+    setLessonOrder(1);
+    setLessonStatus('');
+  };
+
+  // =========================
+  // Fetch Enrollments (read-only overview)
+  // =========================
+  const fetchEnrollments = async () => {
+    setEnrollmentsLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('enrollments')
+        .select('id, user_id, course_id, progress, completed')
+        .order('id', { ascending: false });
+
+      if (error) throw error;
+
+      setEnrollments(data || []);
+
+      // Make sure we have course titles and user emails to map against
+      await fetchCourseOptions();
+      if (users.length === 0) {
+        await fetchUsers();
+      }
+    } catch (error) {
+      console.error('Error fetching enrollments:', error);
+      alert('Failed to load enrollments: ' + error.message);
+    } finally {
+      setEnrollmentsLoading(false);
+    }
+  };
+
+  const getCourseTitleById = (id) =>
+    courseOptions.find((c) => String(c.id) === String(id))?.title ||
+    `#${id}`;
+
+  const getUserEmailById = (id) =>
+    users.find((u) => String(u.id) === String(id))?.email || id;
+
+  // =========================
   // Fetch Profiles
   // =========================
   const fetchProfiles = async () => {
@@ -569,7 +792,27 @@ const Admin = () => {
     if (activeTab === 'sessions') {
       fetchSessions();
     }
+
+    if (activeTab === 'lessons') {
+      fetchCourseOptions();
+    }
+
+    if (activeTab === 'enrollments') {
+      fetchEnrollments();
+    }
   }, [activeTab]);
+
+  // =========================
+  // Load Lessons on Course Selection
+  // =========================
+  useEffect(() => {
+    if (selectedCourseId) {
+      fetchLessons(selectedCourseId);
+      resetLessonForm();
+    } else {
+      setLessons([]);
+    }
+  }, [selectedCourseId]);
 
   // =========================
   // Send Notification
@@ -690,6 +933,16 @@ const Admin = () => {
       icon: 'fas fa-book',
       label: 'Courses',
       tab: 'courses',
+    },
+    {
+      icon: 'fas fa-list-ol',
+      label: 'Lessons',
+      tab: 'lessons',
+    },
+    {
+      icon: 'fas fa-user-graduate',
+      label: 'Enrollments',
+      tab: 'enrollments',
     },
     {
       icon: 'fas fa-users',
@@ -872,6 +1125,20 @@ const Admin = () => {
               <>
                 <i className="fas fa-book"></i>{' '}
                 Courses Management
+              </>
+            )}
+
+            {activeTab === 'lessons' && (
+              <>
+                <i className="fas fa-list-ol"></i>{' '}
+                Lessons Management
+              </>
+            )}
+
+            {activeTab === 'enrollments' && (
+              <>
+                <i className="fas fa-user-graduate"></i>{' '}
+                Enrollments
               </>
             )}
 
@@ -1497,6 +1764,397 @@ const Admin = () => {
               )}
             </div>
           </>
+        )}
+
+        {/* =========================
+            Lessons
+        ========================= */}
+        {activeTab === 'lessons' && (
+          <>
+            <div
+              style={{
+                background: 'white',
+                borderRadius: '12px',
+                padding: '30px',
+                marginBottom: '30px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+              }}
+            >
+              <h2 style={{ color: '#003366', marginTop: 0 }}>
+                <i className="fas fa-list-ol"></i> Select a Course
+              </h2>
+
+              <select
+                value={selectedCourseId}
+                onChange={(e) => setSelectedCourseId(e.target.value)}
+                style={{
+                  width: '100%',
+                  maxWidth: '400px',
+                  padding: '14px',
+                  border: '1px solid #ddd',
+                  borderRadius: '8px',
+                }}
+              >
+                <option value="">-- Choose a course --</option>
+                {courseOptions.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedCourseId && (
+              <>
+                <div
+                  style={{
+                    background: 'white',
+                    borderRadius: '12px',
+                    padding: '30px',
+                    marginBottom: '30px',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                  }}
+                >
+                  <h2 style={{ color: '#003366', marginTop: 0 }}>
+                    <i className="fas fa-plus-circle"></i>{' '}
+                    {editingLessonId ? 'Edit Lesson' : 'Add New Lesson'}
+                  </h2>
+
+                  <form onSubmit={saveLesson}>
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns:
+                          'repeat(auto-fit, minmax(200px, 1fr))',
+                        gap: '15px',
+                      }}
+                    >
+                      <input
+                        type="text"
+                        placeholder="Lesson Title"
+                        value={lessonTitle}
+                        onChange={(e) => setLessonTitle(e.target.value)}
+                        style={{
+                          padding: '14px',
+                          border: '1px solid #ddd',
+                          borderRadius: '8px',
+                        }}
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Lesson Order"
+                        value={lessonOrder}
+                        onChange={(e) => setLessonOrder(e.target.value)}
+                        min="1"
+                        style={{
+                          padding: '14px',
+                          border: '1px solid #ddd',
+                          borderRadius: '8px',
+                        }}
+                      />
+
+                      <input
+                        type="url"
+                        placeholder="Video URL"
+                        value={lessonVideoUri}
+                        onChange={(e) => setLessonVideoUri(e.target.value)}
+                        style={{
+                          padding: '14px',
+                          border: '1px solid #ddd',
+                          borderRadius: '8px',
+                        }}
+                      />
+                    </div>
+
+                    <textarea
+                      placeholder="Short Description"
+                      value={lessonDescription}
+                      onChange={(e) => setLessonDescription(e.target.value)}
+                      rows={2}
+                      style={{
+                        width: '100%',
+                        padding: '14px',
+                        border: '1px solid #ddd',
+                        borderRadius: '8px',
+                        marginTop: '15px',
+                        resize: 'vertical',
+                        boxSizing: 'border-box',
+                        fontFamily: 'inherit',
+                      }}
+                    />
+
+                    <textarea
+                      placeholder="Lesson Content (text)"
+                      value={lessonContent}
+                      onChange={(e) => setLessonContent(e.target.value)}
+                      rows={5}
+                      style={{
+                        width: '100%',
+                        padding: '14px',
+                        border: '1px solid #ddd',
+                        borderRadius: '8px',
+                        marginTop: '15px',
+                        resize: 'vertical',
+                        boxSizing: 'border-box',
+                        fontFamily: 'inherit',
+                      }}
+                    />
+
+                    {lessonStatus && (
+                      <p
+                        style={{
+                          color: lessonStatus.includes('successfully')
+                            ? '#10b981'
+                            : '#ef4444',
+                          marginTop: '15px',
+                        }}
+                      >
+                        {lessonStatus}
+                      </p>
+                    )}
+
+                    <div
+                      style={{
+                        marginTop: '20px',
+                        display: 'flex',
+                        gap: '10px',
+                      }}
+                    >
+                      <button
+                        type="submit"
+                        style={{
+                          background: '#003366',
+                          color: 'white',
+                          border: 'none',
+                          padding: '12px 25px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontWeight: '600',
+                        }}
+                      >
+                        <i
+                          className={
+                            editingLessonId ? 'fas fa-save' : 'fas fa-plus'
+                          }
+                        ></i>{' '}
+                        {editingLessonId ? 'Update Lesson' : 'Add Lesson'}
+                      </button>
+
+                      {editingLessonId && (
+                        <button
+                          type="button"
+                          onClick={resetLessonForm}
+                          style={{
+                            background: '#999',
+                            color: 'white',
+                            border: 'none',
+                            padding: '12px 25px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </div>
+
+                <div
+                  style={{
+                    background: 'white',
+                    borderRadius: '12px',
+                    padding: '30px',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                    overflowX: 'auto',
+                  }}
+                >
+                  <h2 style={{ color: '#003366', marginTop: 0 }}>
+                    Lessons in this Course
+                  </h2>
+
+                  {lessonsLoading ? (
+                    <p style={{ textAlign: 'center', color: '#888' }}>
+                      <i className="fas fa-spinner fa-spin"></i> Loading
+                      lessons...
+                    </p>
+                  ) : lessons.length === 0 ? (
+                    <p
+                      style={{
+                        textAlign: 'center',
+                        color: '#888',
+                        padding: '40px',
+                      }}
+                    >
+                      No lessons yet for this course.
+                    </p>
+                  ) : (
+                    <table
+                      style={{ width: '100%', borderCollapse: 'collapse' }}
+                    >
+                      <thead>
+                        <tr style={{ background: '#003366', color: 'white' }}>
+                          <th style={{ padding: '15px' }}>Order</th>
+                          <th style={{ padding: '15px' }}>Title</th>
+                          <th style={{ padding: '15px' }}>Video</th>
+                          <th style={{ padding: '15px' }}>Actions</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {lessons.map((lesson) => (
+                          <tr
+                            key={lesson.id}
+                            style={{ borderBottom: '1px solid #f0f0f0' }}
+                          >
+                            <td style={{ padding: '15px' }}>
+                              {lesson.lesson_order}
+                            </td>
+
+                            <td
+                              style={{
+                                padding: '15px',
+                                fontWeight: '600',
+                                color: '#003366',
+                              }}
+                            >
+                              {lesson.title}
+                            </td>
+
+                            <td style={{ padding: '15px' }}>
+                              {lesson.video_uri ? (
+                                <i
+                                  className="fas fa-check-circle"
+                                  style={{ color: '#10b981' }}
+                                ></i>
+                              ) : (
+                                <i
+                                  className="fas fa-minus-circle"
+                                  style={{ color: '#ccc' }}
+                                ></i>
+                              )}
+                            </td>
+
+                            <td style={{ padding: '15px' }}>
+                              <button
+                                onClick={() => editLesson(lesson)}
+                                style={{
+                                  background: '#003366',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '8px 12px',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  marginRight: '8px',
+                                }}
+                              >
+                                <i className="fas fa-edit"></i> Edit
+                              </button>
+
+                              <button
+                                onClick={() => deleteLesson(lesson.id)}
+                                style={{
+                                  background: '#ef4444',
+                                  color: 'white',
+                                  border: 'none',
+                                  padding: '8px 12px',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <i className="fas fa-trash"></i> Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </>
+            )}
+          </>
+        )}
+
+        {/* =========================
+            Enrollments
+        ========================= */}
+        {activeTab === 'enrollments' && (
+          <div
+            style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '30px',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+              overflowX: 'auto',
+            }}
+          >
+            <h2 style={{ color: '#003366', marginTop: 0 }}>
+              <i className="fas fa-user-graduate"></i> All Enrollments
+            </h2>
+
+            {enrollmentsLoading ? (
+              <p style={{ textAlign: 'center', color: '#888', padding: '40px' }}>
+                <i className="fas fa-spinner fa-spin"></i> Loading
+                enrollments...
+              </p>
+            ) : enrollments.length === 0 ? (
+              <p style={{ textAlign: 'center', color: '#888', padding: '40px' }}>
+                No enrollments found.
+              </p>
+            ) : (
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#003366', color: 'white' }}>
+                    <th style={{ padding: '15px' }}>Course</th>
+                    <th style={{ padding: '15px' }}>User</th>
+                    <th style={{ padding: '15px' }}>Progress</th>
+                    <th style={{ padding: '15px' }}>Completed</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {enrollments.map((enrollment) => (
+                    <tr
+                      key={enrollment.id}
+                      style={{ borderBottom: '1px solid #f0f0f0' }}
+                    >
+                      <td
+                        style={{
+                          padding: '15px',
+                          fontWeight: '600',
+                          color: '#003366',
+                        }}
+                      >
+                        {getCourseTitleById(enrollment.course_id)}
+                      </td>
+
+                      <td style={{ padding: '15px', fontSize: '0.9rem' }}>
+                        {getUserEmailById(enrollment.user_id)}
+                      </td>
+
+                      <td style={{ padding: '15px' }}>
+                        {enrollment.progress || 0}%
+                      </td>
+
+                      <td style={{ padding: '15px' }}>
+                        {enrollment.completed ? (
+                          <span
+                            style={{ color: '#10b981', fontWeight: '600' }}
+                          >
+                            <i className="fas fa-check-circle"></i> Yes
+                          </span>
+                        ) : (
+                          <span style={{ color: '#f0a500' }}>In Progress</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         )}
 
         {/* =========================
