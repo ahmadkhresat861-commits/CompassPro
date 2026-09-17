@@ -8,6 +8,9 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { t, toggleLang, lang, darkMode, toggleDark } = useLang();
 
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
   const [showNotif, setShowNotif] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unread, setUnread] = useState(0);
@@ -15,6 +18,34 @@ const Navbar = () => {
   const [error, setError] = useState(null);
 
   const notifRef = useRef(null);
+
+  // ── تتبع حالة تسجيل الدخول ──────────────────────────────────────
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+      setUser(currentUser || null);
+      setAuthLoading(false);
+    };
+
+    getUser();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/home');
+  };
 
   // ── جلب الإشعارات ──────────────────────────────────────────────
   useEffect(() => {
@@ -207,13 +238,15 @@ const Navbar = () => {
           {t.courses}
         </a>
 
-        <a
-          onClick={() => navigate('/dashboard')}
-          style={{ cursor: 'pointer' }}
-        >
-          <i className="fas fa-chart-bar"></i>{' '}
-          {t.dashboard}
-        </a>
+        {user && (
+          <a
+            onClick={() => navigate('/dashboard')}
+            style={{ cursor: 'pointer' }}
+          >
+            <i className="fas fa-chart-bar"></i>{' '}
+            {t.dashboard}
+          </a>
+        )}
 
         <a
           onClick={() => navigate('/sessions')}
@@ -231,13 +264,54 @@ const Navbar = () => {
           {t.contact}
         </a>
 
-        <a
-          onClick={() => navigate('/profile')}
-          style={{ cursor: 'pointer' }}
-        >
-          <i className="fas fa-user"></i>{' '}
-          {t.profile}
-        </a>
+        {user && (
+          <a
+            onClick={() => navigate('/profile')}
+            style={{ cursor: 'pointer' }}
+          >
+            <i className="fas fa-user"></i>{' '}
+            {t.profile}
+          </a>
+        )}
+
+        {!authLoading && !user && (
+          <>
+            <a
+              onClick={() => navigate('/login')}
+              style={{ cursor: 'pointer' }}
+            >
+              <i className="fas fa-sign-in-alt"></i>{' '}
+              {lang === 'ar' ? 'تسجيل الدخول' : 'Login'}
+            </a>
+
+            <button
+              onClick={() => navigate('/signup')}
+              style={{
+                background: '#f0a500',
+                border: 'none',
+                color: '#003366',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                fontWeight: '700',
+                fontSize: '0.85rem',
+              }}
+            >
+              <i className="fas fa-user-plus"></i>{' '}
+              {lang === 'ar' ? 'إنشاء حساب' : 'Sign Up'}
+            </button>
+          </>
+        )}
+
+        {!authLoading && user && (
+          <a
+            onClick={handleLogout}
+            style={{ cursor: 'pointer' }}
+          >
+            <i className="fas fa-sign-out-alt"></i>{' '}
+            {lang === 'ar' ? 'تسجيل الخروج' : 'Logout'}
+          </a>
+        )}
 
         {/* زر الوضع الليلي */}
         <button
