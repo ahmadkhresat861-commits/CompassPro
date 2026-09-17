@@ -73,6 +73,9 @@ const Admin = () => {
   const [lessonContent, setLessonContent] = useState('');
   const [lessonVideoUri, setLessonVideoUri] = useState('');
   const [lessonOrder, setLessonOrder] = useState(1);
+  const [lessonPdfUrl, setLessonPdfUrl] = useState('');
+  const [lessonPdfFile, setLessonPdfFile] = useState(null);
+  const [pdfUploading, setPdfUploading] = useState(false);
 
   const [editingLessonId, setEditingLessonId] = useState(null);
   const [lessonStatus, setLessonStatus] = useState('');
@@ -501,7 +504,7 @@ const Admin = () => {
       const { data, error } = await supabase
         .from('lessons')
         .select(
-          'id, course_id, title, description, content, lesson_order, video_url'
+          'id, course_id, title, description, content, lesson_order, video_url, pdf_url'
         )
         .eq('course_id', courseId)
         .order('lesson_order', { ascending: true });
@@ -534,6 +537,32 @@ const Admin = () => {
     }
 
     try {
+      let pdfUrl = lessonPdfUrl;
+
+      if (lessonPdfFile) {
+        setPdfUploading(true);
+
+        const fileExt = lessonPdfFile.name.split('.').pop();
+        const filePath = `${selectedCourseId}/${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('lesson-files')
+          .upload(filePath, lessonPdfFile);
+
+        if (uploadError) {
+          setPdfUploading(false);
+          setLessonStatus('Failed to upload PDF: ' + uploadError.message);
+          return;
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from('lesson-files')
+          .getPublicUrl(filePath);
+
+        pdfUrl = publicUrlData?.publicUrl || '';
+        setPdfUploading(false);
+      }
+
       const lessonData = {
         course_id: selectedCourseId,
         title: lessonTitle.trim(),
@@ -541,6 +570,7 @@ const Admin = () => {
         content: lessonContent.trim(),
         video_url: lessonVideoUri.trim(),
         lesson_order: Number(lessonOrder) || 1,
+        pdf_url: pdfUrl,
       };
 
       let error;
@@ -613,6 +643,8 @@ const Admin = () => {
     setLessonContent(lesson.content || '');
     setLessonVideoUri(lesson.video_url || '');
     setLessonOrder(lesson.lesson_order || 1);
+    setLessonPdfUrl(lesson.pdf_url || '');
+    setLessonPdfFile(null);
     setLessonStatus('');
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -628,6 +660,8 @@ const Admin = () => {
     setLessonContent('');
     setLessonVideoUri('');
     setLessonOrder(1);
+    setLessonPdfUrl('');
+    setLessonPdfFile(null);
     setLessonStatus('');
   };
 
@@ -1867,6 +1901,57 @@ const Admin = () => {
                       />
                     </div>
 
+                    <div style={{ marginTop: '15px' }}>
+                      <label
+                        style={{
+                          display: 'block',
+                          marginBottom: '8px',
+                          fontWeight: '600',
+                          color: '#003366',
+                          fontSize: '0.9rem',
+                        }}
+                      >
+                        <i className="fas fa-file-pdf"></i>{' '}
+                        Lesson PDF (optional)
+                      </label>
+
+                      <input
+                        type="file"
+                        accept="application/pdf"
+                        onChange={(e) =>
+                          setLessonPdfFile(e.target.files?.[0] || null)
+                        }
+                        style={{
+                          padding: '10px',
+                          border: '1px solid #ddd',
+                          borderRadius: '8px',
+                          width: '100%',
+                          boxSizing: 'border-box',
+                        }}
+                      />
+
+                      {lessonPdfUrl && !lessonPdfFile && (
+                        <p
+                          style={{
+                            marginTop: '8px',
+                            fontSize: '0.85rem',
+                            color: '#10b981',
+                          }}
+                        >
+                          <i className="fas fa-check-circle"></i> Current
+                          file:{' '}
+                          <a
+                            href={lessonPdfUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            View PDF
+                          </a>{' '}
+                          (choose a new file above to replace it)
+                        </p>
+                      )}
+                    </div>
+
                     <textarea
                       placeholder="Short Description"
                       value={lessonDescription}
@@ -1923,22 +2008,31 @@ const Admin = () => {
                     >
                       <button
                         type="submit"
+                        disabled={pdfUploading}
                         style={{
-                          background: '#003366',
+                          background: pdfUploading ? '#999' : '#003366',
                           color: 'white',
                           border: 'none',
                           padding: '12px 25px',
                           borderRadius: '8px',
-                          cursor: 'pointer',
+                          cursor: pdfUploading ? 'not-allowed' : 'pointer',
                           fontWeight: '600',
                         }}
                       >
                         <i
                           className={
-                            editingLessonId ? 'fas fa-save' : 'fas fa-plus'
+                            pdfUploading
+                              ? 'fas fa-spinner fa-spin'
+                              : editingLessonId
+                              ? 'fas fa-save'
+                              : 'fas fa-plus'
                           }
                         ></i>{' '}
-                        {editingLessonId ? 'Update Lesson' : 'Add Lesson'}
+                        {pdfUploading
+                          ? 'Uploading PDF...'
+                          : editingLessonId
+                          ? 'Update Lesson'
+                          : 'Add Lesson'}
                       </button>
 
                       {editingLessonId && (
@@ -2032,6 +2126,16 @@ const Admin = () => {
                                 <i
                                   className="fas fa-minus-circle"
                                   style={{ color: '#ccc' }}
+                                ></i>
+                              )}
+                              {lesson.pdf_url && (
+                                <i
+                                  className="fas fa-file-pdf"
+                                  style={{
+                                    color: '#ef4444',
+                                    marginLeft: '8px',
+                                  }}
+                                  title="Has PDF"
                                 ></i>
                               )}
                             </td>
