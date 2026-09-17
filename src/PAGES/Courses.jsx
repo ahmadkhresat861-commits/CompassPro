@@ -368,6 +368,7 @@ const Courses = () => {
             content,
             lesson_order,
             video_url,
+            pdf_url,
             created_at
           `
         )
@@ -1915,6 +1916,35 @@ setSelectedLesson(
                         Your browser does not support video playback.
                       </video>
                     </div>
+                  )}
+
+                  {/* PDF ATTACHMENT */}
+
+                  {selectedLesson.pdf_url && (
+                    <a
+                      href={selectedLesson.pdf_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '12px 20px',
+                        marginBottom: '25px',
+                        background: dm.card,
+                        border: `1px solid ${dm.cardBorder}`,
+                        borderRadius: '10px',
+                        color: dm.heading,
+                        fontWeight: '600',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      <i
+                        className="fas fa-file-pdf"
+                        style={{ color: '#ef4444', fontSize: '1.3rem' }}
+                      />
+                      Download Lesson PDF
+                    </a>
                   )}
 
                   {/* CONTENT */}
