@@ -501,7 +501,7 @@ const Admin = () => {
       const { data, error } = await supabase
         .from('lessons')
         .select(
-          'id, course_id, title, description, content, lesson_order, video_uri'
+          'id, course_id, title, description, content, lesson_order, video_url'
         )
         .eq('course_id', courseId)
         .order('lesson_order', { ascending: true });
@@ -539,7 +539,7 @@ const Admin = () => {
         title: lessonTitle.trim(),
         description: lessonDescription.trim(),
         content: lessonContent.trim(),
-        video_uri: lessonVideoUri.trim(),
+        video_url: lessonVideoUri.trim(),
         lesson_order: Number(lessonOrder) || 1,
       };
 
@@ -611,7 +611,7 @@ const Admin = () => {
     setLessonTitle(lesson.title || '');
     setLessonDescription(lesson.description || '');
     setLessonContent(lesson.content || '');
-    setLessonVideoUri(lesson.video_uri || '');
+    setLessonVideoUri(lesson.video_url || '');
     setLessonOrder(lesson.lesson_order || 1);
     setLessonStatus('');
 
@@ -2023,7 +2023,7 @@ const Admin = () => {
                             </td>
 
                             <td style={{ padding: '15px' }}>
-                              {lesson.video_uri ? (
+                              {lesson.video_url ? (
                                 <i
                                   className="fas fa-check-circle"
                                   style={{ color: '#10b981' }}
