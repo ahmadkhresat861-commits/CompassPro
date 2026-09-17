@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children }) => {
     <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#f0a500' }}></i>
   </div>;
 
-  return user ? children : <Navigate to="/" />;
+  return user ? children : <Navigate to="/login" />;
 };
 
 export default ProtectedRoute;
