@@ -50,7 +50,7 @@ const Dashboard = () => {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        navigate('/');
+        navigate('/login');
         return;
       }
 
