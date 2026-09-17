@@ -55,7 +55,7 @@ const Profile = () => {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        navigate('/');
+        navigate('/login');
         return;
       }
 
