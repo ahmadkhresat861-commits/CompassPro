@@ -44,7 +44,7 @@ const SignUp = () => {
         <i className="fas fa-user-plus"></i> {loading ? 'Creating Account...' : 'Sign Up'}
       </button>
       <p className="login-signup">
-        Already have an account? <a onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>Login</a>
+        Already have an account? <a onClick={() => navigate('/login')} style={{ cursor: 'pointer' }}>Login</a>
       </p>
     </div>
   );
