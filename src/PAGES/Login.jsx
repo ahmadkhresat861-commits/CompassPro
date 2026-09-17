@@ -106,6 +106,26 @@ const Login = () => {
       }}
     >
 
+      {/* Back to Home (for guests redirected here) */}
+      <a
+        onClick={() => navigate('/home')}
+        style={{
+          position: 'absolute',
+          top: '20px',
+          left: '20px',
+          color: 'rgba(255,255,255,0.85)',
+          cursor: 'pointer',
+          fontSize: '0.9rem',
+          fontWeight: '600',
+          zIndex: 10,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+        }}
+      >
+        <i className="fas fa-arrow-left"></i> Back to Home
+      </a>
+
       {/* Background Animated Circles */}
       {[
         {
