@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 import Login from './PAGES/Login'
 import SignUp from './PAGES/SignUp'
@@ -24,9 +24,15 @@ function App() {
       <BrowserRouter>
         <Routes>
 
-          {/* PUBLIC */}
+          {/* ROOT — redirect to the public home page */}
           <Route
             path="/"
+            element={<Navigate to="/home" replace />}
+          />
+
+          {/* LOGIN */}
+          <Route
+            path="/login"
             element={<Login />}
           />
 
@@ -35,31 +41,27 @@ function App() {
             element={<SignUp />}
           />
 
-          {/* HOME */}
+          {/* HOME — public, guests can browse */}
           <Route
             path="/home"
             element={
-              <ProtectedRoute>
-                <>
-                  <Navbar />
-                  <Home />
-                  <Footer />
-                </>
-              </ProtectedRoute>
+              <>
+                <Navbar />
+                <Home />
+                <Footer />
+              </>
             }
           />
 
-          {/* COURSES */}
+          {/* COURSES — public, guests can browse and view details */}
           <Route
             path="/courses"
             element={
-              <ProtectedRoute>
-                <>
-                  <Navbar />
-                  <Courses />
-                  <Footer />
-                </>
-              </ProtectedRoute>
+              <>
+                <Navbar />
+                <Courses />
+                <Footer />
+              </>
             }
           />
 
@@ -91,17 +93,15 @@ function App() {
             }
           />
 
-          {/* CONTACT */}
+          {/* CONTACT — public, guests can reach support */}
           <Route
             path="/contact"
             element={
-              <ProtectedRoute>
-                <>
-                  <Navbar />
-                  <Contact />
-                  <Footer />
-                </>
-              </ProtectedRoute>
+              <>
+                <Navbar />
+                <Contact />
+                <Footer />
+              </>
             }
           />
 
