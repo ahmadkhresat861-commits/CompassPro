@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import '../App.css';
@@ -59,6 +60,7 @@ const StarRating = ({ rating = 0, onRate }) => {
 
 const Courses = () => {
   const { darkMode } = useLang();
+  const navigate = useNavigate();
 
   // ============================================================
   // COLORS
@@ -365,7 +367,7 @@ const Courses = () => {
             description,
             content,
             lesson_order,
-            video_uri,
+            video_url,
             created_at
           `
         )
@@ -1153,35 +1155,55 @@ progressData = data;
             marginBottom: '40px',
           }}
         >
-          <div
-            style={{
-              width: '90px',
-              height: '90px',
-              margin:
-                '0 auto 20px',
-              borderRadius:
-                '50%',
-              background:
-                'linear-gradient(135deg, #003366, #005599)',
-              display: 'flex',
-              alignItems:
-                'center',
-              justifyContent:
-                'center',
-              boxShadow:
-                '0 10px 30px rgba(0,51,102,0.25)',
-            }}
-          >
-            <i
-              className="fas fa-book-open"
+          {selected.image_url ? (
+            <img
+              src={selected.image_url}
+              alt={selected.title}
               style={{
-                fontSize:
-                  '2.5rem',
-                color:
-                  '#f0a500',
+                width: '100%',
+                maxWidth: '500px',
+                height: '220px',
+                objectFit: 'cover',
+                borderRadius: '16px',
+                margin: '0 auto 20px',
+                display: 'block',
+                boxShadow: '0 10px 30px rgba(0,51,102,0.25)',
+              }}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
               }}
             />
-          </div>
+          ) : (
+            <div
+              style={{
+                width: '90px',
+                height: '90px',
+                margin:
+                  '0 auto 20px',
+                borderRadius:
+                  '50%',
+                background:
+                  'linear-gradient(135deg, #003366, #005599)',
+                display: 'flex',
+                alignItems:
+                  'center',
+                justifyContent:
+                  'center',
+                boxShadow:
+                  '0 10px 30px rgba(0,51,102,0.25)',
+              }}
+            >
+              <i
+                className="fas fa-book-open"
+                style={{
+                  fontSize:
+                    '2.5rem',
+                  color:
+                    '#f0a500',
+                }}
+              />
+            </div>
+          )}
 
           <h1
             style={{
@@ -1213,6 +1235,32 @@ progressData = data;
             >
               {selected.category}
             </span>
+          )}
+
+          {selected.description && (
+            <p
+              style={{
+                maxWidth: '650px',
+                margin: '18px auto 0',
+                color: dm.text,
+                lineHeight: '1.7',
+              }}
+            >
+              {selected.description}
+            </p>
+          )}
+
+          {selected.instructor && (
+            <p
+              style={{
+                color: dm.subtext,
+                marginTop: '10px',
+                fontSize: '0.9rem',
+              }}
+            >
+              <i className="fas fa-chalkboard-teacher" />{' '}
+              Instructor: {selected.instructor}
+            </p>
           )}
 
           {/* STATS */}
@@ -1273,6 +1321,27 @@ color:
                 {avgRating ||
                   selected.rating ||
                   'No rating'}
+              </p>
+            </div>
+
+            <div>
+              <i
+                className="fas fa-tag"
+                style={{
+                  color: dm.heading,
+                }}
+              />
+
+              <p
+                style={{
+                  color: dm.text,
+                  marginTop: '5px',
+                  fontWeight: '700',
+                }}
+              >
+                {Number(selected.price) > 0
+                  ? `$${Number(selected.price).toFixed(2)}`
+                  : 'Free'}
               </p>
             </div>
           </div>
@@ -1388,52 +1457,99 @@ color:
                     '10px 0 20px',
                 }}
               >
-                Enroll now and start your learning journey.
+                {user
+                  ? 'Enroll now and start your learning journey.'
+                  : 'Please login or create an account to enroll in this course.'}
               </p>
 
-              <button
-                onClick={
-                  handleEnroll
-                }
-                disabled={
-                  enrolling
-                }
-                style={{
-                  width:
-                    '100%',
-                  padding:
-                    '14px',
-                  background:
-                    enrolling
-                      ? '#888'
-                      : 'linear-gradient(90deg, #003366, #005599)',
-                  color:
-                    'white',
-                  border:
-                    'none',
-                  borderRadius:
-                    '10px',
-                  fontWeight:
-                    '700',
-                  fontSize:
-                    '1rem',
-                  cursor:
-                    enrolling
-                      ? 'not-allowed'
-                      : 'pointer',
-                }}
-              >
-                <i
-className={
-                    enrolling
-                      ? 'fas fa-spinner fa-spin'
-                      : 'fas fa-graduation-cap'
+              {user ? (
+                <button
+                  onClick={
+                    handleEnroll
                   }
-                />{' '}
-                {enrolling
-                  ? 'Enrolling...'
-                  : 'Enroll Now'}
-              </button>
+                  disabled={
+                    enrolling
+                  }
+                  style={{
+                    width:
+                      '100%',
+                    padding:
+                      '14px',
+                    background:
+                      enrolling
+                        ? '#888'
+                        : 'linear-gradient(90deg, #003366, #005599)',
+                    color:
+                      'white',
+                    border:
+                      'none',
+                    borderRadius:
+                      '10px',
+                    fontWeight:
+                      '700',
+                    fontSize:
+                      '1rem',
+                    cursor:
+                      enrolling
+                        ? 'not-allowed'
+                        : 'pointer',
+                  }}
+                >
+                  <i
+className={
+                      enrolling
+                        ? 'fas fa-spinner fa-spin'
+                        : 'fas fa-graduation-cap'
+                    }
+                  />{' '}
+                  {enrolling
+                    ? 'Enrolling...'
+                    : 'Enroll Now'}
+                </button>
+              ) : (
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '10px',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <button
+                    onClick={() => navigate('/login')}
+                    style={{
+                      flex: '1 1 150px',
+                      padding: '14px',
+                      background:
+                        'linear-gradient(90deg, #003366, #005599)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <i className="fas fa-sign-in-alt" />{' '}
+                    Login
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/signup')}
+                    style={{
+                      flex: '1 1 150px',
+                      padding: '14px',
+                      background: '#f0a500',
+                      color: '#003366',
+                      border: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <i className="fas fa-user-plus" />{' '}
+                    Sign Up
+                  </button>
+                </div>
+              )}
             </>
           )}
 
@@ -1767,7 +1883,7 @@ setSelectedLesson(
 
                   {/* VIDEO */}
 
-                  {selectedLesson.video_uri && (
+                  {selectedLesson.video_url && (
                     <div
                       style={{
                         width:
@@ -1784,7 +1900,7 @@ setSelectedLesson(
                     >
                       <video
                         src={
-                          selectedLesson.video_uri
+                          selectedLesson.video_url
                         }
                         controls
                         style={{
@@ -2516,15 +2632,33 @@ Review Submitted! Thank you 🎉
                     'pointer',
                 }}
               >
-                <div
-                  className="card-icon"
-                  style={{
-                    color:
-                      '#f0a500',
-                  }}
-                >
-                  <i className="fas fa-book-open" />
-                </div>
+                {course.image_url ? (
+                  <img
+                    src={course.image_url}
+                    alt={course.title}
+                    style={{
+                      width: 'calc(100% + 50px)',
+                      height: '140px',
+                      objectFit: 'cover',
+                      margin: '-25px -25px 15px -25px',
+                      borderRadius: '12px 12px 0 0',
+                      display: 'block',
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="card-icon"
+                    style={{
+                      color:
+                        '#f0a500',
+                    }}
+                  >
+                    <i className="fas fa-book-open" />
+                  </div>
+                )}
 
                 {course.category && (
                   <span
@@ -2568,8 +2702,22 @@ Review Submitted! Thank you 🎉
                       dm.text,
                   }}
                 >
-                  Explore this course and start learning today.
+                  {course.description ||
+                    'Explore this course and start learning today.'}
                 </p>
+
+                {course.instructor && (
+                  <p
+                    style={{
+                      color: dm.subtext,
+                      fontSize: '0.8rem',
+                      marginTop: '-8px',
+                    }}
+                  >
+                    <i className="fas fa-chalkboard-teacher" />{' '}
+                    {course.instructor}
+                  </p>
+                )}
 
                 <div
                   style={{
@@ -2601,6 +2749,17 @@ Review Submitted! Thank you 🎉
 />{' '}
                     {course.rating ||
                       '0'}
+                  </span>
+
+                  <span
+                    style={{
+                      fontWeight: '700',
+                      color: dm.heading,
+                    }}
+                  >
+                    {Number(course.price) > 0
+                      ? `$${Number(course.price).toFixed(2)}`
+                      : 'Free'}
                   </span>
                 </div>
 
