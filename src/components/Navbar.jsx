@@ -238,6 +238,22 @@ const Navbar = () => {
           {t.courses}
         </a>
 
+        <a
+          onClick={() => navigate('/about')}
+          style={{ cursor: 'pointer' }}
+        >
+          <i className="fas fa-info-circle"></i>{' '}
+          {t.about}
+        </a>
+
+        <a
+          onClick={() => navigate('/services')}
+          style={{ cursor: 'pointer' }}
+        >
+          <i className="fas fa-concierge-bell"></i>{' '}
+          {t.services}
+        </a>
+
         {user && (
           <a
             onClick={() => navigate('/dashboard')}
