@@ -117,6 +117,9 @@ const Home = () => {
       =========================== */}
 
       <section className="home-hero">
+        <div className="home-hero-bg-shape home-hero-bg-shape-1"></div>
+        <div className="home-hero-bg-shape home-hero-bg-shape-2"></div>
+
         <div className="home-hero-content">
 
           <div className="home-hero-icon">
@@ -138,13 +141,38 @@ const Home = () => {
             Learn from expert instructors and grow your career.
           </p>
 
-          <button
-            className="home-start-button"
-            onClick={() => navigate('/courses')}
-          >
-            <i className="fas fa-rocket"></i>
-            Start Learning
-          </button>
+          <div className="home-hero-actions">
+            <button
+              className="home-start-button"
+              onClick={() => navigate('/courses')}
+            >
+              <i className="fas fa-rocket"></i>
+              Start Learning
+            </button>
+
+            <button
+              className="home-secondary-button"
+              onClick={() => navigate('/about')}
+            >
+              <i className="fas fa-info-circle"></i>
+              Learn More
+            </button>
+          </div>
+
+          {!statsLoading && (totalCourses !== null || avgRating !== null) && (
+            <div className="home-hero-badges">
+              {totalCourses !== null && (
+                <span className="home-hero-badge">
+                  <i className="fas fa-book"></i> {totalCourses} Courses
+                </span>
+              )}
+              {avgRating !== null && (
+                <span className="home-hero-badge">
+                  <i className="fas fa-star"></i> {avgRating} / 5 Rating
+                </span>
+              )}
+            </div>
+          )}
 
         </div>
       </section>
