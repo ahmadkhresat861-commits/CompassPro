@@ -52,8 +52,8 @@ const Services = () => {
     },
     {
       icon: 'fas fa-headset',
-      title: '24/7 Support',
-      desc: "Have a question or an issue? Our support team is always available — reach out anytime through our contact page.",
+      title: 'Support',
+      desc: 'Have a question or an issue? Reach out through our contact page and our team will get back to you.',
       action: () => navigate('/contact'),
       actionLabel: 'Contact Support',
     },
