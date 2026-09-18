@@ -807,6 +807,14 @@ const Admin = () => {
   // Load Data
   // =========================
   useEffect(() => {
+    if (activeTab === 'overview') {
+      fetchCourses();
+      fetchUsers();
+      fetchReviews();
+      fetchSessions();
+      fetchEnrollments();
+    }
+
     if (activeTab === 'courses') {
       fetchCourses();
     }
@@ -942,6 +950,12 @@ const Admin = () => {
       label: 'Total Courses',
       value: courses.length,
       color: '#10b981',
+    },
+    {
+      icon: 'fas fa-user-graduate',
+      label: 'Total Enrollments',
+      value: enrollments.length,
+      color: '#8b5cf6',
     },
     {
       icon: 'fas fa-star',
@@ -1218,6 +1232,17 @@ const Admin = () => {
         ========================= */}
         {activeTab === 'overview' && (
           <>
+            {(coursesLoading ||
+              usersLoading ||
+              reviewsLoading ||
+              sessionsLoading ||
+              enrollmentsLoading) && (
+              <p style={{ color: '#888', marginBottom: '20px' }}>
+                <i className="fas fa-spinner fa-spin"></i> Loading live
+                stats...
+              </p>
+            )}
+
             <div
               style={{
                 display: 'flex',
