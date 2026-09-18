@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import '../App.css';
 
@@ -17,12 +18,94 @@ const About = () => {
       : '0 4px 15px rgba(0,0,0,0.08)',
   };
 
+  // ============================================================
+  // REAL STATS — fetched live, never hardcoded
+  // ============================================================
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [totalCourses, setTotalCourses] = useState(null);
+  const [totalInstructors, setTotalInstructors] = useState(null);
+  const [totalEnrollments, setTotalEnrollments] = useState(null);
+  const [avgRating, setAvgRating] = useState(null);
+  const [totalReviews, setTotalReviews] = useState(null);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        // Courses + instructors
+        const { data: courses } = await supabase
+          .from('courses')
+          .select('instructor');
+
+        if (courses) {
+          setTotalCourses(courses.length);
+
+          const instructorSet = new Set(
+            courses
+              .map((c) => c.instructor?.trim())
+              .filter((name) => !!name)
+          );
+          setTotalInstructors(instructorSet.size);
+        }
+
+        // Enrollments (students)
+        const { count: enrollCount } = await supabase
+          .from('enrollments')
+          .select('id', { count: 'exact', head: true });
+
+        if (typeof enrollCount === 'number') {
+          setTotalEnrollments(enrollCount);
+        }
+
+        // Reviews / rating
+        const { data: reviews } = await supabase
+          .from('reviews')
+          .select('rating');
+
+        if (reviews && reviews.length > 0) {
+          const total = reviews.reduce(
+            (sum, r) => sum + Number(r.rating || 0),
+            0
+          );
+          setAvgRating((total / reviews.length).toFixed(1));
+          setTotalReviews(reviews.length);
+        }
+      } catch (error) {
+        console.error('Error loading About stats:', error);
+      } finally {
+        setStatsLoading(false);
+      }
+    };
+
+    loadStats();
+  }, []);
+
+  // Only show a stat card when we actually have real data for it
   const stats = [
-    { value: '500+', label: 'Students', icon: 'fas fa-users' },
-    { value: '20+', label: 'Courses', icon: 'fas fa-book' },
-    { value: '10+', label: 'Instructors', icon: 'fas fa-chalkboard-teacher' },
-    { value: '95%', label: 'Satisfaction', icon: 'fas fa-star' },
-  ];
+    totalEnrollments !== null && totalEnrollments > 0
+      ? {
+          value: totalEnrollments,
+          label: 'Enrollments',
+          icon: 'fas fa-users',
+        }
+      : null,
+    totalCourses !== null
+      ? { value: totalCourses, label: 'Courses', icon: 'fas fa-book' }
+      : null,
+    totalInstructors !== null && totalInstructors > 0
+      ? {
+          value: totalInstructors,
+          label: 'Instructors',
+          icon: 'fas fa-chalkboard-teacher',
+        }
+      : null,
+    avgRating !== null
+      ? {
+          value: `${avgRating} / 5`,
+          label: `Based on ${totalReviews} review${totalReviews === 1 ? '' : 's'}`,
+          icon: 'fas fa-star',
+        }
+      : null,
+  ].filter(Boolean);
 
   const values = [
     {
@@ -123,41 +206,43 @@ const About = () => {
         ))}
       </div>
 
-      {/* STATS */}
-      <div
-        style={{
-          maxWidth: '900px',
-          margin: '0 auto',
-          background: dm.card,
-          borderRadius: '16px',
-          padding: '35px',
-          boxShadow: dm.shadow,
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-          gap: '25px',
-          textAlign: 'center',
-        }}
-      >
-        {stats.map((stat, i) => (
-          <div key={i}>
-            <i
-              className={stat.icon}
-              style={{
-                fontSize: '1.8rem',
-                color: dm.heading,
-                marginBottom: '10px',
-                display: 'block',
-              }}
-            />
-            <h2 style={{ color: dm.heading, margin: '0 0 5px' }}>
-              {stat.value}
-            </h2>
-            <p style={{ color: dm.subtext, margin: 0, fontSize: '0.9rem' }}>
-              {stat.label}
-            </p>
-          </div>
-        ))}
-      </div>
+      {/* STATS — only rendered once real numbers are loaded */}
+      {!statsLoading && stats.length > 0 && (
+        <div
+          style={{
+            maxWidth: '900px',
+            margin: '0 auto',
+            background: dm.card,
+            borderRadius: '16px',
+            padding: '35px',
+            boxShadow: dm.shadow,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: '25px',
+            textAlign: 'center',
+          }}
+        >
+          {stats.map((stat, i) => (
+            <div key={i}>
+              <i
+                className={stat.icon}
+                style={{
+                  fontSize: '1.8rem',
+                  color: dm.heading,
+                  marginBottom: '10px',
+                  display: 'block',
+                }}
+              />
+              <h2 style={{ color: dm.heading, margin: '0 0 5px' }}>
+                {stat.value}
+              </h2>
+              <p style={{ color: dm.subtext, margin: 0, fontSize: '0.9rem' }}>
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
 
       <style>
         {`
