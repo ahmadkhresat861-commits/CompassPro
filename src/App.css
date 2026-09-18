@@ -332,15 +332,43 @@ nav div a i {
 =========================== */
 
 .home-hero {
+  position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #003366, #005599);
   text-align: center;
-  padding: 80px 20px;
+  padding: 90px 20px;
   color: white;
   animation: homeFade 0.8s ease both;
 }
 
+.home-hero-bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-hero-bg-shape-1 {
+  width: 350px;
+  height: 350px;
+  background: #f0a500;
+  top: -120px;
+  left: -100px;
+}
+
+.home-hero-bg-shape-2 {
+  width: 300px;
+  height: 300px;
+  background: #10b981;
+  bottom: -100px;
+  right: -80px;
+}
+
 .home-hero-content {
+  position: relative;
+  z-index: 1;
   animation: homeHeroEnter 1s ease forwards;
 }
 
@@ -349,7 +377,7 @@ nav div a i {
 }
 
 .home-hero h1 {
-  font-size: 2.8rem;
+  font-size: clamp(1.9rem, 5vw, 2.8rem);
   margin-bottom: 15px;
   line-height: 1.3;
 }
@@ -429,6 +457,64 @@ nav div a i {
 
 .home-start-button i {
   margin-right: 8px;
+}
+
+/* ===========================
+   Hero Actions & Badges
+=========================== */
+
+.home-hero-actions {
+  display: flex;
+  gap: 15px;
+  justifyContent: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.home-secondary-button {
+  padding: 16px 35px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  background: transparent;
+  color: white;
+  font-weight: 700;
+  transition: background 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+  animation: buttonEntrance 0.8s 0.6s ease both;
+}
+
+.home-secondary-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: white;
+  transform: translateY(-5px);
+}
+
+.home-secondary-button i {
+  margin-right: 8px;
+}
+
+.home-hero-badges {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.home-hero-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e8f0ff;
+}
+
+.home-hero-badge i {
+  color: #f0a500;
+  margin-right: 6px;
 }
 
 /* ===========================
@@ -604,20 +690,22 @@ section#courses h1 {
 
 .courses-container {
   display: flex;
-  gap: 20px;
+  gap: 25px;
   flex-wrap: wrap;
   justify-content: center;
 }
 
 .course-card {
   padding: 25px;
-  width: 260px;
-  border-radius: 12px;
+  flex: 1 1 260px;
+  max-width: 300px;
+  border-radius: 16px;
   text-align: center;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   background: var(--card, white);
   border-top: 4px solid #003366;
+  overflow: hidden;
 
   transition:
     transform 0.35s ease,
@@ -625,6 +713,14 @@ section#courses h1 {
     background 0.3s ease;
 
   animation: cardEntrance 0.7s ease both;
+}
+
+.course-card img {
+  transition: transform 0.5s ease;
+}
+
+.course-card:hover img {
+  transform: scale(1.08);
 }
 
 .course-card:nth-child(1) {
@@ -812,6 +908,15 @@ footer a:hover {
 
   .course-card {
     width: 45%;
+    max-width: none;
+    flex-basis: auto;
+  }
+
+  .home-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 280px;
+    margin: 0 auto;
   }
 
   footer > div {
@@ -845,6 +950,8 @@ footer a:hover {
 
   .course-card {
     width: 100%;
+    max-width: none;
+    flex-basis: auto;
   }
 
   .home-feature-card {
