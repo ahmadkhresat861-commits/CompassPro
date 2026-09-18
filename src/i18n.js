@@ -3,6 +3,8 @@ export const translations = {
     // Navbar
     home: 'Home',
     courses: 'Courses',
+    about: 'About Us',
+    services: 'Services',
     dashboard: 'Dashboard',
     sessions: 'Sessions',
     contact: 'Contact',
@@ -47,6 +49,8 @@ export const translations = {
     // Navbar
     home: 'الرئيسية',
     courses: 'الكورسات',
+    about: 'من نحن',
+    services: 'خدماتنا',
     dashboard: 'لوحة التحكم',
     sessions: 'المحاضرات',
     contact: 'تواصل معنا',
