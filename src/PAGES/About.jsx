@@ -1,0 +1,174 @@
+import React from 'react';
+import { useLang } from '../LanguageContext';
+import '../App.css';
+
+const About = () => {
+  const { darkMode } = useLang();
+
+  const dm = {
+    bg: darkMode ? '#0f1117' : '#f5f7fa',
+    card: darkMode ? '#1e2130' : '#ffffff',
+    cardBorder: darkMode ? '#2e3250' : '#f0f0f0',
+    heading: darkMode ? '#a0b4ff' : '#003366',
+    text: darkMode ? '#c8d0e0' : '#555555',
+    subtext: darkMode ? '#7a8499' : '#888888',
+    shadow: darkMode
+      ? '0 4px 20px rgba(0,0,0,0.4)'
+      : '0 4px 15px rgba(0,0,0,0.08)',
+  };
+
+  const stats = [
+    { value: '500+', label: 'Students', icon: 'fas fa-users' },
+    { value: '20+', label: 'Courses', icon: 'fas fa-book' },
+    { value: '10+', label: 'Instructors', icon: 'fas fa-chalkboard-teacher' },
+    { value: '95%', label: 'Satisfaction', icon: 'fas fa-star' },
+  ];
+
+  const values = [
+    {
+      icon: 'fas fa-bullseye',
+      title: 'Our Mission',
+      desc: 'To make quality, practical education accessible to every learner in Jordan and beyond, taught by instructors who work in the field.',
+    },
+    {
+      icon: 'fas fa-eye',
+      title: 'Our Vision',
+      desc: "To become the region's most trusted platform for building real, career-ready skills — not just certificates.",
+    },
+    {
+      icon: 'fas fa-heart',
+      title: 'Our Values',
+      desc: 'Practical learning, honest feedback, and a genuine commitment to every student\'s progress, from their first course to their first job.',
+    },
+  ];
+
+  return (
+    <section
+      style={{
+        background: dm.bg,
+        minHeight: '100vh',
+        padding: '50px 20px 70px',
+        animation: 'fadeInPage 0.6s ease both',
+      }}
+    >
+      {/* HEADER */}
+      <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+        <div
+          style={{
+            width: '80px',
+            height: '80px',
+            margin: '0 auto 20px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #003366, #005599)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 10px 30px rgba(0,51,102,0.25)',
+          }}
+        >
+          <i
+            className="fas fa-graduation-cap"
+            style={{ fontSize: '2.2rem', color: '#f0a500' }}
+          />
+        </div>
+
+        <h1 style={{ color: dm.heading, marginBottom: '10px' }}>
+          About Zephyr Academy
+        </h1>
+
+        <p style={{ color: dm.text, maxWidth: '650px', margin: '0 auto' }}>
+          Jordan's premier online learning platform, built to help students
+          and professionals learn real, in-demand skills from expert
+          instructors — at their own pace.
+        </p>
+      </div>
+
+      {/* MISSION / VISION / VALUES */}
+      <div
+        style={{
+          maxWidth: '1000px',
+          margin: '0 auto 50px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '25px',
+        }}
+      >
+        {values.map((item, i) => (
+          <div
+            key={i}
+            style={{
+              background: dm.card,
+              borderRadius: '16px',
+              padding: '30px',
+              boxShadow: dm.shadow,
+              borderTop: '4px solid #f0a500',
+            }}
+          >
+            <i
+              className={item.icon}
+              style={{
+                fontSize: '2rem',
+                color: '#f0a500',
+                marginBottom: '15px',
+                display: 'block',
+              }}
+            />
+            <h3 style={{ color: dm.heading, marginBottom: '10px' }}>
+              {item.title}
+            </h3>
+            <p style={{ color: dm.text, lineHeight: '1.7', margin: 0 }}>
+              {item.desc}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* STATS */}
+      <div
+        style={{
+          maxWidth: '900px',
+          margin: '0 auto',
+          background: dm.card,
+          borderRadius: '16px',
+          padding: '35px',
+          boxShadow: dm.shadow,
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: '25px',
+          textAlign: 'center',
+        }}
+      >
+        {stats.map((stat, i) => (
+          <div key={i}>
+            <i
+              className={stat.icon}
+              style={{
+                fontSize: '1.8rem',
+                color: dm.heading,
+                marginBottom: '10px',
+                display: 'block',
+              }}
+            />
+            <h2 style={{ color: dm.heading, margin: '0 0 5px' }}>
+              {stat.value}
+            </h2>
+            <p style={{ color: dm.subtext, margin: 0, fontSize: '0.9rem' }}>
+              {stat.label}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <style>
+        {`
+          @keyframes fadeInPage {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `}
+      </style>
+    </section>
+  );
+};
+
+export default About;
