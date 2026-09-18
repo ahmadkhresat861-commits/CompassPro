@@ -177,13 +177,16 @@ const Dashboard = () => {
 
   const hoursLearned = 0;
 
+  const [certificateFor, setCertificateFor] = useState(null);
+
   // =========================
-  // PLACEHOLDER CERTIFICATES
+  // REAL CERTIFICATES
   // =========================
-  // Certificates table is not created yet.
+  // A certificate = any completed enrollment.
+  // No separate table needed.
   // =========================
 
-  const certificates = 0;
+  const certificates = completedCoursesCount;
 
   // =========================
   // STATS
@@ -645,6 +648,29 @@ const Dashboard = () => {
                         {course.category}
                       </p>
                     )}
+
+                    {isCompleted && course && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCertificateFor(course);
+                        }}
+                        style={{
+                          marginTop: '12px',
+                          padding: '8px 16px',
+                          background: '#6366f1',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontWeight: '600',
+                          fontSize: '0.85rem',
+                        }}
+                      >
+                        <i className="fas fa-certificate"></i>{' '}
+                        Get Certificate
+                      </button>
+                    )}
                   </div>
                 );
               }
@@ -740,11 +766,140 @@ const Dashboard = () => {
       </div>
 
       {/* =========================
+          CERTIFICATE MODAL
+      ========================= */}
+
+      {certificateFor && (
+        <div
+          className="certificate-overlay"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px',
+          }}
+          onClick={() => setCertificateFor(null)}
+        >
+          <div
+            className="certificate-print-area"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'white',
+              width: '100%',
+              maxWidth: '750px',
+              padding: '50px',
+              borderRadius: '10px',
+              border: '10px solid #003366',
+              textAlign: 'center',
+              position: 'relative',
+            }}
+          >
+            <i
+              className="fas fa-graduation-cap"
+              style={{ fontSize: '2.5rem', color: '#f0a500', marginBottom: '15px' }}
+            ></i>
+
+            <h2 style={{ color: '#003366', letterSpacing: '2px', marginBottom: '5px' }}>
+              ZEPHYR ACADEMY
+            </h2>
+
+            <p style={{ color: '#888', marginBottom: '30px', fontSize: '0.9rem' }}>
+              Certificate of Completion
+            </p>
+
+            <p style={{ color: '#555', fontSize: '1rem' }}>This certifies that</p>
+
+            <h1
+              style={{
+                color: '#003366',
+                margin: '10px 0 25px',
+                fontSize: '2rem',
+                borderBottom: '2px solid #f0a500',
+                display: 'inline-block',
+                paddingBottom: '8px',
+              }}
+            >
+              {profile?.username || user?.email || 'Student'}
+            </h1>
+
+            <p style={{ color: '#555', fontSize: '1rem' }}>
+              has successfully completed the course
+            </p>
+
+            <h2 style={{ color: '#003366', margin: '15px 0 30px' }}>
+              {certificateFor.title}
+            </h2>
+
+            <p style={{ color: '#888', fontSize: '0.85rem' }}>
+              Issued on {new Date().toLocaleDateString()}
+            </p>
+
+            <div
+              className="certificate-actions"
+              style={{ marginTop: '35px', display: 'flex', gap: '12px', justifyContent: 'center' }}
+            >
+              <button
+                onClick={() => window.print()}
+                style={{
+                  padding: '12px 24px',
+                  background: '#003366',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                }}
+              >
+                <i className="fas fa-print"></i> Print / Save as PDF
+              </button>
+
+              <button
+                onClick={() => setCertificateFor(null)}
+                style={{
+                  padding: '12px 24px',
+                  background: '#e5e7eb',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================
           ANIMATIONS
       ========================= */}
 
       <style>
         {`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .certificate-print-area, .certificate-print-area * {
+              visibility: visible;
+            }
+            .certificate-print-area {
+              position: fixed;
+              top: 0;
+              left: 0;
+              border-width: 15px !important;
+            }
+            .certificate-actions {
+              display: none !important;
+            }
+          }
+
           @keyframes dashboardWelcome {
             from {
               opacity: 0;
