@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './PAGES/Login'
 import SignUp from './PAGES/SignUp'
 import Home from './PAGES/Home'
+import About from './PAGES/About'
+import Services from './PAGES/Services'
 import Courses from './PAGES/Courses'
 import Dashboard from './PAGES/Dashboard'
 import Profile from './PAGES/Profile'
@@ -48,6 +50,30 @@ function App() {
               <>
                 <Navbar />
                 <Home />
+                <Footer />
+              </>
+            }
+          />
+
+          {/* ABOUT — public */}
+          <Route
+            path="/about"
+            element={
+              <>
+                <Navbar />
+                <About />
+                <Footer />
+              </>
+            }
+          />
+
+          {/* SERVICES — public */}
+          <Route
+            path="/services"
+            element={
+              <>
+                <Navbar />
+                <Services />
                 <Footer />
               </>
             }
