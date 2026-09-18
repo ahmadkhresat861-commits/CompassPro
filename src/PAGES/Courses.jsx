@@ -709,6 +709,7 @@ progressData = data;
           .from('lesson_progress')
           .insert({
             user_id: user.id,
+            course_id: selected.id,
             lesson_id:
               selectedLesson.id,
             completed: true,
