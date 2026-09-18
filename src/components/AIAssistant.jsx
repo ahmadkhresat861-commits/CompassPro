@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 
 const AIAssistant = () => {
@@ -40,25 +41,15 @@ const AIAssistant = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: `أنت مساعد ذكي متخصص في منصة Zephyr Academy التعليمية. 
-تساعد الطلاب في:
-- فهم المواد الدراسية (React, JavaScript, Python, HTML/CSS, UI/UX, SQL)
-- الإجابة على أسئلتهم التقنية
-- تقديم نصائح للتعلم
-- شرح المفاهيم البرمجية بأسلوب بسيط
-كن ودوداً ومشجعاً. أجب باللغة التي يكتب بها الطالب.`,
+      const { data, error } = await supabase.functions.invoke('zephyr-ai', {
+        body: {
           messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
-        }),
+        },
       });
 
-      const data = await response.json();
-      const reply = data.content?.map(b => b.text).join('') || 'عذراً، حدث خطأ. حاول مرة أخرى.';
+      if (error) throw error;
+
+      const reply = data?.content?.map(b => b.text).join('') || 'عذراً، حدث خطأ. حاول مرة أخرى.';
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: '❌ تعذّر الاتصال. تحقق من الإنترنت وحاول مجدداً.' }]);
