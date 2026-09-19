@@ -6,7 +6,7 @@ import '../App.css';
 
 const Services = () => {
   const navigate = useNavigate();
-  const { darkMode } = useLang();
+  const { darkMode, t } = useLang();
 
   useSEO({
     title: 'Our Services',
@@ -29,41 +29,41 @@ const Services = () => {
   const services = [
     {
       icon: 'fas fa-laptop-code',
-      title: 'Self-Paced Online Courses',
-      desc: 'Browse our full course catalog and learn at your own pace, with video lessons, downloadable materials, and progress tracking.',
+      title: t.serviceCoursesTitle,
+      desc: t.serviceCoursesDesc,
       action: () => navigate('/courses'),
-      actionLabel: 'Browse Courses',
+      actionLabel: t.browseCourses,
     },
     {
       icon: 'fas fa-video',
-      title: 'Live Training Sessions',
-      desc: 'Join scheduled live sessions with instructors for real-time Q&A, deeper dives into course topics, and hands-on practice.',
+      title: t.serviceSessionsTitle,
+      desc: t.serviceSessionsDesc,
       action: () => navigate('/sessions'),
-      actionLabel: 'View Sessions',
+      actionLabel: t.viewSessions,
     },
     {
       icon: 'fas fa-chart-line',
-      title: 'Progress Tracking & Dashboard',
-      desc: 'Keep track of every course you enroll in, lessons completed, and your overall learning progress in one place.',
+      title: t.serviceDashboardTitle,
+      desc: t.serviceDashboardDesc,
       action: () => navigate('/dashboard'),
-      actionLabel: 'Go to Dashboard',
+      actionLabel: t.goToDashboard,
     },
     {
       icon: 'fas fa-robot',
-      title: 'Zephyr AI Assistant',
-      desc: 'Get instant help navigating the platform and understanding course content with our built-in AI assistant.',
+      title: t.serviceAiTitle,
+      desc: t.serviceAiDesc,
     },
     {
       icon: 'fas fa-star',
-      title: 'Course Reviews & Ratings',
-      desc: 'Read honest reviews from other students before enrolling, and share your own experience after completing a course.',
+      title: t.serviceReviewsTitle,
+      desc: t.serviceReviewsDesc,
     },
     {
       icon: 'fas fa-headset',
-      title: 'Support',
-      desc: 'Have a question or an issue? Reach out through our contact page and our team will get back to you.',
+      title: t.serviceSupportTitle,
+      desc: t.serviceSupportDesc,
       action: () => navigate('/contact'),
-      actionLabel: 'Contact Support',
+      actionLabel: t.contactSupportBtn,
     },
   ];
 
@@ -98,12 +98,11 @@ const Services = () => {
         </div>
 
         <h1 style={{ color: dm.heading, marginBottom: '10px' }}>
-          Our Services
+          {t.servicesTitle}
         </h1>
 
         <p style={{ color: dm.text, maxWidth: '650px', margin: '0 auto' }}>
-          Everything Zephyr Academy offers to help you learn, practice, and
-          grow — all in one platform.
+          {t.servicesIntro}
         </p>
       </div>
 
