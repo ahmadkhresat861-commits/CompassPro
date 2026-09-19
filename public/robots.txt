@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /login
+Disallow: /signup
+
+Sitemap: https://edu-course-platform-two.vercel.app/sitemap.xml
