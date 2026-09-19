@@ -5,7 +5,7 @@ import { useSEO } from '../hooks/useSEO';
 import '../App.css';
 
 const About = () => {
-  const { darkMode } = useLang();
+  const { darkMode, t } = useLang();
 
   useSEO({
     title: 'About Us',
@@ -92,24 +92,24 @@ const About = () => {
     totalEnrollments !== null && totalEnrollments > 0
       ? {
           value: totalEnrollments,
-          label: 'Enrollments',
+          label: t.enrollments,
           icon: 'fas fa-users',
         }
       : null,
     totalCourses !== null
-      ? { value: totalCourses, label: 'Courses', icon: 'fas fa-book' }
+      ? { value: totalCourses, label: t.courses, icon: 'fas fa-book' }
       : null,
     totalInstructors !== null && totalInstructors > 0
       ? {
           value: totalInstructors,
-          label: 'Instructors',
+          label: t.instructors,
           icon: 'fas fa-chalkboard-teacher',
         }
       : null,
     avgRating !== null
       ? {
           value: `${avgRating} / 5`,
-          label: `Based on ${totalReviews} review${totalReviews === 1 ? '' : 's'}`,
+          label: `${t.basedOn} ${totalReviews} ${t.reviewsWord}`,
           icon: 'fas fa-star',
         }
       : null,
@@ -118,18 +118,18 @@ const About = () => {
   const values = [
     {
       icon: 'fas fa-bullseye',
-      title: 'Our Mission',
-      desc: 'To make quality, practical education accessible to every learner in Jordan and beyond, taught by instructors who work in the field.',
+      title: t.ourMission,
+      desc: t.ourMissionDesc,
     },
     {
       icon: 'fas fa-eye',
-      title: 'Our Vision',
-      desc: "To become the region's most trusted platform for building real, career-ready skills — not just certificates.",
+      title: t.ourVision,
+      desc: t.ourVisionDesc,
     },
     {
       icon: 'fas fa-heart',
-      title: 'Our Values',
-      desc: 'Practical learning, honest feedback, and a genuine commitment to every student\'s progress, from their first course to their first job.',
+      title: t.ourValues,
+      desc: t.ourValuesDesc,
     },
   ];
 
@@ -164,13 +164,11 @@ const About = () => {
         </div>
 
         <h1 style={{ color: dm.heading, marginBottom: '10px' }}>
-          About Zephyr Academy
+          {t.aboutTitle}
         </h1>
 
         <p style={{ color: dm.text, maxWidth: '650px', margin: '0 auto' }}>
-          Jordan's premier online learning platform, built to help students
-          and professionals learn real, in-demand skills from expert
-          instructors — at their own pace.
+          {t.aboutIntro}
         </p>
       </div>
 
