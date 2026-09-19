@@ -47,8 +47,17 @@ const Navbar = () => {
     navigate('/home');
   };
 
-  // ── جلب الإشعارات ──────────────────────────────────────────────
+  // ── جلب الإشعارات (للمسجلين دخول فقط) ──────────────────────────
   useEffect(() => {
+    if (authLoading) return;
+
+    if (!user) {
+      setNotifications([]);
+      setUnread(0);
+      setLoading(false);
+      return;
+    }
+
     const fetchNotifications = async () => {
       try {
         setLoading(true);
@@ -86,10 +95,12 @@ const Navbar = () => {
     };
 
     fetchNotifications();
-  }, []);
+  }, [user, authLoading]);
 
-  // ── Realtime Notifications ─────────────────────────────────────
+  // ── Realtime Notifications (للمسجلين دخول فقط) ──────────────────
   useEffect(() => {
+    if (!user) return;
+
     const channel = supabase
       .channel('notifications-realtime')
       .on(
@@ -126,9 +137,7 @@ const Navbar = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
-
-  // ── إغلاق الـ dropdown عند الضغط خارجه ─────────────────────────
+  }, [user]);
   useEffect(() => {
     if (!showNotif) return;
 
@@ -342,7 +351,8 @@ const Navbar = () => {
             : '🌐 English'}
         </button>
 
-        {/* جرس الإشعارات */}
+        {/* جرس الإشعارات (للمسجلين دخول فقط) */}
+        {user && (
         <div
           ref={notifRef}
           style={{
@@ -640,6 +650,7 @@ const Navbar = () => {
             </div>
           )}
         </div>
+        )}
       </div>
     </nav>
   );
