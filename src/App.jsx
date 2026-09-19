@@ -91,6 +91,18 @@ function App() {
             }
           />
 
+          {/* COURSE DETAILS — public, unique URL per course for SEO */}
+          <Route
+            path="/courses/:id"
+            element={
+              <>
+                <Navbar />
+                <Courses />
+                <Footer />
+              </>
+            }
+          />
+
           {/* DASHBOARD */}
           <Route
             path="/dashboard"
