@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
+import { useSEO } from '../hooks/useSEO';
 import '../App.css';
 
 const About = () => {
   const { darkMode } = useLang();
+
+  useSEO({
+    title: 'About Us',
+    description:
+      "Learn about Zephyr Academy's mission to make quality, practical education accessible to every learner in Jordan and beyond.",
+    path: '/about',
+  });
 
   const dm = {
     bg: darkMode ? '#0f1117' : '#f5f7fa',
