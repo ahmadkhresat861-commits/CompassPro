@@ -60,7 +60,7 @@ const StarRating = ({ rating = 0, onRate }) => {
 // ============================================================
 
 const Courses = () => {
-  const { darkMode } = useLang();
+  const { darkMode, t } = useLang();
   const navigate = useNavigate();
   const { id: courseIdParam } = useParams();
 
@@ -1139,7 +1139,7 @@ progressData = data;
               color: dm.text,
             }}
           >
-            Loading courses...
+            {t.loadingCourses}
           </p>
         </div>
       </section>
@@ -1198,7 +1198,7 @@ progressData = data;
           }}
         >
           <i className="fas fa-arrow-left" />{' '}
-          Back to Courses
+          {t.backToCourses}
         </button>
 
         {/* ================================================== */}
@@ -1315,7 +1315,7 @@ progressData = data;
               }}
             >
               <i className="fas fa-chalkboard-teacher" />{' '}
-              Instructor: {selected.instructor}
+              {t.instructorLabel}: {selected.instructor}
             </p>
           )}
 
@@ -1353,7 +1353,7 @@ progressData = data;
               >
                 {selected.students ||
                   0}{' '}
-                Students
+                {t.students}
               </p>
             </div>
 
@@ -1376,7 +1376,7 @@ color:
               >
                 {avgRating ||
                   selected.rating ||
-                  'No rating'}
+                  t.noRating}
               </p>
             </div>
 
@@ -1444,7 +1444,7 @@ color:
                     dm.heading,
                 }}
               >
-                You are enrolled 🎉
+                {t.youAreEnrolled} 🎉
               </h3>
 
               <p
@@ -1455,7 +1455,7 @@ color:
                     '10px',
                 }}
               >
-                Your progress:{' '}
+                {t.yourProgress}:{' '}
                 <strong>
                   {calculatedProgress}%
                 </strong>
@@ -1502,7 +1502,7 @@ color:
                     dm.heading,
                 }}
               >
-                Ready to start learning?
+                {t.readyToLearn}
               </h3>
 
               <p
@@ -1514,8 +1514,8 @@ color:
                 }}
               >
                 {user
-                  ? 'Enroll now and start your learning journey.'
-                  : 'Please login or create an account to enroll in this course.'}
+                  ? t.enrollJourney
+                  : t.loginToEnroll}
               </p>
 
               {user ? (
@@ -1559,8 +1559,8 @@ className={
                     }
                   />{' '}
                   {enrolling
-                    ? 'Enrolling...'
-                    : 'Enroll Now'}
+                    ? t.enrolling
+                    : t.enrollNow}
                 </button>
               ) : (
                 <div
@@ -1585,7 +1585,7 @@ className={
                     }}
                   >
                     <i className="fas fa-sign-in-alt" />{' '}
-                    Login
+                    {t.login}
                   </button>
 
                   <button
@@ -1602,7 +1602,7 @@ className={
                     }}
                   >
                     <i className="fas fa-user-plus" />{' '}
-                    Sign Up
+                    {t.signUp}
                   </button>
                 </div>
               )}
@@ -1684,7 +1684,7 @@ className={
                 }}
               >
                 <i className="fas fa-list" />{' '}
-                Course Lessons
+                {t.courseLessons}
               </h3>
 
               {lessonsLoading ? (
@@ -1697,7 +1697,7 @@ className={
                   }}
                 >
                   <i className="fas fa-spinner fa-spin" />{' '}
-                  Loading lessons...
+                  {t.loadingLessons}
                 </p>
               ) : lessons.length ===
                 0 ? (
@@ -1709,7 +1709,7 @@ className={
                       'center',
                   }}
                 >
-                  No lessons available yet.
+                  {t.noLessonsYet}
                 </p>
               ) : (
                 <div
@@ -1868,7 +1868,7 @@ setSelectedLesson(
                         dm.heading,
                     }}
                   >
-                    Start Learning
+                    {t.startLearning}
                   </h2>
                 </div>
               ) : (
@@ -1900,13 +1900,13 @@ setSelectedLesson(
                           '0.9rem',
                       }}
                     >
-                      Lesson{' '}
+                      {t.lessonOf}{' '}
                       {lessons.findIndex(
                         (lesson) =>
                           lesson.id ===
                           selectedLesson.id
                       ) + 1}{' '}
-                      of{' '}
+                      {t.ofWord}{' '}
                       {lessons.length}
                     </span>
 
@@ -1998,7 +1998,7 @@ setSelectedLesson(
                         className="fas fa-file-pdf"
                         style={{ color: '#ef4444', fontSize: '1.3rem' }}
                       />
-                      Download Lesson PDF
+                      {t.downloadPdf}
                     </a>
                   )}
 
@@ -2078,7 +2078,7 @@ setSelectedLesson(
                       }}
                     >
                       <i className="fas fa-arrow-left" />{' '}
-                      Previous
+                      {t.previous}
                     </button>
 
                     <button
@@ -2126,12 +2126,12 @@ setSelectedLesson(
                         }
                       />{' '}
                       {lessonSaving
-                        ? 'Saving...'
+                        ? t.savingWord
                         : isLessonCompleted(
                             selectedLesson.id
                           )
-                        ? 'Lesson Completed'
-                        : 'Mark as Completed'}
+                        ? t.lessonCompleted
+                        : t.markCompleted}
                     </button>
 
                     <button
@@ -2172,7 +2172,7 @@ lesson.id ===
                             : 1,
                       }}
                     >
-                      Next{' '}
+                      {t.next}{' '}
                       <i className="fas fa-arrow-right" />
                     </button>
                   </div>
@@ -2209,7 +2209,7 @@ lesson.id ===
             }}
           >
             <i className="fas fa-star" />{' '}
-            Reviews
+            {t.reviewsLabel}
           </h2>
 
           {reviewLoading ? (
@@ -2222,7 +2222,7 @@ lesson.id ===
               }}
             >
               <i className="fas fa-spinner fa-spin" />{' '}
-              Loading...
+              {t.loadingWord}
             </p>
           ) : reviews.length ===
             0 ? (
@@ -2234,7 +2234,7 @@ lesson.id ===
                   'center',
               }}
             >
-              No reviews yet. Be the first!
+              {t.noReviewsYet}
             </p>
           ) : (
             reviews.map(
@@ -2302,7 +2302,7 @@ lesson.id ===
               }}
             >
               <i className="fas fa-pen" />{' '}
-              Add Your Review
+              {t.addYourReview}
             </h2>
 
             {!user ? (
@@ -2314,7 +2314,7 @@ lesson.id ===
                     'center',
                 }}
               >
-                Please login to leave a review.
+                {t.loginToReview}
               </p>
             ) : (
               <>
@@ -2326,7 +2326,7 @@ lesson.id ===
                       '600',
                   }}
                 >
-                  Your Rating:
+                  {t.yourRating}
                 </p>
 
                 <StarRating
@@ -2350,7 +2350,7 @@ lesson.id ===
                         .value
                     )
                   }
-                  placeholder="Write your review..."
+                  placeholder={t.writeReviewPlaceholder}
                   rows={4}
                   style={{
                     width:
@@ -2411,8 +2411,8 @@ lesson.id ===
                 >
                   <i className="fas fa-paper-plane" />{' '}
                   {reviewLoading
-                    ? 'Submitting...'
-                    : 'Submit Review'}
+                    ? t.submitting
+                    : t.submitReview}
                 </button>
               </>
             )}
@@ -2448,7 +2448,7 @@ lesson.id ===
                   dm.heading,
               }}
             >
-Review Submitted! Thank you 🎉
+{t.reviewSubmitted} 🎉
             </h3>
           </div>
         )}
@@ -2530,7 +2530,7 @@ Review Submitted! Thank you 🎉
         }}
       >
         <i className="fas fa-book-open" />{' '}
-        Our Courses
+        {t.ourCourses}
       </h1>
 
       {/* SEARCH */}
@@ -2569,7 +2569,7 @@ Review Submitted! Thank you 🎉
 
           <input
             type="text"
-            placeholder="Search courses..."
+            placeholder={t.searchCourses}
             value={
               search
             }
@@ -2652,7 +2652,7 @@ Review Submitted! Thank you 🎉
                     'pointer',
                 }}
               >
-                {cat}
+                {cat === 'All' ? t.allCategories : cat}
               </button>
             )
           )}
@@ -2684,7 +2684,7 @@ Review Submitted! Thank you 🎉
           />
 
           <p>
-            No courses found
+            {t.noCoursesFound}
           </p>
         </div>
       ) : (
@@ -2788,7 +2788,7 @@ Review Submitted! Thank you 🎉
                   }}
                 >
                   {course.description ||
-                    'Explore this course and start learning today.'}
+                    t.exploreCourseFallback}
                 </p>
 
                 {course.instructor && (
@@ -2876,7 +2876,7 @@ Review Submitted! Thank you 🎉
                   }}
                 >
                   <i className="fas fa-arrow-right" />{' '}
-                  View Details
+                  {t.viewDetails}
                 </button>
               </div>
             )
