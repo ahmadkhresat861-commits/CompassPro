@@ -1,11 +1,19 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLang } from '../LanguageContext';
+import { useSEO } from '../hooks/useSEO';
 import '../App.css';
 
 const Services = () => {
   const navigate = useNavigate();
   const { darkMode } = useLang();
+
+  useSEO({
+    title: 'Our Services',
+    description:
+      'Explore what Zephyr Academy offers: self-paced online courses, live training sessions, progress tracking, and dedicated support.',
+    path: '/services',
+  });
 
   const dm = {
     bg: darkMode ? '#0f1117' : '#f5f7fa',
