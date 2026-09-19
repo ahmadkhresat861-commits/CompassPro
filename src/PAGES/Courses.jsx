@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
+import { useSEO } from '../hooks/useSEO';
 import '../App.css';
 
 // ============================================================
@@ -61,6 +62,7 @@ const StarRating = ({ rating = 0, onRate }) => {
 const Courses = () => {
   const { darkMode } = useLang();
   const navigate = useNavigate();
+  const { id: courseIdParam } = useParams();
 
   // ============================================================
   // COLORS
@@ -109,6 +111,36 @@ const Courses = () => {
 
   const [courses, setCourses] = useState([]);
   const [selected, setSelected] = useState(null);
+
+  useSEO(
+    selected
+      ? {
+          title: selected.title,
+          description:
+            selected.description ||
+            `Learn ${selected.title} at Zephyr Academy.`,
+          path: `/courses/${selected.id}`,
+          structuredData: {
+            '@context': 'https://schema.org',
+            '@type': 'Course',
+            name: selected.title,
+            description:
+              selected.description ||
+              `Learn ${selected.title} at Zephyr Academy.`,
+            provider: {
+              '@type': 'Organization',
+              name: 'Zephyr Academy',
+              sameAs: 'https://edu-course-platform-two.vercel.app',
+            },
+          },
+        }
+      : {
+          title: 'Courses',
+          description:
+            'Browse all courses available at Zephyr Academy and start learning today.',
+          path: '/courses',
+        }
+  );
 
   // ============================================================
   // SEARCH
@@ -228,6 +260,27 @@ const Courses = () => {
 
     loadData();
   }, []);
+
+  // ============================================================
+  // SYNC SELECTED COURSE WITH URL (/courses/:id)
+  // ============================================================
+
+  useEffect(() => {
+    if (!courseIdParam) {
+      setSelected(null);
+      return;
+    }
+
+    if (courses.length === 0) {
+      return;
+    }
+
+    const matched = courses.find(
+      (course) => String(course.id) === String(courseIdParam)
+    );
+
+    setSelected(matched || null);
+  }, [courseIdParam, courses]);
 
   // ============================================================
   // WHEN COURSE SELECTED
@@ -970,6 +1023,7 @@ progressData = data;
 
   const handleBack = () => {
     setDetailsVisible(false);
+    navigate('/courses');
 
     setTimeout(() => {
       setSelected(null);
@@ -2646,8 +2700,8 @@ Review Submitted! Thank you 🎉
                 }
                 className="course-card"
                 onClick={() =>
-                  setSelected(
-                    course
+                  navigate(
+                    `/courses/${course.id}`
                   )
                 }
                 style={{
@@ -2800,8 +2854,8 @@ Review Submitted! Thank you 🎉
                   ) => {
                     e.stopPropagation();
 
-                    setSelected(
-                      course
+                    navigate(
+                      `/courses/${course.id}`
                     );
                   }}
                   style={{
