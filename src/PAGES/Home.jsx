@@ -1,13 +1,22 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
+import { useSEO } from '../hooks/useSEO';
 import '../App.css';
 
 const Home = () => {
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
-  const { darkMode } = useLang();
+  const { darkMode, t } = useLang();
+
+  useSEO({
+    title: 'Online Courses & Learning Platform',
+    description:
+      "Zephyr Academy is Jordan's premier online learning platform. Learn React, JavaScript, Python, HTML & CSS from expert instructors.",
+    path: '/home',
+  });
 
   const [statsLoading, setStatsLoading] = useState(true);
   const [totalCourses, setTotalCourses] = useState(null);
@@ -74,38 +83,38 @@ const Home = () => {
 
   const stats = [
     totalCourses !== null
-      ? { value: totalCourses, label: 'Courses', icon: 'fas fa-book' }
+      ? { value: totalCourses, label: t.courses, icon: 'fas fa-book' }
       : null,
     totalInstructors !== null && totalInstructors > 0
       ? {
           value: totalInstructors,
-          label: 'Instructors',
+          label: t.instructors,
           icon: 'fas fa-chalkboard-teacher',
         }
       : null,
     totalEnrollments !== null && totalEnrollments > 0
-      ? { value: totalEnrollments, label: 'Enrollments', icon: 'fas fa-users' }
+      ? { value: totalEnrollments, label: t.enrollments, icon: 'fas fa-users' }
       : null,
     avgRating !== null
-      ? { value: `${avgRating} / 5`, label: 'Avg. Rating', icon: 'fas fa-star' }
+      ? { value: `${avgRating} / 5`, label: t.avgRating, icon: 'fas fa-star' }
       : null,
   ].filter(Boolean);
 
   const features = [
     {
       icon: 'fas fa-laptop',
-      title: 'Learn Online',
-      desc: 'Study anytime, anywhere at your own pace',
+      title: t.learnOnline,
+      desc: t.learnOnlineDesc,
     },
     {
       icon: 'fas fa-certificate',
-      title: 'Get Certified',
-      desc: 'Earn certificates recognized by top companies',
+      title: t.getCertified,
+      desc: t.getCertifiedDesc,
     },
     {
       icon: 'fas fa-headset',
-      title: 'Real Support',
-      desc: 'Reach out anytime through our contact page and we\'ll help you out',
+      title: t.support,
+      desc: t.supportDesc,
     },
   ];
 
@@ -134,12 +143,9 @@ const Home = () => {
             ></i>
           </div>
 
-          <h1>Welcome to Zephyr Academy</h1>
+          <h1>{t.welcome}</h1>
 
-          <p>
-            Jordan's premier online learning platform.
-            Learn from expert instructors and grow your career.
-          </p>
+          <p>{t.tagline}</p>
 
           <div className="home-hero-actions">
             <button
@@ -147,7 +153,7 @@ const Home = () => {
               onClick={() => navigate('/courses')}
             >
               <i className="fas fa-rocket"></i>
-              Start Learning
+              {t.startLearning}
             </button>
 
             <button
@@ -155,7 +161,7 @@ const Home = () => {
               onClick={() => navigate('/about')}
             >
               <i className="fas fa-info-circle"></i>
-              Learn More
+              {t.learnMore}
             </button>
           </div>
 
@@ -163,12 +169,12 @@ const Home = () => {
             <div className="home-hero-badges">
               {totalCourses !== null && (
                 <span className="home-hero-badge">
-                  <i className="fas fa-book"></i> {totalCourses} Courses
+                  <i className="fas fa-book"></i> {totalCourses} {t.courses}
                 </span>
               )}
               {avgRating !== null && (
                 <span className="home-hero-badge">
-                  <i className="fas fa-star"></i> {avgRating} / 5 Rating
+                  <i className="fas fa-star"></i> {avgRating} / 5 {t.avgRating}
                 </span>
               )}
             </div>
@@ -225,14 +231,14 @@ const Home = () => {
             textAlign: 'center',
           }}
         >
-          <h1
+          <h2
             style={{
               color: darkMode ? 'white' : '#003366',
               marginBottom: '40px',
             }}
           >
-            Featured Courses
-          </h1>
+            {t.featuredCourses}
+          </h2>
 
           <div
             style={{
@@ -297,7 +303,7 @@ const Home = () => {
                     {course.title}
                   </h3>
                   <p style={{ color: darkMode ? '#a8c8f0' : '#888', fontSize: '0.9rem', margin: 0 }}>
-                    {Number(course.price) > 0 ? `$${Number(course.price).toFixed(2)}` : 'Free'}
+                    {Number(course.price) > 0 ? `$${Number(course.price).toFixed(2)}` : t.free}
                     {course.rating ? ` · ⭐ ${course.rating}` : ''}
                   </p>
                 </div>
@@ -310,7 +316,7 @@ const Home = () => {
             onClick={() => navigate('/courses')}
             style={{ marginTop: '40px' }}
           >
-            View All Courses <i className="fas fa-arrow-right"></i>
+            {t.viewAllCourses} <i className="fas fa-arrow-right"></i>
           </button>
         </section>
       )}
@@ -326,14 +332,14 @@ const Home = () => {
         }}
       >
 
-        <h1
+        <h2
           style={{
             color: darkMode ? 'white' : '#003366',
             marginBottom: '50px',
           }}
         >
-          Why Zephyr Academy?
-        </h1>
+          {t.whyUs}
+        </h2>
 
         <div className="home-features-container">
 
