@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import '../App.css';
@@ -222,83 +222,56 @@ const Navbar = () => {
         }}
       >
 
-        <a
-          onClick={() => navigate('/home')}
-          style={{ cursor: 'pointer' }}
-        >
+        <Link to="/home">
           <i className="fas fa-home"></i>{' '}
           {t.home}
-        </a>
+        </Link>
 
-        <a
-          onClick={() => navigate('/courses')}
-          style={{ cursor: 'pointer' }}
-        >
+        <Link to="/courses">
           <i className="fas fa-book"></i>{' '}
           {t.courses}
-        </a>
+        </Link>
 
-        <a
-          onClick={() => navigate('/about')}
-          style={{ cursor: 'pointer' }}
-        >
+        <Link to="/about">
           <i className="fas fa-info-circle"></i>{' '}
           {t.about}
-        </a>
+        </Link>
 
-        <a
-          onClick={() => navigate('/services')}
-          style={{ cursor: 'pointer' }}
-        >
+        <Link to="/services">
           <i className="fas fa-concierge-bell"></i>{' '}
           {t.services}
-        </a>
+        </Link>
 
         {user && (
-          <a
-            onClick={() => navigate('/dashboard')}
-            style={{ cursor: 'pointer' }}
-          >
+          <Link to="/dashboard">
             <i className="fas fa-chart-bar"></i>{' '}
             {t.dashboard}
-          </a>
+          </Link>
         )}
 
-        <a
-          onClick={() => navigate('/sessions')}
-          style={{ cursor: 'pointer' }}
-        >
+        <Link to="/sessions">
           <i className="fas fa-video"></i>{' '}
           {t.sessions}
-        </a>
+        </Link>
 
-        <a
-          onClick={() => navigate('/contact')}
-          style={{ cursor: 'pointer' }}
-        >
+        <Link to="/contact">
           <i className="fas fa-headset"></i>{' '}
           {t.contact}
-        </a>
+        </Link>
 
         {user && (
-          <a
-            onClick={() => navigate('/profile')}
-            style={{ cursor: 'pointer' }}
-          >
+          <Link to="/profile">
             <i className="fas fa-user"></i>{' '}
             {t.profile}
-          </a>
+          </Link>
         )}
 
         {!authLoading && !user && (
           <>
-            <a
-              onClick={() => navigate('/login')}
-              style={{ cursor: 'pointer' }}
-            >
+            <Link to="/login">
               <i className="fas fa-sign-in-alt"></i>{' '}
               {lang === 'ar' ? 'تسجيل الدخول' : 'Login'}
-            </a>
+            </Link>
 
             <button
               onClick={() => navigate('/signup')}
