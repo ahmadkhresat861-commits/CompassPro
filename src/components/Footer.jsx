@@ -15,7 +15,7 @@ const Footer = () => {
           <div style={{ flex: '2', minWidth: '200px' }}>
             <h2 style={{ color: 'white', marginBottom: '15px' }}>
               <i className="fas fa-graduation-cap" style={{ color: '#f0a500', marginRight: '8px' }}></i>
-              Zephyr Academy
+              CompassPro
             </h2>
             <p style={{ color: '#a8c8f0', lineHeight: '1.8' }}>
               Jordan's premier online learning platform. Learn from expert instructors and grow your career.
@@ -76,7 +76,7 @@ const Footer = () => {
         {/* Bottom */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', textAlign: 'center' }}>
           <p style={{ color: '#a8c8f0', fontSize: '0.9rem' }}>
-            © 2026 Zephyr Academy. All rights reserved. Made with <i className="fas fa-heart" style={{ color: '#f0a500' }}></i> in Jordan
+            © 2026 CompassPro. All rights reserved. Made with <i className="fas fa-heart" style={{ color: '#f0a500' }}></i> in Jordan
           </p>
         </div>
       </div>
