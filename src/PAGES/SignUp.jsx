@@ -33,7 +33,7 @@ const SignUp = () => {
       <div className="login-logo">
         <i className="fas fa-user-plus"></i>
       </div>
-      <h1>Zephyr Academy</h1>
+      <h1>CompassPro</h1>
       <p className="login-tagline">Start Your Journey Today</p>
       <h2>Create Account</h2>
       {error && <p style={{ color: '#ff4444', marginBottom: '15px', fontSize: '0.9rem' }}>{error}</p>}
