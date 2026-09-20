@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
+import { useSEO } from '../hooks/useSEO';
 import '../App.css';
 
 // ============================================================
@@ -9,6 +10,13 @@ import '../App.css';
 
 const Contact = () => {
   const { darkMode, t } = useLang();
+
+  useSEO({
+    title: 'Contact & Support',
+    description:
+      "Get in touch with CompassPro. We're here to help with any questions about our courses or platform.",
+    path: '/contact',
+  });
 
   // ============================================================
   // COLORS (same system as Courses.jsx / other pages)
