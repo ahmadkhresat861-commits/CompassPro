@@ -219,7 +219,7 @@ const Login = () => {
               'textSlideUp 0.8s 0.2s ease both',
           }}
         >
-          Zephyr Academy
+          CompassPro
         </h1>
 
         <p
