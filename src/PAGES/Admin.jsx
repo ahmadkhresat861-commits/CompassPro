@@ -1062,7 +1062,7 @@ const Admin = () => {
                 marginRight: '8px',
               }}
             ></i>
-            Zephyr Admin
+            CompassPro Admin
           </h2>
         </div>
 
