@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
@@ -14,7 +13,7 @@ const Home = () => {
   useSEO({
     title: 'Online Courses & Learning Platform',
     description:
-      "Zephyr Academy is Jordan's premier online learning platform. Learn React, JavaScript, Python, HTML & CSS from expert instructors.",
+      "CompassPro is Jordan's premier online learning platform. Learn React, JavaScript, Python, HTML & CSS from expert instructors.",
     path: '/home',
   });
 
@@ -132,15 +131,17 @@ const Home = () => {
         <div className="home-hero-content">
 
           <div className="home-hero-icon">
-            <i
-              className="fas fa-graduation-cap"
+            <img
+              src="/logo.png"
+              alt="CompassPro"
+              className="hero-logo-animated"
               style={{
-                fontSize: '3.5rem',
-                color: '#f0a500',
+                width: '110px',
+                height: '110px',
                 marginBottom: '20px',
                 display: 'inline-block',
               }}
-            ></i>
+            />
           </div>
 
           <h1>{t.welcome}</h1>
