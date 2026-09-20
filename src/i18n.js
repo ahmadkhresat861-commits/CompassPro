@@ -10,13 +10,13 @@ export const translations = {
     contact: 'Contact',
     profile: 'Profile',
     // Home
-    welcome: 'Welcome to Zephyr Academy',
+    welcome: 'Welcome to CompassPro',
     tagline: "Jordan's premier online learning platform. Learn from expert instructors and grow your career.",
     startLearning: 'Start Learning',
     students: 'Students',
     instructors: 'Instructors',
     satisfaction: 'Satisfaction',
-    whyUs: 'Why Zephyr Academy?',
+    whyUs: 'Why CompassPro?',
     learnOnline: 'Learn Online',
     learnOnlineDesc: 'Study anytime, anywhere at your own pace',
     getCertified: 'Get Certified',
@@ -89,7 +89,7 @@ export const translations = {
     send: 'Send Message',
     followUs: 'Follow Us',
     // About
-    aboutTitle: 'About Zephyr Academy',
+    aboutTitle: 'About CompassPro',
     aboutIntro:
       "Jordan's premier online learning platform, built to help students and professionals learn real, in-demand skills from expert instructors — at their own pace.",
     ourMission: 'Our Mission',
@@ -104,7 +104,7 @@ export const translations = {
     // Services
     servicesTitle: 'Our Services',
     servicesIntro:
-      'Everything Zephyr Academy offers to help you learn, practice, and grow — all in one platform.',
+      'Everything CompassPro offers to help you learn, practice, and grow — all in one platform.',
     serviceCoursesTitle: 'Self-Paced Online Courses',
     serviceCoursesDesc:
       'Browse our full course catalog and learn at your own pace, with video lessons, downloadable materials, and progress tracking.',
@@ -117,7 +117,7 @@ export const translations = {
     serviceDashboardDesc:
       'Keep track of every course you enroll in, lessons completed, and your overall learning progress in one place.',
     goToDashboard: 'Go to Dashboard',
-    serviceAiTitle: 'Zephyr AI Assistant',
+    serviceAiTitle: 'CompassPro AI Assistant',
     serviceAiDesc:
       'Get instant help navigating the platform and understanding course content with our built-in AI assistant.',
     serviceReviewsTitle: 'Course Reviews & Ratings',
@@ -139,13 +139,13 @@ export const translations = {
     contact: 'تواصل معنا',
     profile: 'الملف الشخصي',
     // Home
-    welcome: 'مرحباً بك في أكاديمية زيفير',
+    welcome: 'مرحباً بك في CompassPro',
     tagline: 'منصة التعلم الإلكتروني الأولى في الأردن. تعلم من أفضل المدرسين وطور مسيرتك المهنية.',
     startLearning: 'ابدأ التعلم',
     students: 'طالب',
     instructors: 'مدرس',
     satisfaction: 'رضا',
-    whyUs: 'لماذا أكاديمية زيفير؟',
+    whyUs: 'لماذا CompassPro؟',
     learnOnline: 'تعلم أونلاين',
     learnOnlineDesc: 'ادرس في أي وقت وأي مكان بالسرعة التي تناسبك',
     getCertified: 'احصل على شهادة',
@@ -218,7 +218,7 @@ export const translations = {
     send: 'إرسال الرسالة',
     followUs: 'تابعنا',
     // About
-    aboutTitle: 'عن أكاديمية زيفير',
+    aboutTitle: 'عن CompassPro',
     aboutIntro:
       'منصة التعلم الإلكتروني الأولى في الأردن، بُنيت لمساعدة الطلاب والمحترفين على تعلم مهارات حقيقية ومطلوبة من مدربين خبراء، بالسرعة التي تناسبهم.',
     ourMission: 'رسالتنا',
@@ -233,7 +233,7 @@ export const translations = {
     // Services
     servicesTitle: 'خدماتنا',
     servicesIntro:
-      'كل شي بتقدمه أكاديمية زيفير لمساعدتك تتعلم وتتدرب وتتطور — بمنصة واحدة.',
+      'كل شي بتقدمه CompassPro لمساعدتك تتعلم وتتدرب وتتطور — بمنصة واحدة.',
     serviceCoursesTitle: 'كورسات أونلاين بالسرعة اللي تناسبك',
     serviceCoursesDesc:
       'تصفح كل الكورسات وتعلم بالسرعة اللي تناسبك، مع دروس فيديو، ملفات قابلة للتحميل، ومتابعة تقدمك.',
@@ -246,7 +246,7 @@ export const translations = {
     serviceDashboardDesc:
       'تابع كل كورس مسجل فيه، الدروس المكتملة، وتقدمك التعليمي العام بمكان واحد.',
     goToDashboard: 'اذهب للوحة التحكم',
-    serviceAiTitle: 'مساعد Zephyr AI',
+    serviceAiTitle: 'مساعد CompassPro AI',
     serviceAiDesc:
       'احصل على مساعدة فورية بالتنقل بالمنصة وفهم محتوى الكورسات عبر مساعدنا الذكي المدمج.',
     serviceReviewsTitle: 'تقييمات ومراجعات الكورسات',
