@@ -3,7 +3,6 @@
   "short_name": "CompassPro",
   "description": "Jordan's premier online learning platform",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
   "background_color": "#003366",
   "theme_color": "#003366",
@@ -13,7 +12,7 @@
       "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
