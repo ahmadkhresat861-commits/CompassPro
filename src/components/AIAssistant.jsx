@@ -6,7 +6,7 @@ const AIAssistant = () => {
   const { darkMode } = useLang();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: '👋 مرحباً! أنا مساعدك الذكي في Zephyr Academy. كيف أقدر أساعدك اليوم؟' }
+    { role: 'assistant', content: '👋 مرحباً! أنا مساعدك الذكي في CompassPro. كيف أقدر أساعدك اليوم؟' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -85,7 +85,7 @@ const AIAssistant = () => {
                 🤖
               </div>
               <div>
-                <p style={{ margin: 0, color: 'white', fontWeight: '700', fontSize: '0.95rem' }}>Zephyr AI</p>
+                <p style={{ margin: 0, color: 'white', fontWeight: '700', fontSize: '0.95rem' }}>CompassPro AI</p>
                 <p style={{ margin: 0, color: '#a8c8f0', fontSize: '0.75rem' }}>
                   <span style={{ display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', background: '#10b981', marginRight: '5px' }}></span>
                   متصل الآن
