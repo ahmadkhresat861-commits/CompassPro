@@ -209,17 +209,24 @@ const Navbar = () => {
       {/* اللوجو */}
       <h2
         onClick={() => navigate('/home')}
-        style={{ cursor: 'pointer' }}
+        style={{
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+        }}
       >
-        <i
-          className="fas fa-graduation-cap"
+        <img
+          src="/logo.png"
+          alt="CompassPro"
+          className="navbar-logo-spin"
           style={{
-            color: '#f0a500',
-            marginRight: '8px',
+            width: '32px',
+            height: '32px',
+            marginRight: '10px',
           }}
-        ></i>
+        />
 
-        Zephyr Academy
+        CompassPro
       </h2>
 
       <div
