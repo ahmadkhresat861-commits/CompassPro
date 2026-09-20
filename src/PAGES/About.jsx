@@ -10,7 +10,7 @@ const About = () => {
   useSEO({
     title: 'About Us',
     description:
-      "Learn about Zephyr Academy's mission to make quality, practical education accessible to every learner in Jordan and beyond.",
+      "Learn about CompassPro's mission to make quality, practical education accessible to every learner in Jordan and beyond.",
     path: '/about',
   });
 
