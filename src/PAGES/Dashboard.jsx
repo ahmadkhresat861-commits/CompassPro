@@ -323,7 +323,7 @@ const Dashboard = () => {
             }}
           >
             Continue your learning journey at
-            Zephyr Academy
+            CompassPro
           </p>
         </div>
 
