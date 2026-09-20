@@ -1,6 +1,6 @@
 {
-  "name": "Zephyr Academy",
-  "short_name": "Zephyr",
+  "name": "CompassPro",
+  "short_name": "CompassPro",
   "description": "Jordan's premier online learning platform",
   "start_url": "/",
   "display": "standalone",
@@ -9,9 +9,9 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
