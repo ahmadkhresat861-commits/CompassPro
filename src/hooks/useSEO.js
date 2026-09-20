@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const SITE_NAME = 'Zephyr Academy';
+const SITE_NAME = 'CompassPro';
 const SITE_URL = 'https://edu-course-platform-two.vercel.app';
 
 function setMetaByAttr(attrName, attrValue, content) {
