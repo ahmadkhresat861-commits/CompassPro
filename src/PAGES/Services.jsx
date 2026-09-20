@@ -11,7 +11,7 @@ const Services = () => {
   useSEO({
     title: 'Our Services',
     description:
-      'Explore what Zephyr Academy offers: self-paced online courses, live training sessions, progress tracking, and dedicated support.',
+      'Explore what CompassPro offers: self-paced online courses, live training sessions, progress tracking, and dedicated support.',
     path: '/services',
   });
 
