@@ -138,20 +138,18 @@ const Contact = () => {
       <div style={{ textAlign: 'center', marginBottom: '45px' }}>
         <div
           style={{
-            width: '80px',
-            height: '80px',
-            margin: '0 auto 20px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #003366, #005599)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 10px 30px rgba(0,51,102,0.25)',
+            marginBottom: '20px',
+            animation: 'logoFloat 3s ease-in-out infinite',
           }}
         >
-          <i
-            className="fas fa-headset"
-            style={{ fontSize: '2.2rem', color: '#f0a500' }}
+          <img
+            src="/logo.png"
+            alt="CompassPro"
+            style={{
+              width: '90px',
+              height: 'auto',
+              filter: 'drop-shadow(0 0 15px rgba(240,165,0,0.4))',
+            }}
           />
         </div>
 
@@ -472,6 +470,11 @@ const Contact = () => {
           @keyframes fadeInPage {
             from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
+          }
+
+          @keyframes logoFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
           }
 
           @media (max-width: 768px) {
