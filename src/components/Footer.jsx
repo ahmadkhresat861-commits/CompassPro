@@ -13,8 +13,8 @@ const Footer = () => {
           
           {/* Logo */}
           <div style={{ flex: '2', minWidth: '200px' }}>
-            <h2 style={{ color: 'white', marginBottom: '15px' }}>
-              <i className="fas fa-graduation-cap" style={{ color: '#f0a500', marginRight: '8px' }}></i>
+            <h2 style={{ color: 'white', marginBottom: '15px', display: 'flex', alignItems: 'center' }}>
+              <img src="/logo.png" alt="CompassPro" style={{ height: '36px', width: 'auto', marginRight: '10px' }} />
               CompassPro
             </h2>
             <p style={{ color: '#a8c8f0', lineHeight: '1.8' }}>
@@ -61,7 +61,7 @@ const Footer = () => {
           <div style={{ flex: '1', minWidth: '150px' }}>
             <h3 style={{ color: '#f0a500', marginBottom: '15px' }}>Contact Us</h3>
             {[
-              { icon: 'fas fa-envelope', text: 'support@zephyracademy.com' },
+              { icon: 'fas fa-envelope', text: 'support@compasspro.com' },
               { icon: 'fas fa-phone', text: '+962 7 9999 9999' },
               { icon: 'fas fa-map-marker-alt', text: 'Amman, Jordan' },
             ].map((item, i) => (
