@@ -134,12 +134,12 @@ const Home = () => {
             <img
               src="/logo.png"
               alt="CompassPro"
-              className="hero-logo-animated"
               style={{
                 width: '110px',
                 height: '110px',
                 marginBottom: '20px',
                 display: 'inline-block',
+                borderRadius: '20px',
               }}
             />
           </div>
