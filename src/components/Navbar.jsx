@@ -219,7 +219,7 @@ const Navbar = () => {
           src="/logo.png"
           alt="CompassPro"
           style={{
-            height: '42px',
+            height: '58px',
             width: 'auto',
           }}
         />
