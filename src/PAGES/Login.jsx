@@ -198,15 +198,16 @@ const Login = () => {
               'logoFloat 3s ease-in-out infinite',
           }}
         >
-          <i
-            className="fas fa-graduation-cap"
+          <img
+            src="/logo.png"
+            alt="CompassPro"
             style={{
-              fontSize: '3.5rem',
-              color: '#f0a500',
+              width: '90px',
+              height: 'auto',
               filter:
                 'drop-shadow(0 0 15px rgba(240,165,0,0.4))',
             }}
-          ></i>
+          />
         </div>
 
         {/* Title */}
