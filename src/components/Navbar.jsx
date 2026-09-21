@@ -218,15 +218,11 @@ const Navbar = () => {
         <img
           src="/logo.png"
           alt="CompassPro"
-          className="navbar-logo-spin"
           style={{
-            width: '32px',
-            height: '32px',
-            marginRight: '10px',
+            height: '42px',
+            width: 'auto',
           }}
         />
-
-        CompassPro
       </h2>
 
       <div
