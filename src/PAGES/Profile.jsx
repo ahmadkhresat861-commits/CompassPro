@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
+import Avatar from '../components/Avatar';
 import '../App.css';
 
 const Profile = () => {
@@ -14,11 +15,14 @@ const Profile = () => {
     bio: '',
     phone: '',
     country: '',
+    avatar_url: '',
   });
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [pageVisible, setPageVisible] = useState(false);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   const { darkMode } = useLang();
 
@@ -103,6 +107,92 @@ const Profile = () => {
   };
 
   // ===========================
+  // Avatar Upload
+  // ===========================
+
+  const handleAvatarSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      setMessage('Error: Please select an image file.');
+      return;
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+      setMessage('Error: Image must be smaller than 3MB.');
+      return;
+    }
+
+    setAvatarUploading(true);
+    setMessage('');
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicUrlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // cache-bust so the new image shows immediately even with the same filename
+      const avatarUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          user_id: user.id,
+          avatar_url: avatarUrl,
+        });
+
+      if (updateError) throw updateError;
+
+      setProfile((prev) => ({ ...prev, avatar_url: avatarUrl }));
+      setMessage('Profile photo updated successfully! ✅');
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+      setMessage('Error: Could not upload photo.');
+    } finally {
+      setAvatarUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleAvatarRemove = async () => {
+    if (!user || !profile.avatar_url) return;
+
+    setAvatarUploading(true);
+    setMessage('');
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          user_id: user.id,
+          avatar_url: null,
+        });
+
+      if (error) throw error;
+
+      setProfile((prev) => ({ ...prev, avatar_url: null }));
+      setMessage('Profile photo removed.');
+    } catch (error) {
+      console.error('Avatar remove error:', error);
+      setMessage('Error: Could not remove photo.');
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  // ===========================
   // Logout
   // ===========================
 
@@ -183,40 +273,86 @@ const Profile = () => {
         >
           <div
             style={{
+              position: 'relative',
               width: '110px',
-              height: '110px',
               margin: '0 auto 15px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background:
-                'linear-gradient(135deg, #003366, #005599)',
-              boxShadow: '0 10px 25px rgba(0,51,102,0.3)',
-              transition: 'transform 0.4s ease, box-shadow 0.4s ease',
-              cursor: 'pointer',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform =
-                'scale(1.08) rotate(3deg)';
-              e.currentTarget.style.boxShadow =
-                '0 15px 35px rgba(240,165,0,0.35)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform =
-                'scale(1) rotate(0deg)';
-              e.currentTarget.style.boxShadow =
-                '0 10px 25px rgba(0,51,102,0.3)';
             }}
           >
-            <i
-              className="fas fa-user"
+            <Avatar
+              src={profile.avatar_url}
+              name={profile.username}
+              email={user?.email}
+              size={110}
+              onClick={() => fileInputRef.current?.click()}
+            />
+
+            {avatarUploading && (
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: '50%',
+                  background: 'rgba(0,0,0,0.5)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <i
+                  className="fas fa-spinner fa-spin"
+                  style={{ color: 'white', fontSize: '1.5rem' }}
+                ></i>
+              </div>
+            )}
+
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              title="Change photo"
               style={{
-                fontSize: '4rem',
-                color: '#f0a500',
+                position: 'absolute',
+                bottom: '2px',
+                right: '2px',
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: '#f0a500',
+                color: '#003366',
+                border: '2px solid white',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
-            ></i>
+            >
+              <i className="fas fa-camera" style={{ fontSize: '0.8rem' }}></i>
+            </button>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarSelect}
+              style={{ display: 'none' }}
+            />
           </div>
+
+          {profile.avatar_url && (
+            <button
+              onClick={handleAvatarRemove}
+              disabled={avatarUploading}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#ef4444',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+                marginBottom: '10px',
+              }}
+            >
+              <i className="fas fa-trash" style={{ marginRight: '4px' }}></i>
+              Remove Photo
+            </button>
+          )}
 
           <h2
             style={{
