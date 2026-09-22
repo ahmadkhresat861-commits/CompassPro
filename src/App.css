@@ -113,6 +113,31 @@ nav h2 i {
   color: #f0a500;
 }
 
+/* ============================================================
+   AVATAR — animated fallback glow
+============================================================ */
+
+.cp-avatar-glow {
+  position: absolute;
+  inset: -30%;
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent 60%
+  );
+  animation: avatarGlowSpin 3s linear infinite;
+}
+
+@keyframes avatarGlowSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.cp-avatar:hover .cp-avatar-fallback {
+  filter: brightness(1.1);
+}
+
 nav div a {
   color: white;
   text-decoration: none;
