@@ -118,7 +118,7 @@ const Courses = () => {
           title: selected.title,
           description:
             selected.description ||
-            `Learn ${selected.title} at Zephyr Academy.`,
+            `Learn ${selected.title} at CompassPro.`,
           path: `/courses/${selected.id}`,
           structuredData: {
             '@context': 'https://schema.org',
@@ -126,10 +126,10 @@ const Courses = () => {
             name: selected.title,
             description:
               selected.description ||
-              `Learn ${selected.title} at Zephyr Academy.`,
+              `Learn ${selected.title} at CompassPro.`,
             provider: {
               '@type': 'Organization',
-              name: 'Zephyr Academy',
+              name: 'CompassPro',
               sameAs: 'https://edu-course-platform-two.vercel.app',
             },
           },
@@ -137,7 +137,7 @@ const Courses = () => {
       : {
           title: 'Courses',
           description:
-            'Browse all courses available at Zephyr Academy and start learning today.',
+            'Browse all courses available at CompassPro and start learning today.',
           path: '/courses',
         }
   );
