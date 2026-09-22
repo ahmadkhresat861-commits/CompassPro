@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
+import Avatar from './Avatar';
 import '../App.css';
 
 const Navbar = () => {
@@ -9,6 +10,7 @@ const Navbar = () => {
   const { t, toggleLang, lang, darkMode, toggleDark } = useLang();
 
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
   const [showNotif, setShowNotif] = useState(false);
@@ -41,6 +43,26 @@ const Navbar = () => {
       authListener?.subscription?.unsubscribe();
     };
   }, []);
+
+  // ── جلب بيانات البروفايل (الصورة والاسم) ────────────────────────
+  useEffect(() => {
+    if (!user) {
+      setProfile(null);
+      return;
+    }
+
+    const fetchProfile = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('username, avatar_url')
+        .eq('user_id', user.id)
+        .single();
+
+      if (data) setProfile(data);
+    };
+
+    fetchProfile();
+  }, [user]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -272,8 +294,16 @@ const Navbar = () => {
         </Link>
 
         {user && (
-          <Link to="/profile">
-            <i className="fas fa-user"></i>{' '}
+          <Link
+            to="/profile"
+            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Avatar
+              src={profile?.avatar_url}
+              name={profile?.username}
+              email={user.email}
+              size={26}
+            />
             {t.profile}
           </Link>
         )}
