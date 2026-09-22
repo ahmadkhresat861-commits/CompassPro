@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
+import Avatar from '../components/Avatar';
 import '../App.css';
 
 const Dashboard = () => {
@@ -305,17 +306,27 @@ const Dashboard = () => {
               '0 10px 30px rgba(0,0,0,0.15)',
           }}
         >
-          <h1
+          <div
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '18px',
               marginBottom: '10px',
             }}
           >
-            <i className="fas fa-graduation-cap"></i>{' '}
-            Welcome back,{' '}
-            {profile?.username ||
-              user?.email ||
-              'Student'}!
-          </h1>
+            <Avatar
+              src={profile?.avatar_url}
+              name={profile?.username}
+              email={user?.email}
+              size={64}
+            />
+            <h1 style={{ margin: 0 }}>
+              Welcome back,{' '}
+              {profile?.username ||
+                user?.email ||
+                'Student'}!
+            </h1>
+          </div>
 
           <p
             style={{
