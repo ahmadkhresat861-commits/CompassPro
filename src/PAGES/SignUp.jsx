@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
+import DualOrbitLoader from '../components/DualOrbitLoader';
 import '../App.css';
 
 const SignUp = () => {
@@ -41,7 +42,7 @@ const SignUp = () => {
       <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
       <input type="password" placeholder="Confirm Password" value={confirm} onChange={e => setConfirm(e.target.value)} />
       <button onClick={handleSignUp} disabled={loading}>
-        <i className="fas fa-user-plus"></i> {loading ? 'Creating Account...' : 'Sign Up'}
+        {loading ? <DualOrbitLoader size={18} /> : <i className="fas fa-user-plus"></i>} {loading ? ' Creating Account...' : 'Sign Up'}
       </button>
       <p className="login-signup">
         Already have an account? <a onClick={() => navigate('/login')} style={{ cursor: 'pointer' }}>Login</a>
