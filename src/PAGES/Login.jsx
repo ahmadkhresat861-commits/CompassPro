@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
+import DualOrbitLoader from '../components/DualOrbitLoader';
 import '../App.css';
 
 const MAX_ATTEMPTS = 5;
@@ -452,19 +453,17 @@ const Login = () => {
               '0 8px 20px rgba(240,165,0,0.3)';
           }}
         >
-          <i
-            className={
-              loading
-                ? 'fas fa-spinner fa-spin'
-                : 'fas fa-sign-in-alt'
-            }
-            style={{
-              marginRight: '8px',
-            }}
-          ></i>
+          {loading ? (
+            <DualOrbitLoader size={20} />
+          ) : (
+            <i
+              className="fas fa-sign-in-alt"
+              style={{ marginRight: '8px' }}
+            ></i>
+          )}
 
           {loading
-            ? 'Loading...'
+            ? ' Loading...'
             : 'Login'}
         </button>
 
