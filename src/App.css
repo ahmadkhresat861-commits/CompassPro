@@ -138,6 +138,45 @@ nav h2 i {
   filter: brightness(1.1);
 }
 
+/* ============================================================
+   DUAL ORBIT LOADER
+============================================================ */
+
+.dual-orbit-loader {
+  position: relative;
+  vertical-align: middle;
+}
+
+.dual-orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+}
+
+.dual-orbit-ring-a {
+  inset: 0;
+  border-top-color: #1e90ff;
+  border-bottom-color: #1e90ff;
+  filter: drop-shadow(0 0 3px rgba(30, 144, 255, 0.7));
+  animation: dualOrbitForward 0.9s linear infinite;
+}
+
+.dual-orbit-ring-b {
+  inset: 22%;
+  border-left-color: #ff7f50;
+  border-right-color: #ff7f50;
+  filter: drop-shadow(0 0 3px rgba(255, 127, 80, 0.7));
+  animation: dualOrbitBackward 0.7s linear infinite;
+}
+
+@keyframes dualOrbitForward {
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes dualOrbitBackward {
+  100% { transform: rotate(-360deg); }
+}
+
 nav div a {
   color: white;
   text-decoration: none;
