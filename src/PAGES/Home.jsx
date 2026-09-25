@@ -149,21 +149,24 @@ const Home = () => {
           <p>{t.tagline}</p>
 
           <div className="home-hero-actions">
-            <button
-              className="home-start-button"
+            <Button
+              variant="secondary"
+              size="lg"
+              icon="fas fa-rocket"
               onClick={() => navigate('/courses')}
             >
-              <i className="fas fa-rocket"></i>
               {t.startLearning}
-            </button>
+            </Button>
 
-            <button
-              className="home-secondary-button"
+            <Button
+              variant="outline"
+              size="lg"
+              icon="fas fa-info-circle"
               onClick={() => navigate('/about')}
+              style={{ color: 'white', borderColor: 'rgba(255,255,255,0.6)' }}
             >
-              <i className="fas fa-info-circle"></i>
               {t.learnMore}
-            </button>
+            </Button>
           </div>
 
           {!statsLoading && (totalCourses !== null || avgRating !== null) && (
