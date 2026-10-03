@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
+import Button from '../components/Button';
 import '../App.css';
 
 // ============================================================
@@ -1519,49 +1520,16 @@ color:
               </p>
 
               {user ? (
-                <button
-                  onClick={
-                    handleEnroll
-                  }
-                  disabled={
-                    enrolling
-                  }
-                  style={{
-                    width:
-                      '100%',
-                    padding:
-                      '14px',
-                    background:
-                      enrolling
-                        ? '#888'
-                        : 'linear-gradient(90deg, #003366, #005599)',
-                    color:
-                      'white',
-                    border:
-                      'none',
-                    borderRadius:
-                      '10px',
-                    fontWeight:
-                      '700',
-                    fontSize:
-                      '1rem',
-                    cursor:
-                      enrolling
-                        ? 'not-allowed'
-                        : 'pointer',
-                  }}
+                <Button
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  loading={enrolling}
+                  icon="fas fa-graduation-cap"
+                  onClick={handleEnroll}
                 >
-                  <i
-className={
-                      enrolling
-                        ? 'fas fa-spinner fa-spin'
-                        : 'fas fa-graduation-cap'
-                    }
-                  />{' '}
-                  {enrolling
-                    ? t.enrolling
-                    : t.enrollNow}
-                </button>
+                  {enrolling ? t.enrolling : t.enrollNow}
+                </Button>
               ) : (
                 <div
                   style={{
@@ -2848,36 +2816,17 @@ lesson.id ===
                   </span>
                 </div>
 
-                <button
-                  onClick={(
-                    e
-                  ) => {
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon="fas fa-arrow-right"
+                  onClick={(e) => {
                     e.stopPropagation();
-
-                    navigate(
-                      `/courses/${course.id}`
-                    );
-                  }}
-                  style={{
-                    background:
-                      dm.btnBack,
-                    color:
-                      'white',
-                    border:
-                      'none',
-                    padding:
-                      '10px 20px',
-                    borderRadius:
-                      '8px',
-                    cursor:
-                      'pointer',
-                    fontWeight:
-                      '600',
+                    navigate(`/courses/${course.id}`);
                   }}
                 >
-                  <i className="fas fa-arrow-right" />{' '}
                   {t.viewDetails}
-                </button>
+                </Button>
               </div>
             )
           )}
