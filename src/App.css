@@ -139,6 +139,93 @@ nav h2 i {
 }
 
 /* ============================================================
+   BUTTON SYSTEM
+============================================================ */
+
+.cp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    background 0.2s ease, opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.cp-btn:active:not(.cp-btn-disabled) {
+  transform: scale(0.97);
+}
+
+.cp-btn-sm { padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; }
+.cp-btn-md { padding: 12px 24px; font-size: 0.95rem; }
+.cp-btn-lg { padding: 15px 32px; font-size: 1.05rem; border-radius: 12px; }
+
+.cp-btn-full { width: 100%; }
+
+.cp-btn-primary {
+  background: linear-gradient(90deg, #003366, #005599);
+  color: white;
+  box-shadow: 0 4px 14px rgba(0, 51, 102, 0.3);
+}
+.cp-btn-primary:hover:not(.cp-btn-disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 51, 102, 0.4);
+}
+
+.cp-btn-secondary {
+  background: linear-gradient(90deg, #f0a500, #f7c948);
+  color: #003366;
+  box-shadow: 0 4px 14px rgba(240, 165, 0, 0.3);
+}
+.cp-btn-secondary:hover:not(.cp-btn-disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(240, 165, 0, 0.4);
+}
+
+.cp-btn-outline {
+  background: transparent;
+  color: #003366;
+  border: 2px solid #003366;
+}
+.cp-btn-outline:hover:not(.cp-btn-disabled) {
+  background: rgba(0, 51, 102, 0.08);
+  transform: translateY(-2px);
+}
+
+.cp-btn-danger {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+}
+.cp-btn-danger:hover:not(.cp-btn-disabled) {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+.cp-btn-success {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+.cp-btn-success:hover:not(.cp-btn-disabled) {
+  background: #0ea975;
+  transform: translateY(-2px);
+}
+
+.cp-btn-disabled,
+.cp-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ============================================================
    DUAL ORBIT LOADER
 ============================================================ */
 
