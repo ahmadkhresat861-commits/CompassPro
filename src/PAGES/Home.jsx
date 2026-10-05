@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
+import Button from '../components/Button';
 import '../App.css';
 
 const Home = () => {
@@ -149,21 +150,24 @@ const Home = () => {
           <p>{t.tagline}</p>
 
           <div className="home-hero-actions">
-            <button
-              className="home-start-button"
+            <Button
+              variant="secondary"
+              size="lg"
+              icon="fas fa-rocket"
               onClick={() => navigate('/courses')}
             >
-              <i className="fas fa-rocket"></i>
               {t.startLearning}
-            </button>
+            </Button>
 
-            <button
-              className="home-secondary-button"
+            <Button
+              variant="outline"
+              size="lg"
+              icon="fas fa-info-circle"
               onClick={() => navigate('/about')}
+              style={{ color: 'white', borderColor: 'rgba(255,255,255,0.6)' }}
             >
-              <i className="fas fa-info-circle"></i>
               {t.learnMore}
-            </button>
+            </Button>
           </div>
 
           {!statsLoading && (totalCourses !== null || avgRating !== null) && (
@@ -312,13 +316,14 @@ const Home = () => {
             ))}
           </div>
 
-          <button
-            className="home-start-button"
+          <Button
+            variant="primary"
+            size="lg"
             onClick={() => navigate('/courses')}
             style={{ marginTop: '40px' }}
           >
             {t.viewAllCourses} <i className="fas fa-arrow-right"></i>
-          </button>
+          </Button>
         </section>
       )}
 
