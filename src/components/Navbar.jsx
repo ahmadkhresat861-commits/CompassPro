@@ -16,7 +16,18 @@ const Navbar = () => {
 
   const [showNotif, setShowNotif] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [unread, setUnread] = useState(0);
+  const [lastRead, setLastRead] = useState(() => {
+    try { return localStorage.getItem('notif_last_read'); } catch { return null; }
+  });
+  const [readIds, setReadIds] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('notif_read_ids') || '[]'); } catch { return []; }
+  });
+
+  // الإشعار مقروء إذا فُتح بمفرده أو سبق وقت "تعليم الكل كمقروء"
+  const isRead = (n) =>
+    readIds.includes(n.id) ||
+    (lastRead && new Date(n.created_at) <= new Date(lastRead));
+  const unread = notifications.filter((n) => !isRead(n)).length;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -105,7 +116,6 @@ const Navbar = () => {
 
     if (!user) {
       setNotifications([]);
-      setUnread(0);
       setLoading(false);
       return;
     }
@@ -125,18 +135,6 @@ const Navbar = () => {
 
         if (data) {
           setNotifications(data);
-
-          // احسب عدد غير المقروءة بناءً على وقت آخر قراءة
-          const lastRead = localStorage.getItem('notif_last_read');
-
-          const unreadCount = lastRead
-            ? data.filter(
-                (n) =>
-                  new Date(n.created_at) > new Date(lastRead)
-              ).length
-            : data.length;
-
-          setUnread(unreadCount);
         }
       } catch (err) {
         setError('تعذّر تحميل الإشعارات');
@@ -173,9 +171,6 @@ const Navbar = () => {
             payload.new,
             ...current,
           ]);
-
-          // زيادة عدد الإشعارات غير المقروءة
-          setUnread((current) => current + 1);
         }
       )
       .subscribe((status) => {
@@ -220,27 +215,23 @@ const Navbar = () => {
 
     setShowNotif(next);
 
-    if (next) {
-      // عند فتح القائمة: تصفير العداد
-      setUnread(0);
-
-      localStorage.setItem(
-        'notif_last_read',
-        new Date().toISOString()
-      );
-    }
   };
 
   // ── تعليم الكل كمقروء ───────────────────────────────────────────
   const markAllRead = (e) => {
     e.stopPropagation();
 
-    setUnread(0);
+    const now = new Date().toISOString();
+    setLastRead(now);
+    try { localStorage.setItem('notif_last_read', now); } catch { /* ignore */ }
+  };
 
-    localStorage.setItem(
-      'notif_last_read',
-      new Date().toISOString()
-    );
+  // ── تعليم إشعار واحد كمقروء ─────────────────────────────────────
+  const markOneRead = (id) => {
+    if (readIds.includes(id)) return;
+    const next = [...readIds, id].slice(-200);
+    setReadIds(next);
+    try { localStorage.setItem('notif_read_ids', JSON.stringify(next)); } catch { /* ignore */ }
   };
 
   // ── تنسيق التاريخ ────────────────────────────────────────────────
@@ -490,7 +481,7 @@ const Navbar = () => {
                   fontWeight: '700',
                 }}
               >
-                {unread}
+                {unread > 9 ? '9+' : unread}
               </span>
             )}
           </div>
@@ -633,7 +624,13 @@ const Navbar = () => {
                 notifications.map((notif) => (
                   <div
                     key={notif.id}
+                    onClick={() => markOneRead(notif.id)}
                     style={{
+                      background: isRead(notif)
+                        ? 'transparent'
+                        : darkMode
+                        ? 'rgba(30,144,255,0.12)'
+                        : 'rgba(30,144,255,0.07)',
                       padding: '15px 20px',
                       borderBottom: `1px solid ${
                         darkMode
@@ -651,8 +648,11 @@ const Navbar = () => {
                           : '#f9f9f9')
                     }
                     onMouseOut={(e) =>
-                      (e.currentTarget.style.background =
-                        'transparent')
+                      (e.currentTarget.style.background = isRead(notif)
+                        ? 'transparent'
+                        : darkMode
+                        ? 'rgba(30,144,255,0.12)'
+                        : 'rgba(30,144,255,0.07)')
                     }
                   >
                     <div
@@ -699,6 +699,18 @@ const Navbar = () => {
                             fontWeight: '600',
                           }}
                         >
+                          {!isRead(notif) && (
+                            <span
+                              style={{
+                                display: 'inline-block',
+                                width: '8px',
+                                height: '8px',
+                                borderRadius: '50%',
+                                background: '#1e90ff',
+                                marginInlineEnd: '6px',
+                              }}
+                            />
+                          )}
                           {notif.title}
                         </p>
 
