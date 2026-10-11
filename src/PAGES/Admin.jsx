@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import '../App.css';
 import DualOrbitLoader from '../components/DualOrbitLoader';
+import Button from '../components/Button';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -25,6 +26,16 @@ const Admin = () => {
   const [profilesLoading, setProfilesLoading] = useState(false);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [sessionsLoading, setSessionsLoading] = useState(false);
+  const emptySessionForm = {
+    title: '',
+    course: '',
+    data: '',
+    time: '',
+    instructor: '',
+    zoom_link: '',
+  };
+  const [sessionForm, setSessionForm] = useState(emptySessionForm);
+  const [sessionSaving, setSessionSaving] = useState(false);
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const [userActionLoading, setUserActionLoading] = useState(false);
@@ -698,6 +709,60 @@ const Admin = () => {
   };
 
   // =========================
+  // Add / Delete Session
+  // =========================
+  const handleAddSession = async () => {
+    const f = sessionForm;
+    if (!f.title.trim() || !f.data.trim() || !f.time.trim()) {
+      alert('Title, date and time are required.');
+      return;
+    }
+
+    let link = f.zoom_link.trim();
+    if (link && !/^https?:\/\//i.test(link)) {
+      alert('Meeting link must start with http:// or https://');
+      return;
+    }
+
+    setSessionSaving(true);
+    try {
+      const { error } = await supabase.from('sessions').insert([
+        {
+          title: f.title.trim(),
+          course: f.course.trim() || null,
+          data: f.data.trim(),
+          time: f.time.trim(),
+          instructor: f.instructor.trim() || null,
+          zoom_link: link || null,
+        },
+      ]);
+
+      if (error) throw error;
+
+      setSessionForm(emptySessionForm);
+      await fetchSessions();
+    } catch (error) {
+      console.error('Error adding session:', error);
+      alert('Failed to add session: ' + error.message);
+    } finally {
+      setSessionSaving(false);
+    }
+  };
+
+  const handleDeleteSession = async (id) => {
+    if (!window.confirm('Delete this session?')) return;
+
+    try {
+      const { error } = await supabase.from('sessions').delete().eq('id', id);
+      if (error) throw error;
+      await fetchSessions();
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      alert('Failed to delete session: ' + error.message);
+    }
+  };
+
+  // =========================
   // Fetch Contact Messages (read-only)
   // =========================
   const fetchMessages = async () => {
@@ -805,7 +870,7 @@ const Admin = () => {
       const { data, error } = await supabase
         .from('sessions')
         .select(
-          'id, title, course, data, time'
+          'id, title, course, data, time, instructor, zoom_link'
         )
         .order('id', {
           ascending: false,
@@ -3173,6 +3238,48 @@ const Admin = () => {
               Sessions
             </h2>
 
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '12px',
+                marginBottom: '24px',
+              }}
+            >
+              {[
+                ['title', 'Title *'],
+                ['course', 'Course'],
+                ['data', 'Date * (e.g. 2026-11-20)'],
+                ['time', 'Time * (e.g. 7:00 PM)'],
+                ['instructor', 'Instructor'],
+                ['zoom_link', 'Meeting link (https://...)'],
+              ].map(([key, label]) => (
+                <input
+                  key={key}
+                  type="text"
+                  placeholder={label}
+                  value={sessionForm[key]}
+                  onChange={(e) =>
+                    setSessionForm({ ...sessionForm, [key]: e.target.value })
+                  }
+                  style={{
+                    padding: '12px',
+                    border: '1px solid #d8dee6',
+                    borderRadius: '8px',
+                    fontSize: '0.9rem',
+                  }}
+                />
+              ))}
+              <Button
+                variant="primary"
+                icon="fas fa-plus"
+                loading={sessionSaving}
+                onClick={handleAddSession}
+              >
+                Add Session
+              </Button>
+            </div>
+
             {sessionsLoading ? (
               <p>Loading sessions...</p>
             ) : sessions.length === 0 ? (
@@ -3220,6 +3327,10 @@ const Admin = () => {
                     <th style={{ padding: '15px' }}>
                       Time
                     </th>
+
+                    <th style={{ padding: '15px' }}>
+                      Actions
+                    </th>
                   </tr>
                 </thead>
 
@@ -3253,6 +3364,17 @@ const Admin = () => {
                         <td style={{ padding: '15px' }}>
                           {session.time ||
                             '-'}
+                        </td>
+
+                        <td style={{ padding: '15px' }}>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            icon="fas fa-trash"
+                            onClick={() => handleDeleteSession(session.id)}
+                          >
+                            Delete
+                          </Button>
                         </td>
                       </tr>
                     )
