@@ -1,116 +1,25 @@
-              {!loading &&
-                !error &&
-                notifications.map((notif) => (
-                  <div
-                    key={notif.id}
-                    style={{
-                      padding: '15px 20px',
-                      borderBottom: `1px solid ${
-                        darkMode
-                          ? '#2e2e3e'
-                          : '#f0f0f0'
-                      }`,
-                      cursor: 'pointer',
-                      transition:
-                        'background 0.15s',
-                    }}
-                    onMouseOver={(e) =>
-                      (e.currentTarget.style.background =
-                        darkMode
-                          ? '#2a2a3a'
-                          : '#f9f9f9')
-                    }
-                    onMouseOut={(e) =>
-                      (e.currentTarget.style.background =
-                        'transparent')
-                    }
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: '12px',
-                        alignItems:
-                          'flex-start',
-                      }}
-                    >
+1. Add MCP server
+Add the MCP server to your project config using the command line.
+Code:
+File: Code
+```
+claude mcp add --scope project --transport http supabase "https://mcp.supabase.com/mcp?project_ref=nuoitorotcfvqrinwrrg&read_only=true&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching"
+```
 
-                      <div
-                        style={{
-                          width: '35px',
-                          height: '35px',
-                          borderRadius: '50%',
-                          background: '#003366',
-                          display: 'flex',
-                          alignItems:
-                            'center',
-                          justifyContent:
-                            'center',
-                          flexShrink: 0,
-                        }}
-                      >
-                        <i
-                          className="fas fa-bell"
-                          style={{
-                            color: '#f0a500',
-                            fontSize:
-                              '0.9rem',
-                          }}
-                        ></i>
-                      </div>
+2. Authenticate
+After configuring the MCP server, you need to authenticate. Run this in a regular terminal, not an IDE extension.
+Details:
+Select the supabase server, then Authenticate to begin the flow.
+Code:
+File: Code
+```
+claude /mcp
+```
 
-                      <div>
-                        <p
-                          style={{
-                            margin: 0,
-                            fontSize: '0.9rem',
-                            color: darkMode
-                              ? '#eee'
-                              : '#333',
-                            fontWeight: '600',
-                          }}
-                        >
-                          {notif.title}
-                        </p>
-
-                        <p
-                          style={{
-                            margin:
-                              '4px 0 0',
-                            fontSize:
-                              '0.85rem',
-                            color: darkMode
-                              ? '#aaa'
-                              : '#555',
-                          }}
-                        >
-                          {notif.message}
-                        </p>
-
-                        <p
-                          style={{
-                            margin:
-                              '4px 0 0',
-                            fontSize:
-                              '0.75rem',
-                            color: '#888',
-                          }}
-                        >
-                          {formatDate(
-                            notif.created_at
-                          )}
-                        </p>
-                      </div>
-
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
-        )}
-      </div>
-    </nav>
-  );
-};
-
-export default Navbar;
+3. Install Agent Skills (optional)
+Agent Skills give AI coding tools ready-made instructions, scripts, and resources for working with Supabase more accurately and efficiently.
+Code:
+File: Code
+```
+npx skills add supabase/agent-skills
+```
