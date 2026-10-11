@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+دimport React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
@@ -62,7 +62,7 @@ const Navbar = () => {
     };
 
     fetchProfile();
-  }, [user]);
+  }, [user?.id]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -117,7 +117,7 @@ const Navbar = () => {
     };
 
     fetchNotifications();
-  }, [user, authLoading]);
+  }, [user?.id, authLoading]);
 
   // ── Realtime Notifications (للمسجلين دخول فقط) ──────────────────
   useEffect(() => {
@@ -159,7 +159,7 @@ const Navbar = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user?.id]);
   useEffect(() => {
     if (!showNotif) return;
 
