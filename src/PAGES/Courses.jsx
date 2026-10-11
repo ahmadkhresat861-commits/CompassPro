@@ -131,7 +131,7 @@ const Courses = () => {
             provider: {
               '@type': 'Organization',
               name: 'CompassPro',
-              sameAs: 'https://edu-course-platform-two.vercel.app',
+              sameAs: 'https://edu-compasspro-two.vercel.app',
             },
           },
         }
