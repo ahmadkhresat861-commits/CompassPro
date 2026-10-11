@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import Avatar from './Avatar';
@@ -7,6 +7,7 @@ import '../App.css';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t, toggleLang, lang, darkMode, toggleDark } = useLang();
 
   const [user, setUser] = useState(null);
@@ -20,6 +21,35 @@ const Navbar = () => {
   const [error, setError] = useState(null);
 
   const notifRef = useRef(null);
+  const profileRef = useRef(null);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+
+  // إغلاق القوائم عند تغيّر الصفحة
+  useEffect(() => {
+    setMenuOpen(false);
+    setShowProfile(false);
+    setShowNotif(false);
+  }, [location.pathname]);
+
+  // إغلاق قائمة البروفايل عند الضغط خارجها
+  useEffect(() => {
+    if (!showProfile) return;
+    const onDown = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setShowProfile(false);
+      }
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [showProfile]);
+
+  // تمييز الرابط الحالي
+  const navCls = (path) =>
+    location.pathname === path || location.pathname.startsWith(path + '/')
+      ? 'active'
+      : '';
 
   // ── تتبع حالة تسجيل الدخول ──────────────────────────────────────
   useEffect(() => {
@@ -247,7 +277,18 @@ const Navbar = () => {
         />
       </h2>
 
+      <button
+        type="button"
+        className="cp-hamburger"
+        aria-label="Menu"
+        aria-expanded={menuOpen}
+        onClick={() => setMenuOpen((v) => !v)}
+      >
+        <i className={menuOpen ? 'fas fa-times' : 'fas fa-bars'}></i>
+      </button>
+
       <div
+        className={`cp-nav-links${menuOpen ? ' open' : ''}`}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -256,56 +297,79 @@ const Navbar = () => {
         }}
       >
 
-        <Link to="/home">
+        <Link to="/home" className={navCls('/home')}>
           <i className="fas fa-home"></i>{' '}
           {t.home}
         </Link>
 
-        <Link to="/courses">
+        <Link to="/courses" className={navCls('/courses')}>
           <i className="fas fa-book"></i>{' '}
           {t.courses}
         </Link>
 
-        <Link to="/about">
+        <Link to="/about" className={navCls('/about')}>
           <i className="fas fa-info-circle"></i>{' '}
           {t.about}
         </Link>
 
-        <Link to="/services">
+        <Link to="/services" className={navCls('/services')}>
           <i className="fas fa-concierge-bell"></i>{' '}
           {t.services}
         </Link>
 
         {user && (
-          <Link to="/dashboard">
+          <Link to="/dashboard" className={navCls('/dashboard')}>
             <i className="fas fa-chart-bar"></i>{' '}
             {t.dashboard}
           </Link>
         )}
 
-        <Link to="/sessions">
+        <Link to="/sessions" className={navCls('/sessions')}>
           <i className="fas fa-video"></i>{' '}
           {t.sessions}
         </Link>
 
-        <Link to="/contact">
+        <Link to="/contact" className={navCls('/contact')}>
           <i className="fas fa-headset"></i>{' '}
           {t.contact}
         </Link>
 
         {user && (
-          <Link
-            to="/profile"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
-          >
-            <Avatar
-              src={profile?.avatar_url}
-              name={profile?.username}
-              email={user.email}
-              size={26}
-            />
-            {t.profile}
-          </Link>
+          <div ref={profileRef} style={{ position: 'relative', marginLeft: '8px' }}>
+            <button
+              type="button"
+              className="cp-profile-btn"
+              aria-haspopup="menu"
+              aria-expanded={showProfile}
+              onClick={() => setShowProfile((v) => !v)}
+            >
+              <Avatar
+                src={profile?.avatar_url}
+                name={profile?.username}
+                email={user.email}
+                size={30}
+              />
+              <i className="fas fa-chevron-down" style={{ fontSize: '0.7rem' }}></i>
+            </button>
+
+            {showProfile && (
+              <div className={`cp-dropdown${darkMode ? ' dark' : ''}`} role="menu">
+                <div className="cp-dropdown-head">
+                  <strong>{profile?.username || user.email?.split('@')[0]}</strong>
+                  <span>{user.email}</span>
+                </div>
+                <button type="button" className="cp-dd-item" onClick={() => navigate('/profile')}>
+                  <i className="fas fa-user"></i> {t.profile}
+                </button>
+                <button type="button" className="cp-dd-item" onClick={() => navigate('/dashboard')}>
+                  <i className="fas fa-chart-bar"></i> {t.dashboard}
+                </button>
+                <button type="button" className="cp-dd-item danger" onClick={handleLogout}>
+                  <i className="fas fa-sign-out-alt"></i> {lang === 'ar' ? 'تسجيل الخروج' : 'Logout'}
+                </button>
+              </div>
+            )}
+          </div>
         )}
 
         {!authLoading && !user && (
@@ -332,16 +396,6 @@ const Navbar = () => {
               {lang === 'ar' ? 'إنشاء حساب' : 'Sign Up'}
             </button>
           </>
-        )}
-
-        {!authLoading && user && (
-          <a
-            onClick={handleLogout}
-            style={{ cursor: 'pointer' }}
-          >
-            <i className="fas fa-sign-out-alt"></i>{' '}
-            {lang === 'ar' ? 'تسجيل الخروج' : 'Logout'}
-          </a>
         )}
 
         {/* زر الوضع الليلي */}
