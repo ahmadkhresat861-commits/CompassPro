@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 const SITE_NAME = 'CompassPro';
-const SITE_URL = 'https://edu-course-platform-two.vercel.app';
+const SITE_URL = 'https://edu-compasspro-two.vercel.app';
 
 function setMetaByAttr(attrName, attrValue, content) {
   if (!content) return;
