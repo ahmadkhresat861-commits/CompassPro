@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase } from '../supabase';
+import DualOrbitLoader from './DualOrbitLoader';
 
 const AdminRoute = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(null);
@@ -25,7 +26,7 @@ const AdminRoute = ({ children }) => {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#003366' }}>
-      <i className="fas fa-spinner fa-spin" style={{ fontSize: '3rem', color: '#f0a500' }}></i>
+      <DualOrbitLoader size={48} />
     </div>
   );
 
