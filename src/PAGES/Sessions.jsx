@@ -338,13 +338,13 @@ const Sessions = () => {
                       }}
                     ></i>
 
-                    {session.date} — {session.time}
+                    {session.data || session.date} — {session.time}
                   </p>
                 </div>
 
                 {/* Zoom Button */}
                 <a
-                  href={session.zoom_link}
+                  href={String(session.zoom_link || '').replace(/^[:\s]+/, '')}
                   target="_blank"
                   rel="noreferrer"
                   style={{
