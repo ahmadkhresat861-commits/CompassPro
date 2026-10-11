@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import Avatar from '../components/Avatar';
 import '../App.css';
+import DualOrbitLoader from '../components/DualOrbitLoader';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -240,14 +241,7 @@ const Dashboard = () => {
             textAlign: 'center',
           }}
         >
-          <i
-            className="fas fa-spinner fa-spin"
-            style={{
-              fontSize: '3rem',
-              color: '#f0a500',
-              marginBottom: '15px',
-            }}
-          ></i>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}><DualOrbitLoader size={48} /></div>
 
           <p
             style={{
