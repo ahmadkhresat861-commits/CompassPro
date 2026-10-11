@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
 import '../App.css';
+import DualOrbitLoader from '../components/DualOrbitLoader';
 
 // ============================================================
 // STAR RATING
@@ -1132,14 +1133,7 @@ progressData = data;
             textAlign: 'center',
           }}
         >
-          <i
-            className="fas fa-spinner fa-spin"
-            style={{
-              fontSize: '3rem',
-              color: dm.heading,
-              marginBottom: '15px',
-            }}
-          />
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}><DualOrbitLoader size={48} /></div>
 
           <p
             style={{
