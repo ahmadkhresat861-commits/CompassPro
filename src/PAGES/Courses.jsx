@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
@@ -146,7 +146,14 @@ const Courses = () => {
   // SEARCH
   // ============================================================
 
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const urlQuery = searchParams.get('q') || '';
+  const [search, setSearch] = useState(urlQuery);
+
+  // مزامنة البحث القادم من شريط البحث في الـ Navbar
+  useEffect(() => {
+    setSearch(urlQuery);
+  }, [urlQuery]);
   const [category, setCategory] = useState('All');
 
   // ============================================================
