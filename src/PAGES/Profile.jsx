@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import Avatar from '../components/Avatar';
+import Button from '../components/Button';
+import DualOrbitLoader from '../components/DualOrbitLoader';
 import '../App.css';
 
 const Profile = () => {
@@ -298,10 +300,7 @@ const Profile = () => {
                   justifyContent: 'center',
                 }}
               >
-                <i
-                  className="fas fa-spinner fa-spin"
-                  style={{ color: 'white', fontSize: '1.5rem' }}
-                ></i>
+                <DualOrbitLoader size={30} />
               </div>
             )}
 
@@ -486,109 +485,32 @@ const Profile = () => {
             Save Button
         =========================== */}
 
-        <button
+        <Button
+          variant="primary"
+          size="lg"
+          fullWidth
+          loading={loading}
+          icon="fas fa-save"
           onClick={handleSave}
-          disabled={loading}
-          style={{
-            width: '100%',
-            padding: '14px',
-            background: loading ? '#555' : '#003366',
-            color: 'white',
-            border: 'none',
-            borderRadius: '10px',
-            fontWeight: '700',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            marginBottom: '12px',
-            fontSize: '1rem',
-            transition:
-              'transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease',
-            animation:
-              'profileButtonEnter 0.7s 0.6s ease both',
-          }}
-          onMouseEnter={(e) => {
-            if (!loading) {
-              e.currentTarget.style.transform =
-                'translateY(-3px)';
-              e.currentTarget.style.boxShadow =
-                '0 10px 25px rgba(0,51,102,0.3)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform =
-              'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.transform =
-              'scale(0.98)';
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.transform =
-              'translateY(-3px)';
-          }}
+          style={{ marginBottom: '12px', animation: 'profileButtonEnter 0.7s 0.6s ease both' }}
         >
-          <i
-            className={
-              loading
-                ? 'fas fa-spinner fa-spin'
-                : 'fas fa-save'
-            }
-            style={{ marginRight: '8px' }}
-          ></i>
-
           {loading ? 'Saving...' : 'Save Profile'}
-        </button>
+        </Button>
 
         {/* ===========================
             Logout Button
         =========================== */}
 
-        <button
+        <Button
+          variant="danger"
+          size="lg"
+          fullWidth
+          icon="fas fa-sign-out-alt"
           onClick={handleLogout}
-          style={{
-            width: '100%',
-            padding: '14px',
-            background: '#ff4444',
-            color: 'white',
-            border: 'none',
-            borderRadius: '10px',
-            fontWeight: '700',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            transition:
-              'transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease',
-            animation:
-              'profileButtonEnter 0.7s 0.7s ease both',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = '#e03333';
-            e.currentTarget.style.transform =
-              'translateY(-3px)';
-            e.currentTarget.style.boxShadow =
-              '0 10px 25px rgba(255,68,68,0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = '#ff4444';
-            e.currentTarget.style.transform =
-              'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.transform =
-              'scale(0.98)';
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.transform =
-              'translateY(-3px)';
-          }}
+          style={{ animation: 'profileButtonEnter 0.7s 0.7s ease both' }}
         >
-          <i
-            className="fas fa-sign-out-alt"
-            style={{ marginRight: '8px' }}
-          ></i>
-
           Logout
-        </button>
+        </Button>
       </div>
 
       {/* ===========================
