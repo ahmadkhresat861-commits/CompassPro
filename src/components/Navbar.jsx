@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import Avatar from './Avatar';
 import '../App.css';
+import DualOrbitLoader from './DualOrbitLoader';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -595,14 +596,7 @@ const Navbar = () => {
                     color: '#888',
                   }}
                 >
-                  <i
-                    className="fas fa-spinner fa-spin"
-                    style={{
-                      fontSize: '1.5rem',
-                      marginBottom: '10px',
-                      display: 'block',
-                    }}
-                  ></i>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}><DualOrbitLoader size={28} /></div>
 
                   {lang === 'ar'
                     ? 'جاري التحميل...'
