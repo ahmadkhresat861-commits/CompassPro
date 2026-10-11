@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import '../App.css';
+import DualOrbitLoader from '../components/DualOrbitLoader';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -924,13 +925,7 @@ const Admin = () => {
           justifyContent: 'center',
         }}
       >
-        <i
-          className="fas fa-spinner fa-spin"
-          style={{
-            fontSize: '3rem',
-            color: '#003366',
-          }}
-        ></i>
+        <DualOrbitLoader size={48} />
       </div>
     );
   }
