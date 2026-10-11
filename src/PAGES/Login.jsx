@@ -95,6 +95,8 @@ const Login = () => {
     <div
       style={{
         minHeight: '100vh',
+        boxSizing: 'border-box',
+        padding: '70px 16px 30px',
         background:
           'linear-gradient(135deg, #0a0a2e 0%, #003366 40%, #005599 70%, #0077b6 100%)',
         display: 'flex',
