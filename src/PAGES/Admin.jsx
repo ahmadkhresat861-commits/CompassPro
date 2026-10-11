@@ -86,6 +86,8 @@ const Admin = () => {
   // =========================
   const [enrollments, setEnrollments] = useState([]);
   const [enrollmentsLoading, setEnrollmentsLoading] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
 
   // =========================
   // Check Admin
@@ -695,6 +697,29 @@ const Admin = () => {
     }
   };
 
+  // =========================
+  // Fetch Contact Messages (read-only)
+  // =========================
+  const fetchMessages = async () => {
+    setMessagesLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id, name, email, message, created_at')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      alert('Failed to load messages: ' + error.message);
+    } finally {
+      setMessagesLoading(false);
+    }
+  };
+
   const getCourseTitleById = (id) =>
     courseOptions.find((c) => String(c.id) === String(id))?.title ||
     `#${id}`;
@@ -842,6 +867,10 @@ const Admin = () => {
 
     if (activeTab === 'enrollments') {
       fetchEnrollments();
+    }
+
+    if (activeTab === 'messages') {
+      fetchMessages();
     }
   }, [activeTab]);
 
@@ -991,6 +1020,11 @@ const Admin = () => {
       icon: 'fas fa-users',
       label: 'Users',
       tab: 'users',
+    },
+    {
+      icon: 'fas fa-envelope',
+      label: 'Messages',
+      tab: 'messages',
     },
     {
       icon: 'fas fa-bell',
@@ -1189,6 +1223,13 @@ const Admin = () => {
               <>
                 <i className="fas fa-users"></i>{' '}
                 Users Management
+              </>
+            )}
+
+            {activeTab === 'messages' && (
+              <>
+                <i className="fas fa-envelope"></i>{' '}
+                Contact Messages
               </>
             )}
 
@@ -2277,6 +2318,79 @@ const Admin = () => {
                   ))}
                 </tbody>
               </table>
+            )}
+          </div>
+        )}
+
+        {/* =========================
+            Contact Messages
+        ========================= */}
+        {activeTab === 'messages' && (
+          <div
+            style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '30px',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+            }}
+          >
+            <h2 style={{ color: '#003366', marginTop: 0 }}>
+              <i className="fas fa-envelope"></i> Messages ({messages.length})
+            </h2>
+
+            {messagesLoading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+                <DualOrbitLoader size={40} />
+              </div>
+            ) : messages.length === 0 ? (
+              <p style={{ textAlign: 'center', color: '#888', padding: '40px' }}>
+                No messages yet.
+              </p>
+            ) : (
+              messages.map((m) => (
+                <div
+                  key={m.id}
+                  style={{
+                    border: '1px solid #e8edf3',
+                    borderRadius: '10px',
+                    padding: '16px 18px',
+                    marginBottom: '12px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    <strong style={{ color: '#003366' }}>{m.name}</strong>
+                    <span style={{ color: '#888', fontSize: '0.85rem' }}>
+                      {new Date(m.created_at).toLocaleString()}
+                    </span>
+                  </div>
+
+                  <a
+                    href={`mailto:${m.email}`}
+                    style={{ color: '#0077b6', fontSize: '0.9rem' }}
+                  >
+                    <i className="fas fa-reply"></i> {m.email}
+                  </a>
+
+                  <p
+                    style={{
+                      margin: '10px 0 0',
+                      color: '#444',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {m.message}
+                  </p>
+                </div>
+              ))
             )}
           </div>
         )}
