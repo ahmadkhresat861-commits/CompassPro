@@ -36,13 +36,25 @@ const Navbar = () => {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const searchInputRef = useRef(null);
 
   // إغلاق القوائم عند تغيّر الصفحة
   useEffect(() => {
     setMenuOpen(false);
     setShowProfile(false);
     setShowNotif(false);
+    setSearchOpen(false);
   }, [location.pathname]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const q = searchText.trim();
+    navigate(q ? `/courses?q=${encodeURIComponent(q)}` : '/courses');
+    setSearchOpen(false);
+    setMenuOpen(false);
+  };
 
   // إغلاق قائمة البروفايل عند الضغط خارجها
   useEffect(() => {
@@ -287,6 +299,34 @@ const Navbar = () => {
           flexWrap: 'wrap',
         }}
       >
+
+        <form
+          className={`cp-search${searchOpen ? ' open' : ''}`}
+          onSubmit={handleSearch}
+          role="search"
+        >
+          <input
+            ref={searchInputRef}
+            type="search"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            placeholder={t.searchCourses}
+            aria-label={t.searchCourses}
+          />
+          <button
+            type={searchOpen || searchText ? 'submit' : 'button'}
+            aria-label={t.searchCourses}
+            onClick={(e) => {
+              if (!searchOpen) {
+                e.preventDefault();
+                setSearchOpen(true);
+                setTimeout(() => searchInputRef.current?.focus(), 50);
+              }
+            }}
+          >
+            <i className="fas fa-search"></i>
+          </button>
+        </form>
 
         <Link to="/home" className={navCls('/home')}>
           <i className="fas fa-home"></i>{' '}
