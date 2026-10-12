@@ -36,7 +36,7 @@ const Empty = ({ text }) => (
   <div style={{ padding: '30px 10px', textAlign: 'center', color: '#999', fontSize: 14 }}>{text}</div>
 );
 
-const TrendChart = ({ points }) => {
+const TrendChart = ({ points, color = NAVY }) => {
   const W = 600, H = 200, P = { l: 30, r: 10, t: 12, b: 24 };
   const max = Math.max(1, ...points.map((p) => p.count));
   const iw = W - P.l - P.r, ih = H - P.t - P.b;
@@ -54,10 +54,10 @@ const TrendChart = ({ points }) => {
           <text x={P.l - 6} y={y(tk) + 4} fontSize="10" fill="#999" textAnchor="end">{tk}</text>
         </g>
       ))}
-      <path d={area} fill={`${NAVY}18`} />
-      <path d={line} fill="none" stroke={NAVY} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      <path d={area} fill={`${color}18`} />
+      <path d={line} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
       {points.map((p, i) => p.count > 0 && (
-        <circle key={p.key} cx={x(i)} cy={y(p.count)} r="3" fill={NAVY}><title>{`${p.key}: ${p.count}`}</title></circle>
+        <circle key={p.key} cx={x(i)} cy={y(p.count)} r="3" fill={color}><title>{`${p.key}: ${p.count}`}</title></circle>
       ))}
       {labelIdx.map((i) => (
         <text key={i} x={x(i)} y={H - 6} fontSize="10" fill="#999" textAnchor={i === 0 ? 'start' : i === points.length - 1 ? 'end' : 'middle'}>
@@ -90,17 +90,19 @@ const BarList = ({ rows, color = NAVY, format = (v) => v }) => {
 const AdminAnalytics = () => {
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState(30);
-  const [data, setData] = useState({ enrollments: [], courses: [], reviews: [], messages: [] });
+  const [data, setData] = useState({ enrollments: [], courses: [], reviews: [], messages: [], profiles: [], progress: [] });
 
   useEffect(() => {
     let alive = true;
     (async () => {
       setLoading(true);
-      const [e, c, r, m] = await Promise.all([
+      const [e, c, r, m, pr, lp] = await Promise.all([
         supabase.from('enrollments').select('id,user_id,course_id,enrolled_at,progress,completed'),
         supabase.from('courses').select('id,title,category,price,students'),
         supabase.from('reviews').select('id,course_id,rating'),
         supabase.from('messages').select('id,created_at'),
+        supabase.from('profiles').select('id,created_at'),
+        supabase.from('lesson_progress').select('id,completed,completed_at'),
       ]);
       if (!alive) return;
       setData({
@@ -108,6 +110,8 @@ const AdminAnalytics = () => {
         courses: c.data || [],
         reviews: r.data || [],
         messages: m.data || [],
+        profiles: pr.data || [],
+        progress: lp.data || [],
       });
       setLoading(false);
     })();
@@ -115,7 +119,7 @@ const AdminAnalytics = () => {
   }, []);
 
   const stats = useMemo(() => {
-    const { enrollments, courses, reviews, messages } = data;
+    const { enrollments, courses, reviews, messages, profiles, progress } = data;
     const titleOf = (id) => courses.find((c) => c.id === id)?.title || `#${id}`;
     const since = new Date();
     since.setHours(0, 0, 0, 0);
@@ -134,6 +138,17 @@ const AdminAnalytics = () => {
       if (k in buckets) { buckets[k]++; inRange++; }
     });
     const trend = Object.entries(buckets).map(([key, count]) => ({ key, count }));
+
+    const ub = Object.fromEntries(Object.keys(buckets).map((k) => [k, 0]));
+    let newUsers = 0;
+    profiles.forEach((p) => {
+      if (!p.created_at) return;
+      const k = dayKey(p.created_at);
+      if (k in ub) { ub[k]++; newUsers++; }
+    });
+    const userTrend = Object.entries(ub).map(([key, count]) => ({ key, count }));
+    const lessonsDone = progress.filter((p) => p.completed);
+    const lessonsInRange = lessonsDone.filter((p) => p.completed_at && new Date(p.completed_at) >= since).length;
 
     const completed = enrollments.filter((e) => e.completed).length;
     const avgProgress = enrollments.length
@@ -166,7 +181,8 @@ const AdminAnalytics = () => {
     const msgInRange = messages.filter((m) => m.created_at && new Date(m.created_at) >= since).length;
 
     return {
-      trend, inRange, completed, avgProgress, learners, topCourses, ratings, avgRating,
+      trend, inRange, userTrend, newUsers, lessonsDone: lessonsDone.length, lessonsInRange,
+ completed, avgProgress, learners, topCourses, ratings, avgRating,
       categories, revenue, msgInRange,
       total: enrollments.length,
       completionRate: enrollments.length ? Math.round((completed / enrollments.length) * 100) : 0,
@@ -205,6 +221,12 @@ const AdminAnalytics = () => {
         <Kpi icon="fas fa-circle-check" label="Completion rate" value={`${stats.completionRate}%`} hint={`${stats.completed} completed`} color="#2e7d32" />
         <Kpi icon="fas fa-gauge-high" label="Average progress" value={`${stats.avgProgress}%`} color="#e67e22" />
         <Kpi icon="fas fa-star" label="Average rating" value={stats.avgRating ? stats.avgRating.toFixed(1) : '—'} hint={`${data.reviews.length} reviews`} color="#f1b100" />
+        {data.profiles.length > 0 && (
+          <Kpi icon="fas fa-user-plus" label="Registered users" value={data.profiles.length} hint={`${stats.newUsers} new in last ${range} days`} color="#2980b9" />
+        )}
+        {data.progress.length > 0 && (
+          <Kpi icon="fas fa-book-open-reader" label="Lessons completed" value={stats.lessonsDone} hint={`${stats.lessonsInRange} in last ${range} days`} color="#16a085" />
+        )}
         <Kpi icon="fas fa-envelope" label="Contact messages" value={data.messages.length} hint={`${stats.msgInRange} in last ${range} days`} color="#8e44ad" />
       </div>
 
@@ -212,6 +234,13 @@ const AdminAnalytics = () => {
         <h3 style={{ margin: '0 0 12px', color: NAVY, fontSize: 16 }}>Enrollments over time</h3>
         {stats.inRange === 0 ? <Empty text="No enrollments in this period" /> : <TrendChart points={stats.trend} />}
       </div>
+
+      {data.profiles.length > 0 && (
+        <div style={{ ...card, marginBottom: 18 }}>
+          <h3 style={{ margin: '0 0 12px', color: NAVY, fontSize: 16 }}>New users over time</h3>
+          {stats.newUsers === 0 ? <Empty text="No new users in this period" /> : <TrendChart points={stats.userTrend} color="#2980b9" />}
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
         <div style={card}>
