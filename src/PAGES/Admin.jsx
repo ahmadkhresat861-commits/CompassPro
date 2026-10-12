@@ -37,6 +37,7 @@ const Admin = () => {
   };
   const [sessionForm, setSessionForm] = useState(emptySessionForm);
   const [sessionSaving, setSessionSaving] = useState(false);
+  const [editingSessionId, setEditingSessionId] = useState(null);
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const [userActionLoading, setUserActionLoading] = useState(false);
@@ -727,20 +728,23 @@ const Admin = () => {
 
     setSessionSaving(true);
     try {
-      const { error } = await supabase.from('sessions').insert([
-        {
-          title: f.title.trim(),
-          course: f.course.trim() || null,
-          data: f.data.trim(),
-          time: f.time.trim(),
-          instructor: f.instructor.trim() || null,
-          zoom_link: link || null,
-        },
-      ]);
+      const payload = {
+        title: f.title.trim(),
+        course: f.course.trim() || null,
+        data: f.data.trim(),
+        time: f.time.trim(),
+        instructor: f.instructor.trim() || null,
+        zoom_link: link || null,
+      };
+
+      const { error } = editingSessionId
+        ? await supabase.from('sessions').update(payload).eq('id', editingSessionId)
+        : await supabase.from('sessions').insert([payload]);
 
       if (error) throw error;
 
       setSessionForm(emptySessionForm);
+      setEditingSessionId(null);
       await fetchSessions();
     } catch (error) {
       console.error('Error adding session:', error);
@@ -748,6 +752,24 @@ const Admin = () => {
     } finally {
       setSessionSaving(false);
     }
+  };
+
+  const startEditSession = (session) => {
+    setEditingSessionId(session.id);
+    setSessionForm({
+      title: session.title || '',
+      course: session.course || '',
+      data: session.data || '',
+      time: session.time || '',
+      instructor: session.instructor || '',
+      zoom_link: session.zoom_link || '',
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEditSession = () => {
+    setEditingSessionId(null);
+    setSessionForm(emptySessionForm);
   };
 
   const handleDeleteSession = async (id) => {
@@ -3287,12 +3309,17 @@ const Admin = () => {
               ))}
               <Button
                 variant="primary"
-                icon="fas fa-plus"
+                icon={editingSessionId ? 'fas fa-check' : 'fas fa-plus'}
                 loading={sessionSaving}
                 onClick={handleAddSession}
               >
-                Add Session
+                {editingSessionId ? 'Save Changes' : 'Add Session'}
               </Button>
+              {editingSessionId && (
+                <Button variant="outline" onClick={cancelEditSession}>
+                  Cancel
+                </Button>
+              )}
             </div>
 
             {sessionsLoading ? (
@@ -3381,7 +3408,16 @@ const Admin = () => {
                             '-'}
                         </td>
 
-                        <td style={{ padding: '15px' }}>
+                        <td style={{ padding: '15px', whiteSpace: 'nowrap' }}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            icon="fas fa-pen"
+                            onClick={() => startEditSession(session)}
+                            style={{ marginInlineEnd: 8 }}
+                          >
+                            Edit
+                          </Button>
                           <Button
                             variant="danger"
                             size="sm"
