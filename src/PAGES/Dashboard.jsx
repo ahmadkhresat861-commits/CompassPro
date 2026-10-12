@@ -180,6 +180,23 @@ const Dashboard = () => {
   const hoursLearned = 0;
 
   const [certificateFor, setCertificateFor] = useState(null);
+  const [certInfo, setCertInfo] = useState(null); // { code, issued_on }
+
+  const openCertificate = async (course, enrollmentId) => {
+    setCertificateFor(course);
+    setCertInfo(null);
+    if (!enrollmentId) return;
+    try {
+      const { data, error } = await supabase.rpc('get_my_certificate', {
+        p_enrollment_id: enrollmentId,
+      });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      if (row?.code) setCertInfo(row);
+    } catch (err) {
+      console.error('Certificate info error:', err);
+    }
+  };
 
   // =========================
   // REAL CERTIFICATES
@@ -658,7 +675,7 @@ const Dashboard = () => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setCertificateFor(course);
+                          openCertificate(course, enrollment.id);
                         }}
                         style={{
                           marginTop: '12px',
@@ -840,8 +857,20 @@ const Dashboard = () => {
             </h2>
 
             <p style={{ color: '#888', fontSize: '0.85rem' }}>
-              Issued on {new Date().toLocaleDateString()}
+              Issued on{' '}
+              {(certInfo?.issued_on
+                ? new Date(certInfo.issued_on)
+                : new Date()
+              ).toLocaleDateString()}
             </p>
+
+            {certInfo?.code && (
+              <p style={{ color: '#888', fontSize: '0.8rem', marginTop: '6px' }}>
+                Certificate No: <strong style={{ color: '#003366' }}>{certInfo.code}</strong>
+                <br />
+                Verify at {window.location.origin}/verify
+              </p>
+            )}
 
             <div
               className="certificate-actions"
