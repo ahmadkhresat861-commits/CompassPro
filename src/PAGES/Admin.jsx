@@ -4,6 +4,7 @@ import { supabase } from '../supabase';
 import '../App.css';
 import DualOrbitLoader from '../components/DualOrbitLoader';
 import Button from '../components/Button';
+import AdminAnalytics from '../components/AdminAnalytics';
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -1067,6 +1068,11 @@ const Admin = () => {
       tab: 'overview',
     },
     {
+      icon: 'fas fa-chart-line',
+      label: 'Analytics',
+      tab: 'analytics',
+    },
+    {
       icon: 'fas fa-book',
       label: 'Courses',
       tab: 'courses',
@@ -1263,6 +1269,13 @@ const Admin = () => {
               </>
             )}
 
+            {activeTab === 'analytics' && (
+              <>
+                <i className="fas fa-chart-line"></i>{' '}
+                Analytics
+              </>
+            )}
+
             {activeTab === 'courses' && (
               <>
                 <i className="fas fa-book"></i>{' '}
@@ -1327,6 +1340,8 @@ const Admin = () => {
             )}
           </h1>
         </div>
+
+        {activeTab === 'analytics' && <AdminAnalytics />}
 
         {/* =========================
             Overview
