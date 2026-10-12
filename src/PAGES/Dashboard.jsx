@@ -787,7 +787,7 @@ const Dashboard = () => {
             zIndex: 1000,
             padding: '20px',
           }}
-          onClick={() => setCertificateFor(null)}
+          onClick={() => { setCertificateFor(null); setCertInfo(null); }}
         >
           <div
             className="certificate-print-area"
@@ -863,7 +863,7 @@ const Dashboard = () => {
               </button>
 
               <button
-                onClick={() => setCertificateFor(null)}
+                onClick={() => { setCertificateFor(null); setCertInfo(null); }}
                 style={{
                   padding: '12px 24px',
                   background: '#e5e7eb',

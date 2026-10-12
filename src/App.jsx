@@ -11,6 +11,7 @@ import Profile from './PAGES/Profile'
 import Contact from './PAGES/Contact'
 import Admin from './PAGES/Admin'
 import Sessions from './PAGES/Sessions'
+import Verify from './PAGES/Verify'
 
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -142,6 +143,21 @@ function App() {
               </>
             }
           />
+
+          {/* VERIFY CERTIFICATE — public */}
+          {['/verify', '/verify/:code'].map((path) => (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <>
+                  <Navbar />
+                  <Verify />
+                  <Footer />
+                </>
+              }
+            />
+          ))}
 
           {/* SESSIONS */}
           <Route
