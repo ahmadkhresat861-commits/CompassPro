@@ -474,7 +474,7 @@ const Contact = () => {
 
           @keyframes logoFloat {
             0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(2deg); }
+            50% { transform: translateY(-4px); }
           }
 
           @media (max-width: 768px) {

@@ -535,7 +535,7 @@ const Login = () => {
             }
 
             50% {
-              transform: translateY(-8px) rotate(2deg);
+              transform: translateY(-4px);
             }
           }
 

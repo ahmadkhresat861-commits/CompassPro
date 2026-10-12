@@ -1311,3 +1311,28 @@ nav div a.active {
     flex-shrink: 0;
   }
 }
+
+/* ===========================
+   Logo motion (light)
+=========================== */
+.cp-logo-float {
+  animation: cpLogoFloat 4s ease-in-out infinite;
+}
+
+@keyframes cpLogoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.cp-logo-hover {
+  transition: transform 0.3s ease;
+}
+
+.cp-logo-hover:hover {
+  transform: scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-logo-float { animation: none; }
+  .cp-logo-hover:hover { transform: none; }
+}

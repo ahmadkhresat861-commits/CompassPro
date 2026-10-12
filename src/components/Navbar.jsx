@@ -274,6 +274,7 @@ const Navbar = () => {
         <img
           src="/logo.png"
           alt="CompassPro"
+          className="cp-logo-hover"
           style={{
             height: '58px',
             width: 'auto',
