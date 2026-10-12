@@ -794,7 +794,7 @@ const Admin = () => {
     try {
       const { data, error } = await supabase
         .from('messages')
-        .select('id, name, email, message, created_at')
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -805,6 +805,23 @@ const Admin = () => {
       alert('Failed to load messages: ' + error.message);
     } finally {
       setMessagesLoading(false);
+    }
+  };
+
+  const toggleMessageReplied = async (m) => {
+    const next = !m.replied;
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .update({ replied: next })
+        .eq('id', m.id);
+      if (error) throw error;
+      setMessages((prev) =>
+        prev.map((x) => (x.id === m.id ? { ...x, replied: next } : x))
+      );
+    } catch (error) {
+      console.error('Error updating message:', error);
+      alert('Failed to update message (run messages_replied.sql first): ' + error.message);
     }
   };
 
@@ -2468,7 +2485,18 @@ const Admin = () => {
                       marginBottom: '8px',
                     }}
                   >
-                    <strong style={{ color: '#003366' }}>{m.name}</strong>
+                    <strong style={{ color: '#003366' }}>
+                      {m.name}
+                      {m.replied && (
+                        <span style={{
+                          marginInlineStart: 10, fontSize: '0.72rem', fontWeight: 700,
+                          background: '#e6f4ea', color: '#2e7d32',
+                          padding: '2px 8px', borderRadius: 99,
+                        }}>
+                          Replied
+                        </span>
+                      )}
+                    </strong>
                     <span style={{ color: '#888', fontSize: '0.85rem' }}>
                       {new Date(m.created_at).toLocaleString()}
                     </span>
@@ -2491,6 +2519,17 @@ const Admin = () => {
                   >
                     {m.message}
                   </p>
+
+                  <div style={{ marginTop: 12 }}>
+                    <Button
+                      variant={m.replied ? 'outline' : 'success'}
+                      size="sm"
+                      icon={m.replied ? 'fas fa-rotate-left' : 'fas fa-check'}
+                      onClick={() => toggleMessageReplied(m)}
+                    >
+                      {m.replied ? 'Mark as unreplied' : 'Mark as replied'}
+                    </Button>
+                  </div>
                 </div>
               ))
             )}
