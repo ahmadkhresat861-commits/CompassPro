@@ -594,23 +594,7 @@ const Courses = () => {
 
       const currentStudents =
         Number(selected.students) || 0;
-
-      const {
-        error: updateError,
-      } = await supabase
-        .from('courses')
-        .update({
-          students:
-            currentStudents + 1,
-        })
-        .eq('id', selected.id);
-
-      if (updateError) {
-        console.error(
-          'Students count update error:',
-          updateError
-        );
-      }
+      // students count is maintained by a database trigger
 
       const updatedCourse = {
         ...selected,
