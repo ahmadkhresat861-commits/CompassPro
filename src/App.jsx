@@ -183,6 +183,22 @@ function App() {
             }
           />
 
+          {/* 404 */}
+          <Route
+            path="*"
+            element={
+              <>
+                <Navbar />
+                <div style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '120px 16px 60px' }}>
+                  <h1 style={{ fontSize: '4rem', margin: 0, color: '#003366' }}>404</h1>
+                  <p style={{ color: '#666', margin: '10px 0 24px' }}>This page does not exist.</p>
+                  <a href="/home" style={{ background: '#003366', color: '#fff', padding: '12px 24px', borderRadius: 10, textDecoration: 'none', fontWeight: 600 }}>Back to Home</a>
+                </div>
+                <Footer />
+              </>
+            }
+          />
+
         </Routes>
 
         <AIAssistant />

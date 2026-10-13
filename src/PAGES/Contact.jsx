@@ -437,6 +437,8 @@ const Contact = () => {
                 <a
                   key={i}
                   href="#"
+                  aria-label={s.icon.split('fa-')[1]}
+                  onClick={(e) => e.preventDefault()}
                   style={{
                     width: '42px',
                     height: '42px',

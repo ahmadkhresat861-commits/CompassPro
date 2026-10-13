@@ -28,7 +28,7 @@ const Footer = () => {
                 { icon: 'fab fa-linkedin', color: '#0077b5' },
                 { icon: 'fab fa-whatsapp', color: '#25D366' },
               ].map((s, i) => (
-                <a key={i} href="#" style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color, textDecoration: 'none', fontSize: '1.1rem', transition: 'all 0.3s' }}
+                <a key={i} href="#" aria-label={s.icon.split('fa-')[1]} onClick={e => e.preventDefault()} style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color, textDecoration: 'none', fontSize: '1.1rem', transition: 'all 0.3s' }}
                   onMouseOver={e => e.currentTarget.style.background = s.color}
                   onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
                   <i className={s.icon}></i>

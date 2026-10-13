@@ -95,11 +95,12 @@ const AIAssistant = () => {
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setMessages([{ role: 'assistant', content: '👋 مرحباً! كيف أقدر أساعدك؟' }])}
                 style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontSize: '0.85rem' }}
-                title="مسح المحادثة">
+                title="مسح المحادثة" aria-label="Clear chat">
                 🗑️
               </button>
               <button onClick={() => setOpen(false)}
-                style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontSize: '1rem', fontWeight: '700' }}>
+                style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontSize: '1rem', fontWeight: '700' }}
+                aria-label="Close chat">
                 ✕
               </button>
             </div>
@@ -190,6 +191,7 @@ const AIAssistant = () => {
         onMouseOver={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.boxShadow = '0 12px 35px rgba(0,51,102,0.5)'; }}
         onMouseOut={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,51,102,0.4)'; }}
         title="AI Assistant"
+        aria-label="AI Assistant"
       >
         {open ? '✕' : '🤖'}
       </button>
