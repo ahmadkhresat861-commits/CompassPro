@@ -1,17 +1,18 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 import Login from './PAGES/Login'
 import SignUp from './PAGES/SignUp'
 import Home from './PAGES/Home'
-import About from './PAGES/About'
-import Services from './PAGES/Services'
-import Courses from './PAGES/Courses'
-import Dashboard from './PAGES/Dashboard'
-import Profile from './PAGES/Profile'
-import Contact from './PAGES/Contact'
-import Admin from './PAGES/Admin'
-import Sessions from './PAGES/Sessions'
-import Verify from './PAGES/Verify'
+const About = lazy(() => import('./PAGES/About'))
+const Services = lazy(() => import('./PAGES/Services'))
+const Courses = lazy(() => import('./PAGES/Courses'))
+const Dashboard = lazy(() => import('./PAGES/Dashboard'))
+const Profile = lazy(() => import('./PAGES/Profile'))
+const Contact = lazy(() => import('./PAGES/Contact'))
+const Admin = lazy(() => import('./PAGES/Admin'))
+const Sessions = lazy(() => import('./PAGES/Sessions'))
+const Verify = lazy(() => import('./PAGES/Verify'))
 
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -25,6 +26,7 @@ function App() {
   return (
     <LanguageProvider>
       <BrowserRouter>
+        <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
         <Routes>
 
           {/* ROOT — redirect to the public home page */}
@@ -200,6 +202,7 @@ function App() {
           />
 
         </Routes>
+        </Suspense>
 
         <AIAssistant />
 
