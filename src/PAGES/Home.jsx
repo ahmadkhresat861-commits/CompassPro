@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
-import Button from '../components/Button';
+import CourseCover from '../components/CourseCover';
 import '../App.css';
 
 const Home = () => {
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
-  const { darkMode, t } = useLang();
+  const { t } = useLang();
 
   useSEO({
     title: 'Online Courses & Learning Platform',
@@ -24,6 +24,13 @@ const Home = () => {
   const [totalEnrollments, setTotalEnrollments] = useState(null);
   const [avgRating, setAvgRating] = useState(null);
   const [featuredCourses, setFeaturedCourses] = useState([]);
+  const [searchText, setSearchText] = useState('');
+
+  const goSearch = (q) => {
+    const v = (q ?? searchText).trim();
+    navigate(v ? `/courses?q=${encodeURIComponent(v)}` : '/courses');
+  };
+  const topics = ['React', 'JavaScript', 'Python', 'HTML & CSS'];
 
   useEffect(() => {
     setFadeIn(true);
@@ -119,287 +126,108 @@ const Home = () => {
   ];
 
   return (
-    <div className={`home-page ${fadeIn ? 'home-visible' : ''}`}>
+    <div className={`cp-home ${fadeIn ? 'home-visible' : ''}`}>
 
-      {/* ===========================
-          Hero Section
-      =========================== */}
+      {/* Hero */}
+      <section className="cp-hero">
+        <img src="/logo.png" alt="CompassPro" className="cp-hero-logo" />
+        <h1>{t.welcome}</h1>
+        <p>{t.tagline}</p>
 
-      <section className="home-hero">
-        <div className="home-hero-bg-shape home-hero-bg-shape-1"></div>
-        <div className="home-hero-bg-shape home-hero-bg-shape-2"></div>
+        <form
+          className="cp-hero-search"
+          role="search"
+          onSubmit={(e) => { e.preventDefault(); goSearch(); }}
+        >
+          <i className="fas fa-search" aria-hidden="true"></i>
+          <input
+            type="search"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            placeholder={t.searchCourses}
+            aria-label={t.searchCourses}
+          />
+          <button type="submit" className="cp-hero-cta">{t.startLearning}</button>
+        </form>
 
-        <div className="home-hero-content">
-
-          <div className="home-hero-icon">
-            <img
-              src="/logo.png"
-              alt="CompassPro"
-              className="cp-logo-float"
-              style={{
-                width: '110px',
-                height: '110px',
-                marginBottom: '20px',
-                display: 'inline-block',
-                borderRadius: '20px',
-              }}
-            />
-          </div>
-
-          <h1>{t.welcome}</h1>
-
-          <p>{t.tagline}</p>
-
-          <div className="home-hero-actions">
-            <Button
-              variant="secondary"
-              size="lg"
-              icon="fas fa-rocket"
-              onClick={() => navigate('/courses')}
-            >
-              {t.startLearning}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="lg"
-              icon="fas fa-info-circle"
-              onClick={() => navigate('/about')}
-              style={{ color: 'white', borderColor: 'rgba(255,255,255,0.6)' }}
-            >
-              {t.learnMore}
-            </Button>
-          </div>
-
-          {!statsLoading && (totalCourses !== null || avgRating !== null) && (
-            <div className="home-hero-badges">
-              {totalCourses !== null && (
-                <span className="home-hero-badge">
-                  <i className="fas fa-book"></i> {totalCourses} {t.courses}
-                </span>
-              )}
-              {avgRating !== null && (
-                <span className="home-hero-badge">
-                  <i className="fas fa-star"></i> {avgRating} / 5 {t.avgRating}
-                </span>
-              )}
-            </div>
-          )}
-
+        <div className="cp-hero-topics">
+          {topics.map((topic) => (
+            <button key={topic} type="button" onClick={() => goSearch(topic)}>
+              {topic}
+            </button>
+          ))}
         </div>
       </section>
 
-      {/* ===========================
-          Stats Section
-      =========================== */}
-
+      {/* Stats (only real numbers) */}
       {!statsLoading && stats.length > 0 && (
-      <section
-        className="home-stats"
-        style={{
-          background: darkMode ? '#1a1a2e' : 'white',
-        }}
-      >
-        <div className="home-stats-container">
-
+        <section className="cp-stats">
           {stats.map((stat, index) => (
-            <div
-              className="home-stat-card"
-              key={index}
-            >
-              <i className={`${stat.icon} home-stat-icon`}></i>
-
-              <h2>{stat.value}</h2>
-
-              <p
-                style={{
-                  color: darkMode ? '#a8c8f0' : '#555',
-                }}
-              >
-                {stat.label}
-              </p>
+            <div className="cp-stat" key={index}>
+              <i className={stat.icon} aria-hidden="true"></i>
+              <strong>{stat.value}</strong>
+              <span>{stat.label}</span>
             </div>
           ))}
-
-        </div>
-      </section>
-      )}
-
-      {/* ===========================
-          Featured Courses Section
-      =========================== */}
-
-      {featuredCourses.length > 0 && (
-        <section
-          style={{
-            padding: '60px 20px',
-            background: darkMode ? '#0f1117' : '#f5f7fa',
-            textAlign: 'center',
-          }}
-        >
-          <h2
-            style={{
-              color: darkMode ? 'white' : '#003366',
-              marginBottom: '40px',
-            }}
-          >
-            {t.featuredCourses}
-          </h2>
-
-          <div
-            style={{
-              display: 'flex',
-              gap: '25px',
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              maxWidth: '1100px',
-              margin: '0 auto',
-            }}
-          >
-            {featuredCourses.map((course) => (
-              <div
-                key={course.id}
-                onClick={() => navigate('/courses')}
-                style={{
-                  width: '300px',
-                  background: darkMode ? '#1e2130' : 'white',
-                  borderRadius: '14px',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-                  overflow: 'hidden',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                {course.image_url ? (
-                  <img
-                    src={course.image_url}
-                    alt={course.title}
-                    style={{ width: '100%', height: '150px', objectFit: 'cover' }}
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      height: '150px',
-                      background: 'linear-gradient(135deg, #003366, #005599)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <i className="fas fa-book-open" style={{ fontSize: '2.5rem', color: '#f0a500' }}></i>
-                  </div>
-                )}
-
-                <div style={{ padding: '20px' }}>
-                  {course.category && (
-                    <span
-                      style={{
-                        fontSize: '0.75rem',
-                        color: darkMode ? '#a0b4ff' : '#003366',
-                        background: darkMode ? '#2a3050' : '#f0f0f0',
-                        padding: '4px 10px',
-                        borderRadius: '12px',
-                      }}
-                    >
-                      {course.category}
-                    </span>
-                  )}
-                  <h3 style={{ color: darkMode ? 'white' : '#003366', margin: '10px 0 5px' }}>
-                    {course.title}
-                  </h3>
-                  <p style={{ color: darkMode ? '#a8c8f0' : '#888', fontSize: '0.9rem', margin: 0 }}>
-                    {Number(course.price) > 0 ? `$${Number(course.price).toFixed(2)}` : t.free}
-                    {course.rating ? ` · ⭐ ${course.rating}` : ''}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={() => navigate('/courses')}
-            style={{ marginTop: '40px' }}
-          >
-            {t.viewAllCourses} <i className="fas fa-arrow-right"></i>
-          </Button>
         </section>
       )}
 
-      {/* ===========================
-          Why Us Section
-      =========================== */}
-
-      <section
-        className="home-why-us"
-        style={{
-          background: darkMode ? '#0f0f0f' : '#f5f5f5',
-        }}
-      >
-
-        <h2
-          style={{
-            color: darkMode ? 'white' : '#003366',
-            marginBottom: '50px',
-          }}
-        >
-          {t.whyUs}
-        </h2>
-
-        <div className="home-features-container">
-
-          {features.map((item, index) => (
-            <div
-              className="home-feature-card"
-              key={index}
-              style={{
-                background: darkMode ? '#1a1a2e' : 'white',
-                padding: '40px 30px',
-                borderRadius: '12px',
-                width: '250px',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
-                borderTop: '4px solid #f0a500',
-                animationDelay: `${0.1 + index * 0.15}s`,
-              }}
+      {/* Popular / featured courses */}
+      {featuredCourses.length > 0 && (
+        <section className="cp-section">
+          <div className="cp-section-head">
+            <h2>{t.featuredCourses}</h2>
+            <a
+              href="/courses"
+              onClick={(e) => { e.preventDefault(); navigate('/courses'); }}
             >
+              {t.viewAllCourses}
+            </a>
+          </div>
 
-              <i
-                className={`${item.icon} home-feature-icon`}
-                style={{
-                  fontSize: '2.5rem',
-                  color: '#f0a500',
-                  marginBottom: '15px',
-                  display: 'block',
-                }}
-              ></i>
-
-              <h3
-                style={{
-                  color: darkMode ? 'white' : '#003366',
-                  marginBottom: '10px',
-                }}
+          <div className="cp-grid-3">
+            {featuredCourses.map((course) => (
+              <article
+                key={course.id}
+                className="cp-course-card"
+                onClick={() => navigate(`/courses/${course.id}`)}
               >
-                {item.title}
-              </h3>
+                <CourseCover
+                  src={course.image_url}
+                  category={course.category}
+                  alt={course.title}
+                  height={170}
+                />
+                <div className="cp-course-body">
+                  <h3>{course.title}</h3>
+                  <div className="cp-course-meta">
+                    <span>{course.rating ? `★ ${course.rating}` : ''}</span>
+                    <strong>
+                      {Number(course.price) > 0 ? `$${Number(course.price).toFixed(2)}` : t.free}
+                    </strong>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
-              <p
-                style={{
-                  color: darkMode ? '#a8c8f0' : '#555',
-                  fontSize: '0.9rem',
-                }}
-              >
-                {item.desc}
-              </p>
-
+      {/* Why us */}
+      <section className="cp-section">
+        <div className="cp-section-head">
+          <h2>{t.whyUs}</h2>
+        </div>
+        <div className="cp-grid-3">
+          {features.map((item, index) => (
+            <div className={`cp-feature cp-feature-${index + 1}`} key={index}>
+              <span className="cp-feature-icon"><i className={item.icon} aria-hidden="true"></i></span>
+              <h3>{item.title}</h3>
+              <p>{item.desc}</p>
             </div>
           ))}
-
         </div>
-
       </section>
-
     </div>
   );
 };

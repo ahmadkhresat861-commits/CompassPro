@@ -13,10 +13,10 @@ export const LanguageProvider = ({ children }) => {
 
   return (
     <LanguageContext.Provider value={{ lang, t, toggleLang, isAr, darkMode, toggleDark }}>
-      <div dir={isAr ? 'rtl' : 'ltr'}
+      <div dir={isAr ? 'rtl' : 'ltr'} data-theme={darkMode ? 'dark' : 'light'}
         style={{
-          fontFamily: isAr ? 'Arial, sans-serif' : 'Inter, sans-serif',
-          background: darkMode ? '#0f0f0f' : '#f5f5f5',
+          fontFamily: isAr ? "'IBM Plex Sans Arabic', 'Plus Jakarta Sans', sans-serif" : "'Plus Jakarta Sans', system-ui, sans-serif",
+          background: darkMode ? '#0f0f0f' : '#F3F7FC',
           color: darkMode ? '#f0f0f0' : '#1a1a1a',
           minHeight: '100vh',
           transition: 'all 0.3s'

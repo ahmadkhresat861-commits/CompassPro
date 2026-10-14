@@ -14,7 +14,7 @@
 
 [data-theme="light"] body,
 [data-theme="light"] {
-  --bg: #f5f5f5;
+  --bg: #F3F7FC;
   --bg2: white;
   --card: white;
   --text: #1a1a1a;
@@ -37,8 +37,8 @@ html {
 }
 
 body {
-  font-family: "Inter", system-ui, sans-serif;
-  background: var(--bg, #f5f5f5);
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  background: var(--bg, #F3F7FC);
   color: var(--text, #1a1a1a);
   transition: background 0.3s ease, color 0.3s ease;
   overflow-x: hidden;

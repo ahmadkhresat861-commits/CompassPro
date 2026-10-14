@@ -5,7 +5,7 @@ const Footer = () => {
   const navigate = useNavigate();
 
   return (
-    <footer style={{ background: '#003366', color: 'white', padding: '60px 40px 30px', marginTop: 'auto' }}>
+    <footer className="cp-footer" style={{ background: '#003366', color: 'white', padding: '48px 40px 28px' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
         
         {/* Top */}

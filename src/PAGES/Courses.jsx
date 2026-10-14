@@ -5,6 +5,7 @@ import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
 import '../App.css';
 import DualOrbitLoader from '../components/DualOrbitLoader';
+import CourseCover from '../components/CourseCover';
 
 // ============================================================
 // STAR RATING
@@ -1196,55 +1197,20 @@ progressData = data;
             marginBottom: '40px',
           }}
         >
-          {selected.image_url ? (
-            <img
-              src={selected.image_url}
-              alt={selected.title}
-              style={{
-                width: '100%',
-                maxWidth: '500px',
-                height: '220px',
-                objectFit: 'cover',
-                borderRadius: '16px',
-                margin: '0 auto 20px',
-                display: 'block',
-                boxShadow: '0 10px 30px rgba(0,51,102,0.25)',
-              }}
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: '90px',
-                height: '90px',
-                margin:
-                  '0 auto 20px',
-                borderRadius:
-                  '50%',
-                background:
-                  'linear-gradient(135deg, #003366, #005599)',
-                display: 'flex',
-                alignItems:
-                  'center',
-                justifyContent:
-                  'center',
-                boxShadow:
-                  '0 10px 30px rgba(0,51,102,0.25)',
-              }}
-            >
-              <i
-                className="fas fa-book-open"
-                style={{
-                  fontSize:
-                    '2.5rem',
-                  color:
-                    '#f0a500',
-                }}
-              />
-            </div>
-          )}
+          <CourseCover
+            src={selected.image_url}
+            category={selected.category}
+            alt={selected.title}
+            height={300}
+            showBadge={false}
+            style={{
+              width: '100%',
+              maxWidth: '760px',
+              margin: '0 auto 24px',
+              borderRadius: '24px',
+              boxShadow: '0 10px 30px rgba(0,51,102,0.25)',
+            }}
+          />
 
           <h1
             style={{
@@ -2702,58 +2668,17 @@ lesson.id ===
                     'pointer',
                 }}
               >
-                {course.image_url ? (
-                  <img
-                    src={course.image_url}
-                    alt={course.title}
-                    style={{
-                      width: 'calc(100% + 50px)',
-                      height: '140px',
-                      objectFit: 'cover',
-                      margin: '-25px -25px 15px -25px',
-                      borderRadius: '12px 12px 0 0',
-                      display: 'block',
-                    }}
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <div
-                    className="card-icon"
-                    style={{
-                      color:
-                        '#f0a500',
-                    }}
-                  >
-                    <i className="fas fa-book-open" />
-                  </div>
-                )}
-
-                {course.category && (
-                  <span
-                    style={{
-                      background:
-                        dm.tagBg,
-                      padding:
-                        '4px 12px',
-                      borderRadius:
-                        '20px',
-                      fontSize:
-                        '0.8rem',
-                      color:
-                        dm.tagColor,
-                      marginBottom:
-                        '10px',
-                      display:
-                        'inline-block',
-                    }}
-                  >
-                    {
-                      course.category
-                    }
-                  </span>
-                )}
+                <CourseCover
+                  src={course.image_url}
+                  category={course.category}
+                  alt={course.title}
+                  height={170}
+                  style={{
+                    width: 'calc(100% + 50px)',
+                    margin: '-25px -25px 16px -25px',
+                    borderRadius: '20px 20px 0 0',
+                  }}
+                />
 
                 <h3
                   style={{

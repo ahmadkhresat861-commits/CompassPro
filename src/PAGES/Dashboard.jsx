@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
+import CourseCover from '../components/CourseCover';
 import { useLang } from '../LanguageContext';
 import Avatar from '../components/Avatar';
 import '../App.css';
@@ -102,6 +103,7 @@ const Dashboard = () => {
             id,
             title,
             category,
+            image_url,
             students,
             rating
           )
@@ -590,17 +592,20 @@ const Dashboard = () => {
                           color: text,
                         }}
                       >
-                        <i
-                          className="fas fa-book-open"
+                        <CourseCover
+                          src={course?.image_url}
+                          category={course?.category}
+                          alt=""
+                          height={44}
+                          showBadge={false}
                           style={{
-                            color:
-                              isCompleted
-                                ? '#10b981'
-                                : '#f0a500',
-                            marginRight:
-                              '8px',
+                            display: 'inline-block',
+                            width: '68px',
+                            verticalAlign: 'middle',
+                            borderRadius: '12px',
+                            marginInlineEnd: '12px',
                           }}
-                        ></i>
+                        />
 
                         {course?.title ||
                           'Course'}

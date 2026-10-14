@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import DualOrbitLoader from '../components/DualOrbitLoader';
-import '../App.css';
+import AuthLayout from '../components/AuthLayout';
+import { useLang } from '../LanguageContext';
 
 const SignUp = () => {
-  const [fadeIn, setFadeIn] = useState(false);
+  const { t } = useLang();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => { setFadeIn(true); }, []);
-
   const handleSignUp = async () => {
-    if (password !== confirm) { setError('Passwords do not match!'); return; }
-    if (password.length < 6) { setError('Password must be at least 6 characters!'); return; }
+    if (password !== confirm) { setError(t.errMismatch); return; }
+    if (password.length < 6) { setError(t.errShort); return; }
     setLoading(true);
     setError('');
     const { data, error } = await supabase.auth.signUp({ email, password });
@@ -29,24 +29,72 @@ const SignUp = () => {
     setLoading(false);
   };
 
+  const pwField = (label, value, setValue, placeholder, auto) => (
+    <label className="cp-field">
+      <span>{label}</span>
+      <span className="cp-input">
+        <i className="fas fa-lock" aria-hidden="true"></i>
+        <input
+          type={showPw ? 'text' : 'password'}
+          autoComplete={auto}
+          placeholder={placeholder}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+        <button
+          type="button"
+          className="cp-eye"
+          aria-label={showPw ? t.hidePassword : t.showPassword}
+          onClick={() => setShowPw((v) => !v)}
+        >
+          <i className={showPw ? 'fas fa-eye-slash' : 'fas fa-eye'} aria-hidden="true"></i>
+        </button>
+      </span>
+    </label>
+  );
+
   return (
-    <div id="login" style={{ opacity: fadeIn ? 1 : 0, transition: 'opacity 1s' }}>
-      <div className="login-logo">
-        <i className="fas fa-user-plus"></i>
-      </div>
-      <h1>CompassPro</h1>
-      <p className="login-tagline">Start Your Journey Today</p>
-      <h2>Create Account</h2>
-      {error && <p style={{ color: '#ff4444', marginBottom: '15px', fontSize: '0.9rem' }}>{error}</p>}
-      <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-      <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
-      <input type="password" placeholder="Confirm Password" value={confirm} onChange={e => setConfirm(e.target.value)} />
-      <button onClick={handleSignUp} disabled={loading}>
-        {loading ? <DualOrbitLoader size={18} /> : <i className="fas fa-user-plus"></i>} {loading ? ' Creating Account...' : 'Sign Up'}
-      </button>
-      <p className="login-signup">
-        Already have an account? <a onClick={() => navigate('/login')} style={{ cursor: 'pointer' }}>Login</a>
-      </p>
+    <div>
+      <AuthLayout mode="signup" hero={t.signupHero}>
+        <div>
+          <h2 className="cp-auth-title">{t.createAccount}</h2>
+          <p className="cp-auth-sub">{t.createSub}</p>
+        </div>
+
+        <form
+          className="cp-auth-form"
+          onSubmit={(e) => { e.preventDefault(); handleSignUp(); }}
+          noValidate
+        >
+          {error && <div className="cp-auth-error" role="alert">{error}</div>}
+
+          <label className="cp-field">
+            <span>{t.email}</span>
+            <span className="cp-input">
+              <i className="fas fa-envelope" aria-hidden="true"></i>
+              <input
+                type="email"
+                autoComplete="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </span>
+          </label>
+
+          {pwField(t.password, password, setPassword, t.enterPassword, 'new-password')}
+          {pwField(t.confirmPassword, confirm, setConfirm, t.confirmYourPassword, 'new-password')}
+
+          <button type="submit" className="cp-auth-submit" disabled={loading}>
+            {loading ? <DualOrbitLoader size={18} /> : null} {loading ? t.creatingAccount : t.signUp}
+          </button>
+        </form>
+
+        <p className="cp-auth-foot">
+          {t.haveAccount}{' '}
+          <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>{t.login}</a>
+        </p>
+      </AuthLayout>
     </div>
   );
 };

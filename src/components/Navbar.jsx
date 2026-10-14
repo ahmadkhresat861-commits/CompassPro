@@ -436,9 +436,9 @@ const Navbar = () => {
           onClick={toggleDark}
           style={{
             background:
-              'rgba(255,255,255,0.15)',
+              'var(--cp-chip)',
             border: 'none',
-            color: 'white',
+            color: 'var(--cp-nav-fg)',
             padding: '6px 12px',
             borderRadius: '20px',
             cursor: 'pointer',
@@ -455,9 +455,9 @@ const Navbar = () => {
           onClick={toggleLang}
           style={{
             background:
-              'rgba(255,255,255,0.15)',
+              'var(--cp-chip)',
             border: 'none',
-            color: 'white',
+            color: 'var(--cp-nav-fg)',
             padding: '6px 12px',
             borderRadius: '20px',
             cursor: 'pointer',
@@ -490,7 +490,7 @@ const Navbar = () => {
               height: '40px',
               borderRadius: '50%',
               background:
-                'rgba(255,255,255,0.15)',
+                'var(--cp-chip)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -501,7 +501,7 @@ const Navbar = () => {
               className="fas fa-bell"
               style={{
                 fontSize: '1.1rem',
-                color: 'white',
+                color: 'var(--cp-nav-fg)',
               }}
             ></i>
 
@@ -512,7 +512,7 @@ const Navbar = () => {
                   top: '-2px',
                   right: '-2px',
                   background: '#ff4444',
-                  color: 'white',
+                  color: 'var(--cp-nav-fg)',
                   borderRadius: '50%',
                   width: '18px',
                   height: '18px',
