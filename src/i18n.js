@@ -147,7 +147,8 @@ export const translations = {
     errLockedNow: 'Too many failed attempts. Account locked for 15 minutes.',
     errInvalid: 'Invalid credentials. {n} attempts remaining.',
     errMismatch: 'Passwords do not match!',
-    errShort: 'Password must be at least 6 characters!',
+    errShort: 'Password must be at least 8 characters and include a letter and a number.',
+    errPwned: 'This password appeared in a known data breach. Please choose a different one.',
   },
   ar: {
     // Navbar
@@ -297,6 +298,7 @@ export const translations = {
     errLockedNow: 'محاولات فاشلة كثيرة. تم قفل الحساب لمدة 15 دقيقة.',
     errInvalid: 'بيانات الدخول غير صحيحة. تبقّى {n} محاولات.',
     errMismatch: 'كلمتا المرور غير متطابقتين!',
-    errShort: 'يجب أن تكون كلمة المرور 6 أحرف على الأقل!',
+    errShort: 'يجب أن تكون كلمة المرور 8 أحرف على الأقل وتحتوي على حرف ورقم.',
+    errPwned: 'كلمة المرور هذه ظهرت في تسريب بيانات معروف. اختر كلمة مرور أخرى.',
   }
 };
