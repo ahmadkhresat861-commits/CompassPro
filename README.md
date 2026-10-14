@@ -1,20 +1,58 @@
-<<<<<<< HEAD
-# React + Vite
+# CompassPro
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-Currently, two official plugins are available:
+An educational course platform (LMS-style): courses, lessons with PDFs, live sessions,
+progress tracking, certificates with public verification, and an admin dashboard.
+Bilingual (English / Arabic with RTL).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+**Live:** https://edu-compasspro-two.vercel.app
 
-## React Compiler
+## Tech stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19 + Vite
+- react-router-dom 7
+- Supabase (Auth, Postgres with RLS, Storage, Edge Functions)
+- Deployed on Vercel
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-=======
-# edu-course-platform
-Educational courses platform
->>>>>>> 82d19bf7128b6a0d0bbf1324a265a8bfff44d370
+- Guest browsing, sign up / login, profile
+- Courses, lessons, progress, reviews, certificates (`/verify`)
+- Live sessions (Zoom links), notifications, contact form
+- Admin panel: courses, lessons, enrollments, users, messages, analytics
+- EN/AR UI (`src/i18n.js`), dark mode, SEO (sitemap, robots, meta)
+
+## Getting started
+
+```bash
+npm install
+npm run dev        # http://localhost:5173
+npm run build      # production build to dist/
+npm run lint
+```
+
+## Configuration
+
+The Supabase project URL and the **public anon key** are in `src/supabase.js`.
+The anon key is safe to expose; data access is protected by Row Level Security.
+
+Never put the `service_role` key or any secret (e.g. API keys for AI features)
+in the frontend. Secrets belong in Supabase Edge Function secrets.
+
+## Project structure
+
+```
+src/
+  PAGES/        route pages (Home, Courses, Dashboard, Admin, ...)
+  components/   shared UI (Navbar, Footer, CourseCover, AuthLayout, ...)
+  hooks/        custom hooks
+  i18n.js       translations
+  redesign.css  design tokens and global overrides
+supabase/sql/   SQL scripts already applied to the database (reference only)
+public/         static files, sitemap, robots
+```
+
+## Database
+
+Row Level Security is enabled on all tables. Admin checks are enforced in the
+database (`is_admin()` and policies), not only in the UI. See `supabase/sql/`
+for the history of changes.
