@@ -1176,7 +1176,10 @@ const Admin = () => {
           color: 'white',
           padding: '30px 0',
           position: 'fixed',
-          height: '100vh',
+          top: '16px',
+          left: '16px',
+          borderRadius: '24px',
+          height: 'calc(100vh - 32px)',
           zIndex: 100,
           overflowY: 'auto',
         }}
@@ -1281,7 +1284,7 @@ const Admin = () => {
       ========================= */}
       <div
         style={{
-          marginLeft: '250px',
+          marginLeft: '282px',
           flex: 1,
           padding: '40px',
         }}
@@ -1297,6 +1300,8 @@ const Admin = () => {
           <h1
             style={{
               color: '#003366',
+              fontSize: '2rem',
+              fontWeight: 800,
             }}
           >
             {activeTab === 'overview' && (
@@ -1411,11 +1416,11 @@ const Admin = () => {
                     flex: '1',
                     minWidth: '200px',
                     background: 'white',
-                    borderRadius: '12px',
+                    borderRadius: '24px',
                     padding: '25px',
                     textAlign: 'center',
                     boxShadow:
-                      '0 4px 15px rgba(0,0,0,0.08)',
+                      '0 4px 15px rgba(0,51,102,0.08)',
                     borderTop:
                       `4px solid ${stat.color}`,
                   }}
@@ -1455,10 +1460,10 @@ const Admin = () => {
             <div
               style={{
                 background: 'white',
-                borderRadius: '12px',
+                borderRadius: '24px',
                 padding: '30px',
                 boxShadow:
-                  '0 4px 15px rgba(0,0,0,0.08)',
+                  '0 4px 15px rgba(0,51,102,0.08)',
               }}
             >
               <h2
@@ -1491,11 +1496,11 @@ const Admin = () => {
             <div
               style={{
                 background: 'white',
-                borderRadius: '12px',
+                borderRadius: '24px',
                 padding: '30px',
                 marginBottom: '30px',
                 boxShadow:
-                  '0 4px 15px rgba(0,0,0,0.08)',
+                  '0 4px 15px rgba(0,51,102,0.08)',
               }}
             >
               <h2
@@ -1532,7 +1537,7 @@ const Admin = () => {
                       padding: '14px',
                       border:
                         '1px solid #ddd',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                     }}
                   />
 
@@ -1549,7 +1554,7 @@ const Admin = () => {
                       padding: '14px',
                       border:
                         '1px solid #ddd',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                     }}
                   />
 
@@ -1567,7 +1572,7 @@ const Admin = () => {
                       padding: '14px',
                       border:
                         '1px solid #ddd',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                     }}
                   />
 
@@ -1587,7 +1592,7 @@ const Admin = () => {
                       padding: '14px',
                       border:
                         '1px solid #ddd',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                     }}
                   />
 
@@ -1604,7 +1609,7 @@ const Admin = () => {
                       padding: '14px',
                       border:
                         '1px solid #ddd',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                     }}
                   />
 
@@ -1623,7 +1628,7 @@ const Admin = () => {
                       padding: '14px',
                       border:
                         '1px solid #ddd',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                     }}
                   />
 
@@ -1640,7 +1645,7 @@ const Admin = () => {
                       padding: '14px',
                       border:
                         '1px solid #ddd',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                     }}
                   />
                 </div>
@@ -1658,7 +1663,7 @@ const Admin = () => {
                     width: '100%',
                     padding: '14px',
                     border: '1px solid #ddd',
-                    borderRadius: '8px',
+                    borderRadius: '14px',
                     marginTop: '15px',
                     resize: 'vertical',
                     boxSizing: 'border-box',
@@ -1683,7 +1688,7 @@ const Admin = () => {
                       style={{
                         maxWidth: '220px',
                         maxHeight: '130px',
-                        borderRadius: '8px',
+                        borderRadius: '14px',
                         border: '1px solid #ddd',
                         objectFit: 'cover',
                       }}
@@ -1725,7 +1730,7 @@ const Admin = () => {
                       border: 'none',
                       padding:
                         '12px 25px',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                       cursor: 'pointer',
                       fontWeight: '600',
                     }}
@@ -1754,7 +1759,7 @@ const Admin = () => {
                         border: 'none',
                         padding:
                           '12px 25px',
-                        borderRadius: '8px',
+                        borderRadius: '14px',
                         cursor: 'pointer',
                       }}
                     >
@@ -1768,10 +1773,10 @@ const Admin = () => {
             <div
               style={{
                 background: 'white',
-                borderRadius: '12px',
+                borderRadius: '24px',
                 padding: '30px',
                 boxShadow:
-                  '0 4px 15px rgba(0,0,0,0.08)',
+                  '0 4px 15px rgba(0,51,102,0.08)',
                 overflowX: 'auto',
               }}
             >
@@ -1801,7 +1806,7 @@ const Admin = () => {
                     border: 'none',
                     padding:
                       '10px 18px',
-                    borderRadius: '8px',
+                    borderRadius: '14px',
                     cursor: 'pointer',
                   }}
                 >
@@ -1986,10 +1991,10 @@ const Admin = () => {
             <div
               style={{
                 background: 'white',
-                borderRadius: '12px',
+                borderRadius: '24px',
                 padding: '30px',
                 marginBottom: '30px',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                boxShadow: '0 4px 15px rgba(0,51,102,0.08)',
               }}
             >
               <h2 style={{ color: '#003366', marginTop: 0 }}>
@@ -2004,7 +2009,7 @@ const Admin = () => {
                   maxWidth: '400px',
                   padding: '14px',
                   border: '1px solid #ddd',
-                  borderRadius: '8px',
+                  borderRadius: '14px',
                 }}
               >
                 <option value="">-- Choose a course --</option>
@@ -2021,10 +2026,10 @@ const Admin = () => {
                 <div
                   style={{
                     background: 'white',
-                    borderRadius: '12px',
+                    borderRadius: '24px',
                     padding: '30px',
                     marginBottom: '30px',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                    boxShadow: '0 4px 15px rgba(0,51,102,0.08)',
                   }}
                 >
                   <h2 style={{ color: '#003366', marginTop: 0 }}>
@@ -2049,7 +2054,7 @@ const Admin = () => {
                         style={{
                           padding: '14px',
                           border: '1px solid #ddd',
-                          borderRadius: '8px',
+                          borderRadius: '14px',
                         }}
                       />
 
@@ -2062,7 +2067,7 @@ const Admin = () => {
                         style={{
                           padding: '14px',
                           border: '1px solid #ddd',
-                          borderRadius: '8px',
+                          borderRadius: '14px',
                         }}
                       />
 
@@ -2074,7 +2079,7 @@ const Admin = () => {
                         style={{
                           padding: '14px',
                           border: '1px solid #ddd',
-                          borderRadius: '8px',
+                          borderRadius: '14px',
                         }}
                       />
                     </div>
@@ -2102,7 +2107,7 @@ const Admin = () => {
                         style={{
                           padding: '10px',
                           border: '1px solid #ddd',
-                          borderRadius: '8px',
+                          borderRadius: '14px',
                           width: '100%',
                           boxSizing: 'border-box',
                         }}
@@ -2139,7 +2144,7 @@ const Admin = () => {
                         width: '100%',
                         padding: '14px',
                         border: '1px solid #ddd',
-                        borderRadius: '8px',
+                        borderRadius: '14px',
                         marginTop: '15px',
                         resize: 'vertical',
                         boxSizing: 'border-box',
@@ -2156,7 +2161,7 @@ const Admin = () => {
                         width: '100%',
                         padding: '14px',
                         border: '1px solid #ddd',
-                        borderRadius: '8px',
+                        borderRadius: '14px',
                         marginTop: '15px',
                         resize: 'vertical',
                         boxSizing: 'border-box',
@@ -2192,7 +2197,7 @@ const Admin = () => {
                           color: 'white',
                           border: 'none',
                           padding: '12px 25px',
-                          borderRadius: '8px',
+                          borderRadius: '14px',
                           cursor: pdfUploading ? 'not-allowed' : 'pointer',
                           fontWeight: '600',
                         }}
@@ -2222,7 +2227,7 @@ const Admin = () => {
                             color: 'white',
                             border: 'none',
                             padding: '12px 25px',
-                            borderRadius: '8px',
+                            borderRadius: '14px',
                             cursor: 'pointer',
                           }}
                         >
@@ -2236,9 +2241,9 @@ const Admin = () => {
                 <div
                   style={{
                     background: 'white',
-                    borderRadius: '12px',
+                    borderRadius: '24px',
                     padding: '30px',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                    boxShadow: '0 4px 15px rgba(0,51,102,0.08)',
                     overflowX: 'auto',
                   }}
                 >
@@ -2326,7 +2331,7 @@ const Admin = () => {
                                   color: 'white',
                                   border: 'none',
                                   padding: '8px 12px',
-                                  borderRadius: '6px',
+                                  borderRadius: '10px',
                                   cursor: 'pointer',
                                   marginRight: '8px',
                                 }}
@@ -2341,7 +2346,7 @@ const Admin = () => {
                                   color: 'white',
                                   border: 'none',
                                   padding: '8px 12px',
-                                  borderRadius: '6px',
+                                  borderRadius: '10px',
                                   cursor: 'pointer',
                                 }}
                               >
@@ -2366,9 +2371,9 @@ const Admin = () => {
           <div
             style={{
               background: 'white',
-              borderRadius: '12px',
+              borderRadius: '24px',
               padding: '30px',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+              boxShadow: '0 4px 15px rgba(0,51,102,0.08)',
               overflowX: 'auto',
             }}
           >
@@ -2446,9 +2451,9 @@ const Admin = () => {
           <div
             style={{
               background: 'white',
-              borderRadius: '12px',
+              borderRadius: '24px',
               padding: '30px',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+              boxShadow: '0 4px 15px rgba(0,51,102,0.08)',
             }}
           >
             <h2 style={{ color: '#003366', marginTop: 0 }}>
@@ -2542,11 +2547,11 @@ const Admin = () => {
             <div
               style={{
                 background: 'white',
-                borderRadius: '12px',
+                borderRadius: '24px',
                 padding: '30px',
                 marginBottom: '30px',
                 boxShadow:
-                  '0 4px 15px rgba(0,0,0,0.08)',
+                  '0 4px 15px rgba(0,51,102,0.08)',
               }}
             >
               <h2
@@ -2581,7 +2586,7 @@ const Admin = () => {
                       padding: '14px',
                       border:
                         '1px solid #ddd',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                     }}
                   />
 
@@ -2598,7 +2603,7 @@ const Admin = () => {
                       padding: '14px',
                       border:
                         '1px solid #ddd',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                     }}
                   />
 
@@ -2615,7 +2620,7 @@ const Admin = () => {
                       padding: '14px',
                       border:
                         '1px solid #ddd',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                     }}
                   />
 
@@ -2630,7 +2635,7 @@ const Admin = () => {
                       padding: '14px',
                       border:
                         '1px solid #ddd',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                     }}
                   >
                     <option value="user">
@@ -2674,7 +2679,7 @@ const Admin = () => {
                     border: 'none',
                     padding:
                       '12px 25px',
-                    borderRadius: '8px',
+                    borderRadius: '14px',
                     cursor: userActionLoading
                       ? 'not-allowed'
                       : 'pointer',
@@ -2698,10 +2703,10 @@ const Admin = () => {
             <div
               style={{
                 background: 'white',
-                borderRadius: '12px',
+                borderRadius: '24px',
                 padding: '30px',
                 boxShadow:
-                  '0 4px 15px rgba(0,0,0,0.08)',
+                  '0 4px 15px rgba(0,51,102,0.08)',
                 overflowX: 'auto',
               }}
             >
@@ -2738,7 +2743,7 @@ const Admin = () => {
                     border: 'none',
                     padding:
                       '10px 18px',
-                    borderRadius: '8px',
+                    borderRadius: '14px',
                     cursor:
                       usersLoading
                         ? 'not-allowed'
@@ -2952,11 +2957,11 @@ const Admin = () => {
           <div
             style={{
               background: 'white',
-              borderRadius: '12px',
+              borderRadius: '24px',
               padding: '30px',
               maxWidth: '700px',
               boxShadow:
-                '0 4px 15px rgba(0,0,0,0.08)',
+                '0 4px 15px rgba(0,51,102,0.08)',
             }}
           >
             <h2
@@ -3082,10 +3087,10 @@ const Admin = () => {
           <div
             style={{
               background: 'white',
-              borderRadius: '12px',
+              borderRadius: '24px',
               padding: '30px',
               boxShadow:
-                '0 4px 15px rgba(0,0,0,0.08)',
+                '0 4px 15px rgba(0,51,102,0.08)',
               overflowX: 'auto',
             }}
           >
@@ -3186,10 +3191,10 @@ const Admin = () => {
           <div
             style={{
               background: 'white',
-              borderRadius: '12px',
+              borderRadius: '24px',
               padding: '30px',
               boxShadow:
-                '0 4px 15px rgba(0,0,0,0.08)',
+                '0 4px 15px rgba(0,51,102,0.08)',
               overflowX: 'auto',
             }}
           >
@@ -3296,10 +3301,10 @@ const Admin = () => {
           <div
             style={{
               background: 'white',
-              borderRadius: '12px',
+              borderRadius: '24px',
               padding: '30px',
               boxShadow:
-                '0 4px 15px rgba(0,0,0,0.08)',
+                '0 4px 15px rgba(0,51,102,0.08)',
               overflowX: 'auto',
             }}
           >
@@ -3339,7 +3344,7 @@ const Admin = () => {
                   style={{
                     padding: '12px',
                     border: '1px solid #d8dee6',
-                    borderRadius: '8px',
+                    borderRadius: '14px',
                     fontSize: '0.9rem',
                   }}
                 />

@@ -251,11 +251,11 @@ const Profile = () => {
           maxWidth: '600px',
           margin: '0 auto',
           background: card,
-          borderRadius: '18px',
+          borderRadius: '24px',
           padding: '40px',
           boxShadow: darkMode
             ? '0 15px 40px rgba(0,0,0,0.45)'
-            : '0 15px 40px rgba(0,0,0,0.10)',
+            : '0 4px 20px rgba(0,51,102,0.08)',
           transition:
             'background 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease',
           animation: 'profileCardEnter 0.8s ease both',

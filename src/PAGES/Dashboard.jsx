@@ -308,15 +308,15 @@ const Dashboard = () => {
         <div
           style={{
             background:
-              'linear-gradient(135deg, #003366, #005599)',
-            borderRadius: '20px',
+              '#003366',
+            borderRadius: '24px',
             padding: '40px',
             color: 'white',
             marginBottom: '30px',
             animation:
               'dashboardWelcome 0.8s ease both',
             boxShadow:
-              '0 10px 30px rgba(0,0,0,0.15)',
+              '0 4px 20px rgba(0,51,102,0.08)',
           }}
         >
           <div
@@ -391,13 +391,11 @@ const Dashboard = () => {
               style={{
                 flex: '1',
                 minWidth: '200px',
-                background: card,
-                borderRadius: '20px',
+                background: darkMode ? card : ['#E6F0FB','#FFF3D6','#E3F5EC','#E6F0FB'][i % 4],
+                borderRadius: '24px',
                 padding: '25px',
                 boxShadow:
-                  '0 4px 15px rgba(0,0,0,0.08)',
-                borderTop:
-                  `4px solid ${stat.color}`,
+                  '0 4px 20px rgba(0,51,102,0.08)',
                 textAlign: 'center',
                 animation:
                   'dashboardCardEnter 0.7s ease both',

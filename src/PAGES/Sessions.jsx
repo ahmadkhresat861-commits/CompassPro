@@ -94,9 +94,11 @@ const Sessions = () => {
       {/* Hero */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #003366, #005599)',
-          padding: '70px 20px',
-          textAlign: 'center',
+          background: '#003366',
+          margin: '100px 32px 0',
+          borderRadius: '24px',
+          padding: '48px 40px',
+          textAlign: 'left',
           color: 'white',
           overflow: 'hidden',
         }}
@@ -108,10 +110,9 @@ const Sessions = () => {
         >
           <div
             style={{
-              fontSize: '4rem',
+              fontSize: '2rem',
               color: '#f0a500',
-              marginBottom: '15px',
-              animation: 'float 3s ease-in-out infinite',
+              marginBottom: '10px',
             }}
           >
             <i className="fas fa-video"></i>
@@ -120,6 +121,7 @@ const Sessions = () => {
           <h1
             style={{
               fontSize: '2.5rem',
+              fontWeight: 800,
               marginBottom: '10px',
             }}
           >
@@ -257,7 +259,7 @@ const Sessions = () => {
                   alignItems: 'center',
                   flexWrap: 'wrap',
                   gap: '20px',
-                  borderLeft: `5px solid ${dm.border}`,
+                  border: `1px solid ${darkMode ? '#2e3250' : '#CBD7E8'}`,
                   animation: 'sessionCardEnter 0.7s ease both',
                   animationDelay: `${index * 0.15}s`,
                   transition: 'transform 0.3s ease, box-shadow 0.3s ease',
