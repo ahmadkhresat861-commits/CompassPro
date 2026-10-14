@@ -71,7 +71,7 @@ const Verify = () => {
             placeholder="CP-00009-A1B2"
             aria-label="Certificate number"
             style={{
-              flex: '1 1 220px', padding: '13px 14px', borderRadius: 10, fontSize: '1rem',
+              flex: '1 1 220px', padding: '13px 14px', borderRadius: 999, fontSize: '1rem',
               border: '1px solid #d8dee6', background: card, color: text, boxSizing: 'border-box',
             }}
           />
@@ -85,7 +85,7 @@ const Verify = () => {
         )}
 
         {state.status === 'valid' && (
-          <div style={{ background: card, color: text, borderRadius: 14, padding: 26, borderTop: '5px solid #2e7d32', boxShadow: '0 4px 15px rgba(0,0,0,0.08)' }}>
+          <div style={{ background: card, color: text, borderRadius: 24, padding: 26, borderTop: '5px solid #2e7d32', boxShadow: '0 4px 15px rgba(0,51,102,0.08)' }}>
             <div style={{ color: '#2e7d32', fontWeight: 800, marginBottom: 14 }}>
               <i className="fas fa-circle-check"></i> Valid certificate
             </div>
@@ -100,7 +100,7 @@ const Verify = () => {
         )}
 
         {state.status === 'invalid' && (
-          <div style={{ background: card, color: text, borderRadius: 14, padding: 24, borderTop: '5px solid #c62828', textAlign: 'center' }}>
+          <div style={{ background: card, color: text, borderRadius: 24, padding: 24, borderTop: '5px solid #c62828', textAlign: 'center' }}>
             <div style={{ color: '#c62828', fontWeight: 800 }}>
               <i className="fas fa-circle-xmark"></i> Certificate not found
             </div>

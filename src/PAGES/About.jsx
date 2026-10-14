@@ -15,15 +15,15 @@ const About = () => {
   });
 
   const dm = {
-    bg: darkMode ? '#0f1117' : '#f5f7fa',
-    card: darkMode ? '#1e2130' : '#ffffff',
+    bg: darkMode ? '#0f0f0f' : '#F3F7FC',
+    card: darkMode ? '#1a1a2e' : '#ffffff',
     cardBorder: darkMode ? '#2e3250' : '#f0f0f0',
-    heading: darkMode ? '#a0b4ff' : '#003366',
-    text: darkMode ? '#c8d0e0' : '#555555',
-    subtext: darkMode ? '#7a8499' : '#888888',
+    heading: darkMode ? '#ffffff' : '#003366',
+    text: darkMode ? '#a8c8f0' : '#4A5D78',
+    subtext: darkMode ? '#7a8499' : '#4A5D78',
     shadow: darkMode
       ? '0 4px 20px rgba(0,0,0,0.4)'
-      : '0 4px 15px rgba(0,0,0,0.08)',
+      : '0 4px 20px rgba(0,51,102,0.08)',
   };
 
   // ============================================================
@@ -143,31 +143,12 @@ const About = () => {
       }}
     >
       {/* HEADER */}
-      <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-        <div
-          style={{
-            width: '80px',
-            height: '80px',
-            margin: '0 auto 20px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #003366, #005599)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 10px 30px rgba(0,51,102,0.25)',
-          }}
-        >
-          <i
-            className="fas fa-graduation-cap"
-            style={{ fontSize: '2.2rem', color: '#f0a500' }}
-          />
-        </div>
-
-        <h1 style={{ color: dm.heading, marginBottom: '10px' }}>
+      <div style={{ maxWidth: '1344px', margin: '0 auto 36px', padding: '0 8px' }}>
+        <h1 style={{ color: dm.heading, fontSize: 'clamp(2rem, 4vw, 2.75rem)', fontWeight: 800, marginBottom: '10px' }}>
           {t.aboutTitle}
         </h1>
 
-        <p style={{ color: dm.text, maxWidth: '650px', margin: '0 auto' }}>
+        <p style={{ color: dm.text, maxWidth: '760px', fontSize: '1.1rem', lineHeight: 1.6, margin: 0 }}>
           {t.aboutIntro}
         </p>
       </div>
@@ -175,8 +156,8 @@ const About = () => {
       {/* MISSION / VISION / VALUES */}
       <div
         style={{
-          maxWidth: '1000px',
-          margin: '0 auto 50px',
+          maxWidth: '1344px',
+          margin: '0 auto 40px',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
           gap: '25px',
@@ -186,22 +167,28 @@ const About = () => {
           <div
             key={i}
             style={{
-              background: dm.card,
-              borderRadius: '16px',
-              padding: '30px',
-              boxShadow: dm.shadow,
-              borderTop: '4px solid #f0a500',
+              background: darkMode ? dm.card : ['#E6F0FB', '#FFF3D6', '#E3F5EC'][i % 3],
+              borderRadius: '20px',
+              padding: '28px',
+              boxShadow: darkMode ? dm.shadow : 'none',
             }}
           >
-            <i
-              className={item.icon}
+            <span
               style={{
-                fontSize: '2rem',
-                color: '#f0a500',
-                marginBottom: '15px',
-                display: 'block',
+                width: '48px',
+                height: '48px',
+                borderRadius: '14px',
+                background: ['#003366', '#F0A500', '#0F7A4C'][i % 3],
+                color: i % 3 === 1 ? '#002347' : '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.2rem',
+                marginBottom: '16px',
               }}
-            />
+            >
+              <i className={item.icon} />
+            </span>
             <h3 style={{ color: dm.heading, marginBottom: '10px' }}>
               {item.title}
             </h3>
@@ -216,10 +203,10 @@ const About = () => {
       {!statsLoading && stats.length > 0 && (
         <div
           style={{
-            maxWidth: '900px',
+            maxWidth: '1344px',
             margin: '0 auto',
             background: dm.card,
-            borderRadius: '16px',
+            borderRadius: '24px',
             padding: '35px',
             boxShadow: dm.shadow,
             display: 'grid',

@@ -16,14 +16,14 @@ const Services = () => {
   });
 
   const dm = {
-    bg: darkMode ? '#0f1117' : '#f5f7fa',
-    card: darkMode ? '#1e2130' : '#ffffff',
-    heading: darkMode ? '#a0b4ff' : '#003366',
-    text: darkMode ? '#c8d0e0' : '#555555',
-    subtext: darkMode ? '#7a8499' : '#888888',
+    bg: darkMode ? '#0f0f0f' : '#F3F7FC',
+    card: darkMode ? '#1a1a2e' : '#ffffff',
+    heading: darkMode ? '#ffffff' : '#003366',
+    text: darkMode ? '#a8c8f0' : '#4A5D78',
+    subtext: darkMode ? '#7a8499' : '#4A5D78',
     shadow: darkMode
       ? '0 4px 20px rgba(0,0,0,0.4)'
-      : '0 4px 15px rgba(0,0,0,0.08)',
+      : '0 4px 20px rgba(0,51,102,0.08)',
   };
 
   const services = [
@@ -77,31 +77,12 @@ const Services = () => {
       }}
     >
       {/* HEADER */}
-      <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-        <div
-          style={{
-            width: '80px',
-            height: '80px',
-            margin: '0 auto 20px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #003366, #005599)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 10px 30px rgba(0,51,102,0.25)',
-          }}
-        >
-          <i
-            className="fas fa-concierge-bell"
-            style={{ fontSize: '2.2rem', color: '#f0a500' }}
-          />
-        </div>
-
-        <h1 style={{ color: dm.heading, marginBottom: '10px' }}>
+      <div style={{ maxWidth: '1344px', margin: '0 auto 36px', padding: '0 8px' }}>
+        <h1 style={{ color: dm.heading, fontSize: 'clamp(2rem, 4vw, 2.75rem)', fontWeight: 800, marginBottom: '10px' }}>
           {t.servicesTitle}
         </h1>
 
-        <p style={{ color: dm.text, maxWidth: '650px', margin: '0 auto' }}>
+        <p style={{ color: dm.text, maxWidth: '760px', fontSize: '1.1rem', lineHeight: 1.6, margin: 0 }}>
           {t.servicesIntro}
         </p>
       </div>
@@ -109,7 +90,7 @@ const Services = () => {
       {/* SERVICES GRID */}
       <div
         style={{
-          maxWidth: '1100px',
+          maxWidth: '1344px',
           margin: '0 auto',
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -121,21 +102,29 @@ const Services = () => {
             key={i}
             style={{
               background: dm.card,
-              borderRadius: '16px',
-              padding: '30px',
+              borderRadius: '24px',
+              padding: '28px',
               boxShadow: dm.shadow,
               display: 'flex',
               flexDirection: 'column',
             }}
           >
-            <i
-              className={service.icon}
+            <span
               style={{
-                fontSize: '2rem',
-                color: '#f0a500',
-                marginBottom: '15px',
+                width: '48px',
+                height: '48px',
+                borderRadius: '14px',
+                background: ['#003366', '#F0A500', '#0F7A4C'][i % 3],
+                color: i % 3 === 1 ? '#002347' : '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.2rem',
+                marginBottom: '16px',
               }}
-            />
+            >
+              <i className={service.icon} />
+            </span>
 
             <h3 style={{ color: dm.heading, marginBottom: '10px' }}>
               {service.title}
@@ -157,11 +146,11 @@ const Services = () => {
                 onClick={service.action}
                 style={{
                   alignSelf: 'flex-start',
-                  background: darkMode ? '#2a3580' : '#003366',
+                  background: '#003366',
                   color: '#ffffff',
                   border: 'none',
-                  padding: '10px 18px',
-                  borderRadius: '8px',
+                  padding: '11px 22px',
+                  borderRadius: '999px',
                   cursor: 'pointer',
                   fontWeight: '600',
                   fontSize: '0.9rem',

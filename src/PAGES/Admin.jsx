@@ -1162,7 +1162,7 @@ const Admin = () => {
     <div
       style={{
         minHeight: '100vh',
-        background: '#f5f5f5',
+        background: '#F3F7FC',
         display: 'flex',
       }}
     >
@@ -1212,19 +1212,17 @@ const Admin = () => {
               setActiveTab(item.tab)
             }
             style={{
-              padding: '15px 25px',
+              padding: '11px 18px',
+              margin: '4px 14px',
+              borderRadius: '999px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
               background:
                 activeTab === item.tab
-                  ? 'rgba(240,165,0,0.2)'
+                  ? 'rgba(240,165,0,0.22)'
                   : 'transparent',
-              borderLeft:
-                activeTab === item.tab
-                  ? '3px solid #f0a500'
-                  : '3px solid transparent',
             }}
           >
             <i

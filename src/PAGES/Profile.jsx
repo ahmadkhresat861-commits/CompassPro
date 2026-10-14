@@ -32,7 +32,7 @@ const Profile = () => {
   // Dark / Light Mode
   // ===========================
 
-  const bg = darkMode ? '#0f0f0f' : '#f5f5f5';
+  const bg = darkMode ? '#0f0f0f' : '#F3F7FC';
   const card = darkMode ? '#1a1a2e' : 'white';
   const text = darkMode ? 'white' : '#003366';
   const text2 = darkMode ? '#a8c8f0' : '#888';
@@ -381,7 +381,7 @@ const Profile = () => {
           <div
             style={{
               padding: '14px',
-              borderRadius: '10px',
+              borderRadius: '14px',
               marginBottom: '25px',
               textAlign: 'center',
               background: message.includes('Error')
@@ -455,7 +455,7 @@ const Profile = () => {
               style={{
                 width: '100%',
                 padding: '13px 15px',
-                borderRadius: '10px',
+                borderRadius: '14px',
                 border: `1px solid ${border}`,
                 fontSize: '1rem',
                 background: inputBg,

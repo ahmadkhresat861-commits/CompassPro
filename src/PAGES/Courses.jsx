@@ -71,20 +71,20 @@ const Courses = () => {
   // ============================================================
 
   const dm = {
-    bg: darkMode ? '#0f1117' : '#f5f7fa',
-    card: darkMode ? '#1e2130' : '#ffffff',
+    bg: darkMode ? '#0f0f0f' : '#F3F7FC',
+    card: darkMode ? '#1a1a2e' : '#ffffff',
     cardBorder: darkMode ? '#2e3250' : '#f0f0f0',
-    heading: darkMode ? '#a0b4ff' : '#003366',
-    text: darkMode ? '#c8d0e0' : '#555555',
+    heading: darkMode ? '#ffffff' : '#003366',
+    text: darkMode ? '#c8d0e0' : '#4A5D78',
     subtext: darkMode ? '#7a8499' : '#888888',
-    input: darkMode ? '#1e2130' : '#ffffff',
+    input: darkMode ? '#1a1a2e' : '#ffffff',
     inputBorder: darkMode ? '#3a4060' : '#dddddd',
     inputColor: darkMode ? '#e0e6f0' : '#333333',
 
     catActive: darkMode ? '#ffffff' : '#ffffff',
-    catActiveBg: darkMode ? '#2a3580' : '#003366',
-    catBorder: darkMode ? '#a0b4ff' : '#003366',
-    catInactive: darkMode ? '#a0b4ff' : '#003366',
+    catActiveBg: darkMode ? '#003366' : '#003366',
+    catBorder: darkMode ? '#ffffff' : '#003366',
+    catInactive: darkMode ? '#ffffff' : '#003366',
 
     reviewBg: darkMode ? '#161a28' : '#ffffff',
     successBg: darkMode ? '#0d2318' : '#f0fff4',
@@ -94,9 +94,9 @@ const Courses = () => {
       : '0 4px 15px rgba(0,0,0,0.08)',
 
     tagBg: darkMode ? '#2a3050' : '#f0f0f0',
-    tagColor: darkMode ? '#a0b4ff' : '#555555',
+    tagColor: darkMode ? '#ffffff' : '#4A5D78',
 
-    btnBack: darkMode ? '#2a3580' : '#003366',
+    btnBack: darkMode ? '#003366' : '#003366',
 
     lessonActive: darkMode
       ? '#252c52'

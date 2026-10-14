@@ -10,15 +10,15 @@ const Sessions = () => {
   const [pageVisible, setPageVisible] = useState(false);
 
   const dm = {
-    pageBg: darkMode ? '#0f1117' : '#f5f5f5',
-    card: darkMode ? '#1e2130' : 'white',
+    pageBg: darkMode ? '#0f0f0f' : '#F3F7FC',
+    card: darkMode ? '#1a1a2e' : 'white',
     shadow: darkMode
       ? '0 10px 35px rgba(0,0,0,0.35)'
-      : '0 8px 25px rgba(0,0,0,0.08)',
-    border: darkMode ? '#a0b4ff' : '#003366',
-    heading: darkMode ? '#a0b4ff' : '#003366',
-    text: darkMode ? '#c8d0e0' : '#555',
-    subtext: darkMode ? '#7a8499' : '#888',
+      : '0 4px 20px rgba(0,51,102,0.08)',
+    border: darkMode ? '#ffffff' : '#003366',
+    heading: darkMode ? '#ffffff' : '#003366',
+    text: darkMode ? '#a8c8f0' : '#4A5D78',
+    subtext: darkMode ? '#7a8499' : '#4A5D78',
   };
 
   useEffect(() => {
@@ -205,7 +205,7 @@ const Sessions = () => {
               textAlign: 'center',
               padding: '80px 30px',
               background: dm.card,
-              borderRadius: '16px',
+              borderRadius: '24px',
               boxShadow: dm.shadow,
               animation: 'slideUp 0.8s ease both',
             }}
@@ -249,7 +249,7 @@ const Sessions = () => {
                 key={session.id}
                 style={{
                   background: dm.card,
-                  borderRadius: '16px',
+                  borderRadius: '24px',
                   padding: '25px',
                   boxShadow: dm.shadow,
                   display: 'flex',
@@ -351,7 +351,7 @@ const Sessions = () => {
                     padding: '13px 25px',
                     background: '#2D8CFF',
                     color: 'white',
-                    borderRadius: '10px',
+                    borderRadius: '999px',
                     textDecoration: 'none',
                     fontWeight: '700',
                     display: 'flex',

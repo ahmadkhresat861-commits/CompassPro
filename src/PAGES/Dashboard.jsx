@@ -29,7 +29,7 @@ const Dashboard = () => {
   // THEME
   // =========================
 
-  const bg = darkMode ? '#0f0f0f' : '#f5f5f5';
+  const bg = darkMode ? '#0f0f0f' : '#F3F7FC';
   const card = darkMode ? '#1a1a2e' : 'white';
   const text = darkMode ? 'white' : '#003366';
   const text2 = darkMode ? '#a8c8f0' : '#888';
@@ -309,7 +309,7 @@ const Dashboard = () => {
           style={{
             background:
               'linear-gradient(135deg, #003366, #005599)',
-            borderRadius: '12px',
+            borderRadius: '20px',
             padding: '40px',
             color: 'white',
             marginBottom: '30px',
@@ -363,7 +363,7 @@ const Dashboard = () => {
                 : '#fff1f2',
               color: '#ef4444',
               padding: '15px',
-              borderRadius: '10px',
+              borderRadius: '14px',
               marginBottom: '25px',
               textAlign: 'center',
             }}
@@ -392,7 +392,7 @@ const Dashboard = () => {
                 flex: '1',
                 minWidth: '200px',
                 background: card,
-                borderRadius: '12px',
+                borderRadius: '20px',
                 padding: '25px',
                 boxShadow:
                   '0 4px 15px rgba(0,0,0,0.08)',
@@ -460,7 +460,7 @@ const Dashboard = () => {
         <div
           style={{
             background: card,
-            borderRadius: '12px',
+            borderRadius: '20px',
             padding: '30px',
             boxShadow:
               '0 4px 15px rgba(0,0,0,0.08)',
@@ -516,7 +516,7 @@ const Dashboard = () => {
                   background: '#003366',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '14px',
                   cursor: 'pointer',
                   fontWeight: '600',
                 }}
@@ -602,7 +602,7 @@ const Dashboard = () => {
                             display: 'inline-block',
                             width: '68px',
                             verticalAlign: 'middle',
-                            borderRadius: '12px',
+                            borderRadius: '20px',
                             marginInlineEnd: '12px',
                           }}
                         />
@@ -688,7 +688,7 @@ const Dashboard = () => {
                           background: '#6366f1',
                           color: 'white',
                           border: 'none',
-                          borderRadius: '8px',
+                          borderRadius: '14px',
                           cursor: 'pointer',
                           fontWeight: '600',
                           fontSize: '0.85rem',
@@ -728,7 +728,7 @@ const Dashboard = () => {
               background: '#003366',
               color: 'white',
               border: 'none',
-              borderRadius: '12px',
+              borderRadius: '20px',
               cursor: 'pointer',
               fontWeight: '600',
               fontSize: '1rem',
@@ -764,7 +764,7 @@ const Dashboard = () => {
               background: '#f0a500',
               color: '#003366',
               border: 'none',
-              borderRadius: '12px',
+              borderRadius: '20px',
               cursor: 'pointer',
               fontWeight: '600',
               fontSize: '1rem',
@@ -819,7 +819,7 @@ const Dashboard = () => {
               width: '100%',
               maxWidth: '750px',
               padding: '50px',
-              borderRadius: '10px',
+              borderRadius: '14px',
               border: '10px solid #003366',
               textAlign: 'center',
               position: 'relative',
@@ -888,7 +888,7 @@ const Dashboard = () => {
                   background: '#003366',
                   color: 'white',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '14px',
                   cursor: 'pointer',
                   fontWeight: '600',
                 }}
@@ -903,7 +903,7 @@ const Dashboard = () => {
                   background: '#e5e7eb',
                   color: '#333',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '14px',
                   cursor: 'pointer',
                   fontWeight: '600',
                 }}

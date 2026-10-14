@@ -23,20 +23,20 @@ const Contact = () => {
   // ============================================================
 
   const dm = {
-    bg: darkMode ? '#0f1117' : '#f5f7fa',
-    card: darkMode ? '#1e2130' : '#ffffff',
+    bg: darkMode ? '#0f0f0f' : '#F3F7FC',
+    card: darkMode ? '#1a1a2e' : '#ffffff',
     cardBorder: darkMode ? '#2e3250' : '#f0f0f0',
-    heading: darkMode ? '#a0b4ff' : '#003366',
-    text: darkMode ? '#c8d0e0' : '#555555',
-    subtext: darkMode ? '#7a8499' : '#888888',
-    input: darkMode ? '#1e2130' : '#ffffff',
-    inputBorder: darkMode ? '#3a4060' : '#dddddd',
+    heading: darkMode ? '#ffffff' : '#003366',
+    text: darkMode ? '#a8c8f0' : '#4A5D78',
+    subtext: darkMode ? '#7a8499' : '#4A5D78',
+    input: darkMode ? '#1a1a2e' : '#ffffff',
+    inputBorder: darkMode ? '#3a4060' : '#CBD7E8',
     inputColor: darkMode ? '#e0e6f0' : '#333333',
     shadow: darkMode
       ? '0 4px 20px rgba(0,0,0,0.4)'
-      : '0 4px 15px rgba(0,0,0,0.08)',
+      : '0 4px 15px rgba(0,51,102,0.08)',
     successBg: darkMode ? '#0d2318' : '#f0fff4',
-    btnBack: darkMode ? '#2a3580' : '#003366',
+    btnBack: darkMode ? '#003366' : '#003366',
   };
 
   // ============================================================
@@ -180,7 +180,7 @@ const Contact = () => {
         <div
           style={{
             background: dm.card,
-            borderRadius: '16px',
+            borderRadius: '24px',
             padding: '35px',
             boxShadow: dm.shadow,
           }}
@@ -213,7 +213,7 @@ const Contact = () => {
                     style={{
                       width: '100%',
                       padding: '12px 14px',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                       border: `1px solid ${dm.inputBorder}`,
                       fontSize: '1rem',
                       background: dm.input,
@@ -244,7 +244,7 @@ const Contact = () => {
                     style={{
                       width: '100%',
                       padding: '12px 14px',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                       border: `1px solid ${dm.inputBorder}`,
                       fontSize: '1rem',
                       background: dm.input,
@@ -275,7 +275,7 @@ const Contact = () => {
                     style={{
                       width: '100%',
                       padding: '12px 14px',
-                      borderRadius: '8px',
+                      borderRadius: '14px',
                       border: `1px solid ${dm.inputBorder}`,
                       fontSize: '1rem',
                       background: dm.input,
@@ -312,11 +312,11 @@ const Contact = () => {
                     width: '100%',
                     padding: '14px',
                     background: sending
-                      ? '#888888'
+                      ? '#4A5D78'
                       : 'linear-gradient(90deg, #003366, #005599)',
                     color: '#ffffff',
                     border: 'none',
-                    borderRadius: '10px',
+                    borderRadius: '999px',
                     fontWeight: '700',
                     fontSize: '1rem',
                     cursor: sending ? 'not-allowed' : 'pointer',
@@ -356,7 +356,7 @@ const Contact = () => {
                   background: dm.btnBack,
                   color: '#ffffff',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '14px',
                   cursor: 'pointer',
                   fontWeight: '600',
                 }}
@@ -381,7 +381,7 @@ const Contact = () => {
           <div
             style={{
               background: dm.card,
-              borderRadius: '16px',
+              borderRadius: '24px',
               padding: '30px',
               boxShadow: dm.shadow,
             }}
@@ -423,7 +423,7 @@ const Contact = () => {
           <div
             style={{
               background: dm.card,
-              borderRadius: '16px',
+              borderRadius: '24px',
               padding: '30px',
               boxShadow: dm.shadow,
             }}
