@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 import Login from './PAGES/Login'
 import SignUp from './PAGES/SignUp'
+import ForgotPassword from './PAGES/ForgotPassword'
+import ResetPassword from './PAGES/ResetPassword'
 import Home from './PAGES/Home'
 const About = lazy(() => import('./PAGES/About'))
 const Services = lazy(() => import('./PAGES/Services'))
@@ -45,6 +47,9 @@ function App() {
             path="/signup"
             element={<SignUp />}
           />
+
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* HOME — public, guests can browse */}
           <Route

@@ -4,30 +4,7 @@ import { supabase } from '../supabase';
 import DualOrbitLoader from '../components/DualOrbitLoader';
 import AuthLayout from '../components/AuthLayout';
 import { useLang } from '../LanguageContext';
-
-// Checks a password against HaveIBeenPwned using k-anonymity:
-// only the first 5 chars of the SHA-1 hash leave the browser.
-// Fails open (returns false) if the service is unreachable.
-async function isPwned(password) {
-  try {
-    const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(password));
-    const hex = Array.from(new Uint8Array(buf))
-      .map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-    const prefix = hex.slice(0, 5);
-    const suffix = hex.slice(5);
-    const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`, {
-      headers: { 'Add-Padding': 'true' },
-    });
-    if (!res.ok) return false;
-    const text = await res.text();
-    return text.split('\n').some((line) => {
-      const [h, count] = line.trim().split(':');
-      return h === suffix && parseInt(count, 10) > 0;
-    });
-  } catch {
-    return false;
-  }
-}
+import { isPwned, isStrongEnough } from '../utils/password';
 
 const SignUp = () => {
   const { t } = useLang();
@@ -41,7 +18,7 @@ const SignUp = () => {
 
   const handleSignUp = async () => {
     if (password !== confirm) { setError(t.errMismatch); return; }
-    if (password.length < 8 || !/[A-Za-z\u0600-\u06FF]/.test(password) || !/\d/.test(password)) {
+    if (!isStrongEnough(password)) {
       setError(t.errShort); return;
     }
     setLoading(true);

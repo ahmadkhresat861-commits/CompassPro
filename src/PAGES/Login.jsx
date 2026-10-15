@@ -139,6 +139,10 @@ const Login = () => {
             </span>
           </label>
 
+          <p className="cp-auth-foot" style={{ margin: '-4px 0 0', textAlign: 'end' }}>
+            <a href="/forgot-password" onClick={(e) => { e.preventDefault(); navigate('/forgot-password'); }}>{t.forgotPassword}</a>
+          </p>
+
           <button type="submit" className="cp-auth-submit" disabled={loading}>
             {loading ? <DualOrbitLoader size={18} /> : null} {loading ? t.loggingIn : t.login}
           </button>
