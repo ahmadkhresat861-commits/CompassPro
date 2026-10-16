@@ -1224,7 +1224,7 @@ const Admin = () => {
               gap: '12px',
               background:
                 activeTab === item.tab
-                  ? 'rgba(240,165,0,0.22)'
+                  ? '#F0A500'
                   : 'transparent',
             }}
           >
@@ -1233,7 +1233,7 @@ const Admin = () => {
               style={{
                 color:
                   activeTab === item.tab
-                    ? '#f0a500'
+                    ? '#003366'
                     : '#a8c8f0',
               }}
             ></i>
@@ -1242,8 +1242,10 @@ const Admin = () => {
               style={{
                 color:
                   activeTab === item.tab
-                    ? 'white'
+                    ? '#003366'
                     : '#a8c8f0',
+                fontWeight:
+                  activeTab === item.tab ? 700 : 400,
               }}
             >
               {item.label}
@@ -1395,7 +1397,7 @@ const Admin = () => {
               reviewsLoading ||
               sessionsLoading ||
               enrollmentsLoading) && (
-              <p style={{ color: '#888', marginBottom: '20px' }}>
+              <p style={{ color: '#4A5D78', marginBottom: '20px' }}>
                 <i className="fas fa-spinner fa-spin"></i> Loading live
                 stats...
               </p>
@@ -1409,20 +1411,18 @@ const Admin = () => {
                 marginBottom: '30px',
               }}
             >
-              {stats.map((stat) => (
+              {stats.map((stat, si) => (
                 <div
                   key={stat.label}
                   style={{
                     flex: '1',
                     minWidth: '200px',
-                    background: 'white',
+                    background: ['#E6F0FB', '#FFF3D6', '#E3F5EC'][si % 3],
                     borderRadius: '24px',
                     padding: '25px',
                     textAlign: 'center',
                     boxShadow:
-                      '0 4px 15px rgba(0,51,102,0.08)',
-                    borderTop:
-                      `4px solid ${stat.color}`,
+                      '0 4px 20px rgba(0,51,102,0.08)',
                   }}
                 >
                   <i
@@ -1447,7 +1447,7 @@ const Admin = () => {
 
                   <p
                     style={{
-                      color: '#888',
+                      color: '#4A5D78',
                       fontSize: '0.9rem',
                     }}
                   >
@@ -1477,7 +1477,7 @@ const Admin = () => {
 
               <p
                 style={{
-                  color: '#888',
+                  color: '#4A5D78',
                 }}
               >
                 Use the sidebar to manage courses,
@@ -1536,7 +1536,7 @@ const Admin = () => {
                     style={{
                       padding: '14px',
                       border:
-                        '1px solid #ddd',
+                        '1px solid #CBD7E8',
                       borderRadius: '14px',
                     }}
                   />
@@ -1553,7 +1553,7 @@ const Admin = () => {
                     style={{
                       padding: '14px',
                       border:
-                        '1px solid #ddd',
+                        '1px solid #CBD7E8',
                       borderRadius: '14px',
                     }}
                   />
@@ -1571,7 +1571,7 @@ const Admin = () => {
                     style={{
                       padding: '14px',
                       border:
-                        '1px solid #ddd',
+                        '1px solid #CBD7E8',
                       borderRadius: '14px',
                     }}
                   />
@@ -1591,7 +1591,7 @@ const Admin = () => {
                     style={{
                       padding: '14px',
                       border:
-                        '1px solid #ddd',
+                        '1px solid #CBD7E8',
                       borderRadius: '14px',
                     }}
                   />
@@ -1608,7 +1608,7 @@ const Admin = () => {
                     style={{
                       padding: '14px',
                       border:
-                        '1px solid #ddd',
+                        '1px solid #CBD7E8',
                       borderRadius: '14px',
                     }}
                   />
@@ -1627,7 +1627,7 @@ const Admin = () => {
                     style={{
                       padding: '14px',
                       border:
-                        '1px solid #ddd',
+                        '1px solid #CBD7E8',
                       borderRadius: '14px',
                     }}
                   />
@@ -1644,7 +1644,7 @@ const Admin = () => {
                     style={{
                       padding: '14px',
                       border:
-                        '1px solid #ddd',
+                        '1px solid #CBD7E8',
                       borderRadius: '14px',
                     }}
                   />
@@ -1662,7 +1662,7 @@ const Admin = () => {
                   style={{
                     width: '100%',
                     padding: '14px',
-                    border: '1px solid #ddd',
+                    border: '1px solid #CBD7E8',
                     borderRadius: '14px',
                     marginTop: '15px',
                     resize: 'vertical',
@@ -1676,7 +1676,7 @@ const Admin = () => {
                     <p
                       style={{
                         fontSize: '0.85rem',
-                        color: '#888',
+                        color: '#4A5D78',
                         marginBottom: '8px',
                       }}
                     >
@@ -1689,7 +1689,7 @@ const Admin = () => {
                         maxWidth: '220px',
                         maxHeight: '130px',
                         borderRadius: '14px',
-                        border: '1px solid #ddd',
+                        border: '1px solid #CBD7E8',
                         objectFit: 'cover',
                       }}
                       onError={(e) => {
@@ -1730,7 +1730,7 @@ const Admin = () => {
                       border: 'none',
                       padding:
                         '12px 25px',
-                      borderRadius: '14px',
+                      borderRadius: '999px',
                       cursor: 'pointer',
                       fontWeight: '600',
                     }}
@@ -1759,7 +1759,7 @@ const Admin = () => {
                         border: 'none',
                         padding:
                           '12px 25px',
-                        borderRadius: '14px',
+                        borderRadius: '999px',
                         cursor: 'pointer',
                       }}
                     >
@@ -1806,7 +1806,7 @@ const Admin = () => {
                     border: 'none',
                     padding:
                       '10px 18px',
-                    borderRadius: '14px',
+                    borderRadius: '999px',
                     cursor: 'pointer',
                   }}
                 >
@@ -1819,7 +1819,7 @@ const Admin = () => {
                 <p
                   style={{
                     textAlign: 'center',
-                    color: '#888',
+                    color: '#4A5D78',
                   }}
                 >
                   <i className="fas fa-spinner fa-spin"></i>{' '}
@@ -1829,7 +1829,7 @@ const Admin = () => {
                 <p
                   style={{
                     textAlign: 'center',
-                    color: '#888',
+                    color: '#4A5D78',
                     padding: '40px',
                   }}
                 >
@@ -1994,7 +1994,7 @@ const Admin = () => {
                 borderRadius: '24px',
                 padding: '30px',
                 marginBottom: '30px',
-                boxShadow: '0 4px 15px rgba(0,51,102,0.08)',
+                boxShadow: '0 4px 20px rgba(0,51,102,0.08)',
               }}
             >
               <h2 style={{ color: '#003366', marginTop: 0 }}>
@@ -2008,7 +2008,7 @@ const Admin = () => {
                   width: '100%',
                   maxWidth: '400px',
                   padding: '14px',
-                  border: '1px solid #ddd',
+                  border: '1px solid #CBD7E8',
                   borderRadius: '14px',
                 }}
               >
@@ -2029,7 +2029,7 @@ const Admin = () => {
                     borderRadius: '24px',
                     padding: '30px',
                     marginBottom: '30px',
-                    boxShadow: '0 4px 15px rgba(0,51,102,0.08)',
+                    boxShadow: '0 4px 20px rgba(0,51,102,0.08)',
                   }}
                 >
                   <h2 style={{ color: '#003366', marginTop: 0 }}>
@@ -2053,7 +2053,7 @@ const Admin = () => {
                         onChange={(e) => setLessonTitle(e.target.value)}
                         style={{
                           padding: '14px',
-                          border: '1px solid #ddd',
+                          border: '1px solid #CBD7E8',
                           borderRadius: '14px',
                         }}
                       />
@@ -2066,7 +2066,7 @@ const Admin = () => {
                         min="1"
                         style={{
                           padding: '14px',
-                          border: '1px solid #ddd',
+                          border: '1px solid #CBD7E8',
                           borderRadius: '14px',
                         }}
                       />
@@ -2078,7 +2078,7 @@ const Admin = () => {
                         onChange={(e) => setLessonVideoUri(e.target.value)}
                         style={{
                           padding: '14px',
-                          border: '1px solid #ddd',
+                          border: '1px solid #CBD7E8',
                           borderRadius: '14px',
                         }}
                       />
@@ -2106,7 +2106,7 @@ const Admin = () => {
                         }
                         style={{
                           padding: '10px',
-                          border: '1px solid #ddd',
+                          border: '1px solid #CBD7E8',
                           borderRadius: '14px',
                           width: '100%',
                           boxSizing: 'border-box',
@@ -2143,7 +2143,7 @@ const Admin = () => {
                       style={{
                         width: '100%',
                         padding: '14px',
-                        border: '1px solid #ddd',
+                        border: '1px solid #CBD7E8',
                         borderRadius: '14px',
                         marginTop: '15px',
                         resize: 'vertical',
@@ -2160,7 +2160,7 @@ const Admin = () => {
                       style={{
                         width: '100%',
                         padding: '14px',
-                        border: '1px solid #ddd',
+                        border: '1px solid #CBD7E8',
                         borderRadius: '14px',
                         marginTop: '15px',
                         resize: 'vertical',
@@ -2227,7 +2227,7 @@ const Admin = () => {
                             color: 'white',
                             border: 'none',
                             padding: '12px 25px',
-                            borderRadius: '14px',
+                            borderRadius: '999px',
                             cursor: 'pointer',
                           }}
                         >
@@ -2243,7 +2243,7 @@ const Admin = () => {
                     background: 'white',
                     borderRadius: '24px',
                     padding: '30px',
-                    boxShadow: '0 4px 15px rgba(0,51,102,0.08)',
+                    boxShadow: '0 4px 20px rgba(0,51,102,0.08)',
                     overflowX: 'auto',
                   }}
                 >
@@ -2252,7 +2252,7 @@ const Admin = () => {
                   </h2>
 
                   {lessonsLoading ? (
-                    <p style={{ textAlign: 'center', color: '#888' }}>
+                    <p style={{ textAlign: 'center', color: '#4A5D78' }}>
                       <i className="fas fa-spinner fa-spin"></i> Loading
                       lessons...
                     </p>
@@ -2260,7 +2260,7 @@ const Admin = () => {
                     <p
                       style={{
                         textAlign: 'center',
-                        color: '#888',
+                        color: '#4A5D78',
                         padding: '40px',
                       }}
                     >
@@ -2373,7 +2373,7 @@ const Admin = () => {
               background: 'white',
               borderRadius: '24px',
               padding: '30px',
-              boxShadow: '0 4px 15px rgba(0,51,102,0.08)',
+              boxShadow: '0 4px 20px rgba(0,51,102,0.08)',
               overflowX: 'auto',
             }}
           >
@@ -2382,12 +2382,12 @@ const Admin = () => {
             </h2>
 
             {enrollmentsLoading ? (
-              <p style={{ textAlign: 'center', color: '#888', padding: '40px' }}>
+              <p style={{ textAlign: 'center', color: '#4A5D78', padding: '40px' }}>
                 <i className="fas fa-spinner fa-spin"></i> Loading
                 enrollments...
               </p>
             ) : enrollments.length === 0 ? (
-              <p style={{ textAlign: 'center', color: '#888', padding: '40px' }}>
+              <p style={{ textAlign: 'center', color: '#4A5D78', padding: '40px' }}>
                 No enrollments found.
               </p>
             ) : (
@@ -2453,7 +2453,7 @@ const Admin = () => {
               background: 'white',
               borderRadius: '24px',
               padding: '30px',
-              boxShadow: '0 4px 15px rgba(0,51,102,0.08)',
+              boxShadow: '0 4px 20px rgba(0,51,102,0.08)',
             }}
           >
             <h2 style={{ color: '#003366', marginTop: 0 }}>
@@ -2465,7 +2465,7 @@ const Admin = () => {
                 <DualOrbitLoader size={40} />
               </div>
             ) : messages.length === 0 ? (
-              <p style={{ textAlign: 'center', color: '#888', padding: '40px' }}>
+              <p style={{ textAlign: 'center', color: '#4A5D78', padding: '40px' }}>
                 No messages yet.
               </p>
             ) : (
@@ -2500,7 +2500,7 @@ const Admin = () => {
                         </span>
                       )}
                     </strong>
-                    <span style={{ color: '#888', fontSize: '0.85rem' }}>
+                    <span style={{ color: '#4A5D78', fontSize: '0.85rem' }}>
                       {new Date(m.created_at).toLocaleString()}
                     </span>
                   </div>
@@ -2515,7 +2515,7 @@ const Admin = () => {
                   <p
                     style={{
                       margin: '10px 0 0',
-                      color: '#444',
+                      color: '#0F2340',
                       whiteSpace: 'pre-wrap',
                       wordBreak: 'break-word',
                     }}
@@ -2585,7 +2585,7 @@ const Admin = () => {
                     style={{
                       padding: '14px',
                       border:
-                        '1px solid #ddd',
+                        '1px solid #CBD7E8',
                       borderRadius: '14px',
                     }}
                   />
@@ -2602,7 +2602,7 @@ const Admin = () => {
                     style={{
                       padding: '14px',
                       border:
-                        '1px solid #ddd',
+                        '1px solid #CBD7E8',
                       borderRadius: '14px',
                     }}
                   />
@@ -2619,7 +2619,7 @@ const Admin = () => {
                     style={{
                       padding: '14px',
                       border:
-                        '1px solid #ddd',
+                        '1px solid #CBD7E8',
                       borderRadius: '14px',
                     }}
                   />
@@ -2634,7 +2634,7 @@ const Admin = () => {
                     style={{
                       padding: '14px',
                       border:
-                        '1px solid #ddd',
+                        '1px solid #CBD7E8',
                       borderRadius: '14px',
                     }}
                   >
@@ -2780,7 +2780,7 @@ const Admin = () => {
                 <p
                   style={{
                     textAlign: 'center',
-                    color: '#888',
+                    color: '#4A5D78',
                     padding: '40px',
                   }}
                 >
@@ -2791,7 +2791,7 @@ const Admin = () => {
                 <p
                   style={{
                     textAlign: 'center',
-                    color: '#888',
+                    color: '#4A5D78',
                     padding: '40px',
                   }}
                 >
@@ -2995,7 +2995,7 @@ const Admin = () => {
                   marginBottom:
                     '15px',
                   border:
-                    '1px solid #ddd',
+                    '1px solid #CBD7E8',
                   borderRadius:
                     '8px',
                   boxSizing:
@@ -3020,7 +3020,7 @@ const Admin = () => {
                   marginBottom:
                     '15px',
                   border:
-                    '1px solid #ddd',
+                    '1px solid #CBD7E8',
                   borderRadius:
                     '8px',
                   boxSizing:
@@ -3109,7 +3109,7 @@ const Admin = () => {
               <p
                 style={{
                   textAlign: 'center',
-                  color: '#888',
+                  color: '#4A5D78',
                   padding: '40px',
                 }}
               >
@@ -3213,7 +3213,7 @@ const Admin = () => {
               <p
                 style={{
                   textAlign: 'center',
-                  color: '#888',
+                  color: '#4A5D78',
                   padding: '40px',
                 }}
               >
@@ -3370,7 +3370,7 @@ const Admin = () => {
               <p
                 style={{
                   textAlign: 'center',
-                  color: '#888',
+                  color: '#4A5D78',
                   padding: '40px',
                 }}
               >
