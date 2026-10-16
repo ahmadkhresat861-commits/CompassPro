@@ -22,13 +22,10 @@ const Footer = () => {
             </p>
             <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
               {[
-                { icon: 'fab fa-facebook', color: '#1877F2' },
-                { icon: 'fab fa-instagram', color: '#E1306C' },
-                { icon: 'fab fa-twitter', color: '#1DA1F2' },
-                { icon: 'fab fa-linkedin', color: '#0077b5' },
-                { icon: 'fab fa-whatsapp', color: '#25D366' },
+                { icon: 'fab fa-facebook', color: '#1877F2', url: 'https://www.facebook.com/share/1Dn2UCTUfP/', label: 'Facebook' },
+                { icon: 'fab fa-instagram', color: '#E1306C', url: 'https://www.instagram.com/compasspro.academy', label: 'Instagram' },
               ].map((s, i) => (
-                <a key={i} href="#" aria-label={s.icon.split('fa-')[1]} onClick={e => e.preventDefault()} style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color, textDecoration: 'none', fontSize: '1.1rem', transition: 'all 0.3s' }}
+                <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label} style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color, textDecoration: 'none', fontSize: '1.1rem', transition: 'all 0.3s' }}
                   onMouseOver={e => e.currentTarget.style.background = s.color}
                   onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
                   <i className={s.icon}></i>

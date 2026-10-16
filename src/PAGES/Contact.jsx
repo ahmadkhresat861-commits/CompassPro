@@ -113,11 +113,8 @@ const Contact = () => {
   ];
 
   const socialLinks = [
-    { icon: 'fab fa-facebook', color: '#1877F2' },
-    { icon: 'fab fa-instagram', color: '#E1306C' },
-    { icon: 'fab fa-twitter', color: '#1DA1F2' },
-    { icon: 'fab fa-linkedin', color: '#0077b5' },
-    { icon: 'fab fa-whatsapp', color: '#25D366' },
+    { icon: 'fab fa-facebook', color: '#1877F2', url: 'https://www.facebook.com/share/1Dn2UCTUfP/', label: 'Facebook' },
+    { icon: 'fab fa-instagram', color: '#E1306C', url: 'https://www.instagram.com/compasspro.academy', label: 'Instagram' },
   ];
 
   // ============================================================
@@ -435,9 +432,10 @@ const Contact = () => {
               {socialLinks.map((s, i) => (
                 <a
                   key={i}
-                  href="#"
-                  aria-label={s.icon.split('fa-')[1]}
-                  onClick={(e) => e.preventDefault()}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
                   style={{
                     width: '42px',
                     height: '42px',
