@@ -15,6 +15,7 @@ const Contact = lazy(() => import('./PAGES/Contact'))
 const Admin = lazy(() => import('./PAGES/Admin'))
 const Sessions = lazy(() => import('./PAGES/Sessions'))
 const Verify = lazy(() => import('./PAGES/Verify'))
+const Legal = lazy(() => import('./PAGES/Legal'))
 
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -50,6 +51,10 @@ function App() {
 
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+
+          {/* LEGAL — public */}
+          <Route path="/privacy" element={<><Navbar /><Legal kind="privacy" /><Footer /></>} />
+          <Route path="/terms" element={<><Navbar /><Legal kind="terms" /><Footer /></>} />
 
           {/* HOME — public, guests can browse */}
           <Route

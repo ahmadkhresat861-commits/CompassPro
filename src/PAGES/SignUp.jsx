@@ -96,6 +96,12 @@ const SignUp = () => {
           <button type="submit" className="cp-auth-submit" disabled={loading}>
             {loading ? <DualOrbitLoader size={18} /> : null} {loading ? t.creatingAccount : t.signUp}
           </button>
+          <p className="cp-auth-foot" style={{ margin: 0, fontSize: '0.8rem' }}>
+            {t.agreePre}{' '}
+            <a href="/terms" target="_blank" rel="noopener noreferrer">{t.termsLink}</a>{' '}
+            {t.agreeAnd}{' '}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer">{t.privacyLink}</a>
+          </p>
         </form>
 
         <p className="cp-auth-foot">

@@ -75,6 +75,11 @@ const Footer = () => {
 
         {/* Bottom */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', textAlign: 'center' }}>
+          <p style={{ marginBottom: '10px' }}>
+            {[{ label: 'Privacy Policy', path: '/privacy' }, { label: 'Terms of Use', path: '/terms' }].map((l, i) => (
+              <a key={i} href={l.path} onClick={e => { e.preventDefault(); navigate(l.path); }} style={{ color: '#a8c8f0', textDecoration: 'none', margin: '0 12px', fontSize: '0.9rem' }}>{l.label}</a>
+            ))}
+          </p>
           <p style={{ color: '#a8c8f0', fontSize: '0.9rem' }}>
             © 2026 CompassPro. All rights reserved. Made with <i className="fas fa-heart" style={{ color: '#f0a500' }}></i> in Jordan
           </p>
