@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
-import '../App.css';
 
 const Sessions = () => {
   const { darkMode } = useLang();

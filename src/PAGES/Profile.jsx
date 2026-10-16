@@ -5,7 +5,6 @@ import { useLang } from '../LanguageContext';
 import Avatar from '../components/Avatar';
 import Button from '../components/Button';
 import DualOrbitLoader from '../components/DualOrbitLoader';
-import '../App.css';
 
 const Profile = () => {
   const navigate = useNavigate();

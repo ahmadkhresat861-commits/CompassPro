@@ -3,7 +3,6 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
-import '../App.css';
 import DualOrbitLoader from '../components/DualOrbitLoader';
 import CourseCover from '../components/CourseCover';
 

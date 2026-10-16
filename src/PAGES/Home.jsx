@@ -4,7 +4,6 @@ import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
 import CourseCover from '../components/CourseCover';
-import '../App.css';
 
 const Home = () => {
   const navigate = useNavigate();

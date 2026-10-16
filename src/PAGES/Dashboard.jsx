@@ -4,7 +4,6 @@ import { supabase } from '../supabase';
 import CourseCover from '../components/CourseCover';
 import { useLang } from '../LanguageContext';
 import Avatar from '../components/Avatar';
-import '../App.css';
 import DualOrbitLoader from '../components/DualOrbitLoader';
 
 const Dashboard = () => {

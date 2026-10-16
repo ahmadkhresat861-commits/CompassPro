@@ -5,7 +5,6 @@ import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
 import DualOrbitLoader from '../components/DualOrbitLoader';
 import Button from '../components/Button';
-import '../App.css';
 
 // ============================================================
 // VERIFY CERTIFICATE — public page: /verify/:code

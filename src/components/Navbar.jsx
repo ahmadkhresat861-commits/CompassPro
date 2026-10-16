@@ -3,7 +3,6 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import Avatar from './Avatar';
-import '../App.css';
 import DualOrbitLoader from './DualOrbitLoader';
 
 const Navbar = () => {

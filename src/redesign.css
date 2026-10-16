@@ -1,3 +1,6 @@
+/* Load the legacy stylesheet first so every rule below reliably wins on equal specificity. */
+@import './App.css';
+
 /* ============================================================
    CompassPro — Direction B+ (design tokens + global overrides)
    Loaded after App.css so it can restyle shared pieces.

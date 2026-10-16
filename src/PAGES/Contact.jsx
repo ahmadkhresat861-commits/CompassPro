@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
-import '../App.css';
 
 // ============================================================
 // CONTACT

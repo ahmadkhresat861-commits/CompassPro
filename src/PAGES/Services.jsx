@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
-import '../App.css';
 
 const Services = () => {
   const navigate = useNavigate();
