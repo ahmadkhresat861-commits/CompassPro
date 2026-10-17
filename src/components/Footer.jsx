@@ -24,6 +24,7 @@ const Footer = () => {
               {[
                 { icon: 'fab fa-facebook', color: '#1877F2', url: 'https://www.facebook.com/share/1Dn2UCTUfP/', label: 'Facebook' },
                 { icon: 'fab fa-instagram', color: '#E1306C', url: 'https://www.instagram.com/compasspro.academy', label: 'Instagram' },
+      { icon: 'fab fa-linkedin', color: '#0A66C2', url: 'https://www.linkedin.com/company/compasspro-learning/', label: 'LinkedIn' },
               ].map((s, i) => (
                 <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.label} style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.color, textDecoration: 'none', fontSize: '1.1rem', transition: 'all 0.3s' }}
                   onMouseOver={e => e.currentTarget.style.background = s.color}
