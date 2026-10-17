@@ -1130,8 +1130,13 @@ const Admin = () => {
       tab: 'overview',
     },
     {
+      icon: 'fas fa-bullhorn',
+      label: 'Landing (guests)',
+      tab: 'landing',
+    },
+    {
       icon: 'fas fa-house',
-      label: 'Home',
+      label: 'Home (members)',
       tab: 'home',
     },
     {
@@ -1341,10 +1346,17 @@ const Admin = () => {
               </>
             )}
 
+            {activeTab === 'landing' && (
+              <>
+                <i className="fas fa-bullhorn"></i>{' '}
+                Landing Page (visitors)
+              </>
+            )}
+
             {activeTab === 'home' && (
               <>
                 <i className="fas fa-house"></i>{' '}
-                Home Page
+                Home Page (members)
               </>
             )}
 
@@ -1420,7 +1432,8 @@ const Admin = () => {
           </h1>
         </div>
 
-        {activeTab === 'home' && <AdminHome />}
+        {activeTab === 'landing' && <AdminHome key="landing" settingsKey="landing" />}
+        {activeTab === 'home' && <AdminHome key="home" settingsKey="home" />}
         {activeTab === 'analytics' && <AdminAnalytics />}
 
         {/* =========================

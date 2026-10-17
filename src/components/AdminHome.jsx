@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabase';
 import DualOrbitLoader from './DualOrbitLoader';
-import { HOME_DEFAULTS, mergeHome } from '../hooks/useHomeSettings';
+import { defaultsFor, mergeHome } from '../hooks/useHomeSettings';
 
 const NAVY = '#003366';
 const card = { background: '#fff', borderRadius: 20, padding: 24, boxShadow: '0 4px 20px rgba(0,51,102,0.08)', marginBottom: 20 };
@@ -26,8 +26,9 @@ const Field = ({ lbl, value, onChange, dir, placeholder }) => (
   </div>
 );
 
-const AdminHome = () => {
-  const [s, setS] = useState(HOME_DEFAULTS);
+const AdminHome = ({ settingsKey = 'home' }) => {
+  const isLanding = settingsKey === 'landing';
+  const [s, setS] = useState(() => defaultsFor(settingsKey));
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -36,10 +37,10 @@ const AdminHome = () => {
   useEffect(() => {
     (async () => {
       const [{ data: cfg }, { data: cs }] = await Promise.all([
-        supabase.from('site_settings').select('value').eq('key', 'home').maybeSingle(),
+        supabase.from('site_settings').select('value').eq('key', settingsKey).maybeSingle(),
         supabase.from('courses').select('id, title, category').order('created_at', { ascending: false }),
       ]);
-      if (cfg?.value) setS(mergeHome(cfg.value));
+      if (cfg?.value) setS(mergeHome(cfg.value, settingsKey));
       setCourses(cs || []);
       setLoading(false);
     })();
@@ -72,7 +73,7 @@ const AdminHome = () => {
     setMsg(null);
     const { error } = await supabase
       .from('site_settings')
-      .upsert({ key: 'home', value: s, updated_at: new Date().toISOString() });
+      .upsert({ key: settingsKey, value: s, updated_at: new Date().toISOString() });
     setSaving(false);
     setMsg(error
       ? { ok: false, text: `Could not save: ${error.message}. Did you run supabase/sql/home_settings.sql?` }
@@ -86,7 +87,7 @@ const AdminHome = () => {
   return (
     <div>
       <div style={card}>
-        <h3 style={h3}>Hero (top banner)</h3>
+        <h3 style={h3}>{isLanding ? 'Hero (landing page for visitors)' : 'Hero (home page for members)'}</h3>
         <p style={hint}>Leave a field empty to keep the default text.</p>
         <div style={grid2}>
           <div>
@@ -102,6 +103,7 @@ const AdminHome = () => {
         </div>
       </div>
 
+      {isLanding && (
       <div style={card}>
         <h3 style={h3}>Most requested courses</h3>
         <p style={hint}>Tick the courses to feature. Order below is the order shown on Home.</p>
@@ -129,24 +131,26 @@ const AdminHome = () => {
           ))}
         </div>
       </div>
+      )}
 
       <div style={card}>
         <h3 style={h3}>Sections</h3>
         <p style={hint}>Show or hide each block of the Home page.</p>
         <div style={{ display: 'grid', gap: 10 }}>
-          {Object.keys(SECTION_LABELS).map((k) => (
+          {Object.keys(SECTION_LABELS).filter((k) => isLanding || ['stats', 'available', 'why'].includes(k)).map((k) => (
             <label key={k} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, cursor: 'pointer' }}>
               <input type="checkbox" checked={!!s.sections[k]} onChange={(e) => setSec(k, e.target.checked)} />
-              {SECTION_LABELS[k]}
+              {!isLanding && k === 'available' ? 'Newest courses' : SECTION_LABELS[k]}
             </label>
           ))}
         </div>
-        <label style={{ ...label, marginTop: 18 }}>How many "Available courses" to show</label>
+        <label style={{ ...label, marginTop: 18 }}>How many courses to show</label>
         <select style={{ ...input, maxWidth: 160 }} value={s.availableCount} onChange={(e) => setS((p) => ({ ...p, availableCount: Number(e.target.value) }))}>
           {[3, 6, 9, 12].map((n) => <option key={n} value={n}>{n}</option>)}
         </select>
       </div>
 
+      {isLanding && (
       <div style={card}>
         <h3 style={h3}>Call to action (bottom banner)</h3>
         <p style={hint}>Leave empty to keep the default text.</p>
@@ -161,13 +165,14 @@ const AdminHome = () => {
           </div>
         </div>
       </div>
+      )}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
         <button type="button" onClick={save} disabled={saving}
           style={{ background: '#F0A500', color: NAVY, border: 'none', borderRadius: 999, padding: '12px 32px', fontWeight: 800, fontSize: 15, cursor: 'pointer', fontFamily: 'inherit' }}>
           {saving ? 'Saving…' : 'Save changes'}
         </button>
-        <a href="/home" target="_blank" rel="noopener noreferrer" style={{ color: NAVY, fontWeight: 700, fontSize: 14 }}>Preview Home ↗</a>
+        <a href={isLanding ? '/' : '/home'} target="_blank" rel="noopener noreferrer" style={{ color: NAVY, fontWeight: 700, fontSize: 14 }}>Preview page ↗</a>
         {msg && <span role="status" style={{ color: msg.ok ? '#0a7a43' : '#b3261e', fontWeight: 600, fontSize: 14 }}>{msg.text}</span>}
       </div>
     </div>

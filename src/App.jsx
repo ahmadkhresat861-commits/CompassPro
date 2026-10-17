@@ -23,6 +23,7 @@ import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
 import InstructorRoute from './components/InstructorRoute'
+import RootRoute from './components/RootRoute'
 import AIAssistant from './components/AIAssistant'
 
 import { LanguageProvider } from './LanguageContext'
@@ -34,11 +35,8 @@ function App() {
         <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
         <Routes>
 
-          {/* ROOT — redirect to the public home page */}
-          <Route
-            path="/"
-            element={<Navigate to="/home" replace />}
-          />
+          {/* ROOT — landing page for visitors, members go to /home */}
+          <Route path="/" element={<RootRoute />} />
 
           {/* LOGIN */}
           <Route

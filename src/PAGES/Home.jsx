@@ -6,11 +6,12 @@ import { useSEO } from '../hooks/useSEO';
 import { useHomeSettings } from '../hooks/useHomeSettings';
 import CourseCover from '../components/CourseCover';
 
-const Home = () => {
+const Home = ({ variant = 'home' }) => {
+  const isLanding = variant === 'landing';
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
   const { t, isAr } = useLang();
-  const { settings: hs } = useHomeSettings();
+  const { settings: hs } = useHomeSettings(variant);
   const L = isAr ? 'ar' : 'en';
   const heroT1 = hs.hero[`title1_${L}`] || t.heroTitle1;
   const heroT2 = hs.hero[`title2_${L}`] || t.heroTitle2;
@@ -22,7 +23,7 @@ const Home = () => {
     title: 'Online Courses & Learning Platform',
     description:
       "CompassPro is Jordan's premier online learning platform. Learn React, JavaScript, Python, HTML & CSS from expert instructors.",
-    path: '/home',
+    path: isLanding ? '/' : '/home',
   });
 
   const [statsLoading, setStatsLoading] = useState(true);
@@ -207,7 +208,7 @@ const Home = () => {
       )}
 
       {/* Most requested courses (chosen by admin) */}
-      {hs.sections.popular && popularCourses.length > 0 && (
+      {isLanding && hs.sections.popular && popularCourses.length > 0 && (
         <section className="cp-section">
           <div className="cp-section-head">
             <h2><span className="cp-badge-hot">{t.hot}</span> {t.popularCourses}</h2>
@@ -223,7 +224,7 @@ const Home = () => {
       {hs.sections.available && availableCourses.length > 0 && (
         <section className="cp-section">
           <div className="cp-section-head">
-            <h2>{t.availableCourses}</h2>
+            <h2>{isLanding ? t.availableCourses : t.featuredCourses}</h2>
             <a href="/courses" onClick={(e) => { e.preventDefault(); navigate('/courses'); }}>
               {t.viewAllCourses}
             </a>
@@ -251,7 +252,7 @@ const Home = () => {
       )}
 
       {/* Marketing CTA */}
-      {hs.sections.cta && (
+      {isLanding && hs.sections.cta && (
       <section className="cp-section">
         <div className="cp-mkt">
           <div className="cp-mkt-head">

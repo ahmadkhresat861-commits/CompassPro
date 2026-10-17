@@ -10,8 +10,10 @@ export const HOME_DEFAULTS = {
   cta: { title_en: '', sub_en: '', title_ar: '', sub_ar: '' },
 };
 
-export const mergeHome = (saved) => ({
-  ...HOME_DEFAULTS,
+export const defaultsFor = (key) => (key === 'landing' ? HOME_DEFAULTS : { ...HOME_DEFAULTS, availableCount: 3 });
+
+export const mergeHome = (saved, key = 'home') => ({
+  ...defaultsFor(key),
   ...(saved || {}),
   hero: { ...HOME_DEFAULTS.hero, ...(saved?.hero || {}) },
   sections: { ...HOME_DEFAULTS.sections, ...(saved?.sections || {}) },
@@ -19,8 +21,8 @@ export const mergeHome = (saved) => ({
   popularIds: Array.isArray(saved?.popularIds) ? saved.popularIds : [],
 });
 
-export function useHomeSettings() {
-  const [settings, setSettings] = useState(HOME_DEFAULTS);
+export function useHomeSettings(key = 'home') {
+  const [settings, setSettings] = useState(() => defaultsFor(key));
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -30,9 +32,9 @@ export function useHomeSettings() {
         const { data, error } = await supabase
           .from('site_settings')
           .select('value')
-          .eq('key', 'home')
+          .eq('key', key)
           .maybeSingle();
-        if (alive && !error && data?.value) setSettings(mergeHome(data.value));
+        if (alive && !error && data?.value) setSettings(mergeHome(data.value, key));
       } catch {
         /* table missing or offline: keep defaults */
       } finally {
@@ -40,7 +42,7 @@ export function useHomeSettings() {
       }
     })();
     return () => { alive = false; };
-  }, []);
+  }, [key]);
 
   return { settings, loaded };
 }
