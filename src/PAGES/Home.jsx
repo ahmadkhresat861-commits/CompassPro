@@ -128,33 +128,41 @@ const Home = () => {
     <div className={`cp-home ${fadeIn ? 'home-visible' : ''}`}>
 
       {/* Hero */}
-      <section className="cp-hero">
-        <img src="/logo.png" alt="CompassPro" className="cp-hero-logo" />
-        <h1>{t.welcome}</h1>
-        <p>{t.tagline}</p>
+      <section className="cp-hero" aria-labelledby="cp-hero-title">
+        <div className="cp-hero-inner">
+          <img src="/logo.png" alt="CompassPro" className="cp-hero-logo" />
+          <h1 id="cp-hero-title">
+            {t.heroTitle1} <span>{t.heroTitle2}</span>
+          </h1>
+          <p>{t.heroSub}</p>
 
-        <form
-          className="cp-hero-search"
-          role="search"
-          onSubmit={(e) => { e.preventDefault(); goSearch(); }}
-        >
-          <i className="fas fa-search" aria-hidden="true"></i>
-          <input
-            type="search"
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            placeholder={t.searchCourses}
-            aria-label={t.searchCourses}
-          />
-          <button type="submit" className="cp-hero-cta">{t.startLearning}</button>
-        </form>
-
-        <div className="cp-hero-topics">
-          {topics.map((topic) => (
-            <button key={topic} type="button" onClick={() => goSearch(topic)}>
-              {topic}
+          <form
+            className="cp-hero-search"
+            role="search"
+            onSubmit={(e) => { e.preventDefault(); goSearch(); }}
+          >
+            <input
+              type="search"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder={t.heroSearch}
+              aria-label={t.heroSearch}
+            />
+            <button type="submit" className="cp-hero-cta" aria-label={t.heroSearchBtn}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.5-3.5" />
+              </svg>
             </button>
-          ))}
+          </form>
+
+          <div className="cp-hero-topics">
+            {topics.map((topic) => (
+              <button key={topic} type="button" onClick={() => goSearch(topic)}>
+                {topic}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 

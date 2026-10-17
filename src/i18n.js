@@ -11,6 +11,11 @@ export const translations = {
     profile: 'Profile',
     // Home
     welcome: 'Welcome to CompassPro',
+    heroTitle1: 'Know your direction,',
+    heroTitle2: 'learn the way',
+    heroSub: 'Learn, grow your skills, and set off with CompassPro',
+    heroSearch: 'Search for a course...',
+    heroSearchBtn: 'Search',
     tagline: "Jordan's premier online learning platform. Learn from expert instructors and grow your career.",
     startLearning: 'Start Learning',
     students: 'Students',
@@ -181,6 +186,11 @@ export const translations = {
     profile: 'الملف الشخصي',
     // Home
     welcome: 'مرحباً بك في CompassPro',
+    heroTitle1: 'اعرف وجهتك،',
+    heroTitle2: 'وتعلّم الطريق',
+    heroSub: 'تعلّم، طوّر مهاراتك، وانطلق مع CompassPro',
+    heroSearch: 'ابحث عن دورة...',
+    heroSearchBtn: 'بحث',
     tagline: 'منصة التعلم الإلكتروني الأولى في الأردن. تعلم من أفضل المدرسين وطور مسيرتك المهنية.',
     startLearning: 'ابدأ التعلم',
     students: 'طالب',
