@@ -3,12 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
+import { useHomeSettings } from '../hooks/useHomeSettings';
 import CourseCover from '../components/CourseCover';
 
 const Home = () => {
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
-  const { t } = useLang();
+  const { t, isAr } = useLang();
+  const { settings: hs } = useHomeSettings();
+  const L = isAr ? 'ar' : 'en';
+  const heroT1 = hs.hero[`title1_${L}`] || t.heroTitle1;
+  const heroT2 = hs.hero[`title2_${L}`] || t.heroTitle2;
+  const heroSub = hs.hero[`sub_${L}`] || t.heroSub;
+  const ctaTitle = hs.cta[`title_${L}`] || t.mktTitle;
+  const ctaSub = hs.cta[`sub_${L}`] || t.mktSub;
 
   useSEO({
     title: 'Online Courses & Learning Platform',
@@ -22,7 +30,11 @@ const Home = () => {
   const [totalInstructors, setTotalInstructors] = useState(null);
   const [totalEnrollments, setTotalEnrollments] = useState(null);
   const [avgRating, setAvgRating] = useState(null);
-  const [featuredCourses, setFeaturedCourses] = useState([]);
+  const [allForHome, setAllForHome] = useState([]);
+  const popularCourses = hs.popularIds
+    .map((id) => allForHome.find((c) => String(c.id) === String(id)))
+    .filter(Boolean);
+  const availableCourses = allForHome.slice(0, hs.availableCount);
   const [searchText, setSearchText] = useState('');
 
   const goSearch = (q) => {
@@ -36,15 +48,13 @@ const Home = () => {
 
     const loadData = async () => {
       try {
+        // Available courses: newest first (count set from Admin > Home)
         const { data: courses } = await supabase
           .from('courses')
           .select('id, title, category, image_url, price, rating')
           .order('created_at', { ascending: false })
-          .limit(3);
-
-        if (courses) {
-          setFeaturedCourses(courses);
-        }
+          .limit(100);
+        if (courses) setAllForHome(courses);
 
         const { data: allCourses } = await supabase
           .from('courses')
@@ -86,6 +96,23 @@ const Home = () => {
 
     loadData();
   }, []);
+
+  const renderCourse = (course) => (
+    <article
+      key={course.id}
+      className="cp-course-card"
+      onClick={() => navigate(`/courses/${course.id}`)}
+    >
+      <CourseCover src={course.image_url} category={course.category} alt={course.title} height={170} />
+      <div className="cp-course-body">
+        <h3>{course.title}</h3>
+        <div className="cp-course-meta">
+          <span>{course.rating ? `★ ${course.rating}` : ''}</span>
+          <strong>{Number(course.price) > 0 ? `$${Number(course.price).toFixed(2)}` : t.free}</strong>
+        </div>
+      </div>
+    </article>
+  );
 
   const stats = [
     totalCourses !== null
@@ -132,9 +159,9 @@ const Home = () => {
         <div className="cp-hero-inner">
           <img src="/logo.png" alt="CompassPro" className="cp-hero-logo" />
           <h1 id="cp-hero-title">
-            {t.heroTitle1} <span>{t.heroTitle2}</span>
+            {heroT1} <span>{heroT2}</span>
           </h1>
-          <p>{t.heroSub}</p>
+          <p>{heroSub}</p>
 
           <form
             className="cp-hero-search"
@@ -167,7 +194,7 @@ const Home = () => {
       </section>
 
       {/* Stats (only real numbers) */}
-      {!statsLoading && stats.length > 0 && (
+      {hs.sections.stats && !statsLoading && stats.length > 0 && (
         <section className="cp-stats">
           {stats.map((stat, index) => (
             <div className="cp-stat" key={index}>
@@ -179,48 +206,34 @@ const Home = () => {
         </section>
       )}
 
-      {/* Popular / featured courses */}
-      {featuredCourses.length > 0 && (
+      {/* Most requested courses (chosen by admin) */}
+      {hs.sections.popular && popularCourses.length > 0 && (
         <section className="cp-section">
           <div className="cp-section-head">
-            <h2>{t.featuredCourses}</h2>
-            <a
-              href="/courses"
-              onClick={(e) => { e.preventDefault(); navigate('/courses'); }}
-            >
+            <h2><span className="cp-badge-hot">{t.hot}</span> {t.popularCourses}</h2>
+            <a href="/courses" onClick={(e) => { e.preventDefault(); navigate('/courses'); }}>
               {t.viewAllCourses}
             </a>
           </div>
+          <div className="cp-grid-3">{popularCourses.map(renderCourse)}</div>
+        </section>
+      )}
 
-          <div className="cp-grid-3">
-            {featuredCourses.map((course) => (
-              <article
-                key={course.id}
-                className="cp-course-card"
-                onClick={() => navigate(`/courses/${course.id}`)}
-              >
-                <CourseCover
-                  src={course.image_url}
-                  category={course.category}
-                  alt={course.title}
-                  height={170}
-                />
-                <div className="cp-course-body">
-                  <h3>{course.title}</h3>
-                  <div className="cp-course-meta">
-                    <span>{course.rating ? `★ ${course.rating}` : ''}</span>
-                    <strong>
-                      {Number(course.price) > 0 ? `$${Number(course.price).toFixed(2)}` : t.free}
-                    </strong>
-                  </div>
-                </div>
-              </article>
-            ))}
+      {/* Available courses */}
+      {hs.sections.available && availableCourses.length > 0 && (
+        <section className="cp-section">
+          <div className="cp-section-head">
+            <h2>{t.availableCourses}</h2>
+            <a href="/courses" onClick={(e) => { e.preventDefault(); navigate('/courses'); }}>
+              {t.viewAllCourses}
+            </a>
           </div>
+          <div className="cp-grid-3">{availableCourses.map(renderCourse)}</div>
         </section>
       )}
 
       {/* Why us */}
+      {hs.sections.why && (
       <section className="cp-section">
         <div className="cp-section-head">
           <h2>{t.whyUs}</h2>
@@ -235,13 +248,15 @@ const Home = () => {
           ))}
         </div>
       </section>
+      )}
 
       {/* Marketing CTA */}
+      {hs.sections.cta && (
       <section className="cp-section">
         <div className="cp-mkt">
           <div className="cp-mkt-head">
-            <h2>{t.mktTitle}</h2>
-            <p>{t.mktSub}</p>
+            <h2>{ctaTitle}</h2>
+            <p>{ctaSub}</p>
           </div>
           <div className="cp-mkt-steps">
             {[
@@ -265,6 +280,7 @@ const Home = () => {
           </div>
         </div>
       </section>
+      )}
     </div>
   );
 };

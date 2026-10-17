@@ -664,3 +664,5 @@ nav div a i { display: none; }
 .cp-mkt-btn.primary:hover { filter: brightness(1.06); }
 .cp-mkt-btn:focus-visible { outline: 3px solid var(--cp-gold); outline-offset: 2px; }
 @media (max-width: 900px) { .cp-mkt-steps { grid-template-columns: minmax(0, 1fr); } .cp-mkt { padding: 36px 20px; border-radius: 24px; } }
+
+.cp-badge-hot { display: inline-block; background: var(--cp-gold); color: #002347; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 999px; vertical-align: middle; margin-inline-end: 8px; }
