@@ -26,6 +26,7 @@ export function useHomeSettings(key = 'home') {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    if (key === 'none') { setLoaded(true); return undefined; } // member home uses built-in defaults
     let alive = true;
     (async () => {
       try {

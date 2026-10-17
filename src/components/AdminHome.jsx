@@ -87,7 +87,7 @@ const AdminHome = ({ settingsKey = 'home' }) => {
   return (
     <div>
       <div style={card}>
-        <h3 style={h3}>{isLanding ? 'Hero (landing page for visitors)' : 'Hero (home page for members)'}</h3>
+        <h3 style={h3}>{isLanding ? 'Hero (home page for visitors)' : 'Hero (home page for members)'}</h3>
         <p style={hint}>Leave a field empty to keep the default text.</p>
         <div style={grid2}>
           <div>

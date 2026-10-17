@@ -11,7 +11,7 @@ const Home = ({ variant = 'home' }) => {
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
   const { t, isAr } = useLang();
-  const { settings: hs } = useHomeSettings(variant);
+  const { settings: hs } = useHomeSettings(isLanding ? 'landing' : 'none');
   const L = isAr ? 'ar' : 'en';
   const heroT1 = hs.hero[`title1_${L}`] || t.heroTitle1;
   const heroT2 = hs.hero[`title2_${L}`] || t.heroTitle2;
