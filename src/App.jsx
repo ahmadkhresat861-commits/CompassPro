@@ -35,8 +35,8 @@ function App() {
         <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
         <Routes>
 
-          {/* ROOT — landing page for visitors, members go to /home */}
-          <Route path="/" element={<RootRoute />} />
+          {/* ROOT — redirect to the home page */}
+          <Route path="/" element={<Navigate to="/home" replace />} />
 
           {/* LOGIN */}
           <Route
@@ -56,17 +56,8 @@ function App() {
           <Route path="/privacy" element={<><Navbar /><Legal kind="privacy" /><Footer /></>} />
           <Route path="/terms" element={<><Navbar /><Legal kind="terms" /><Footer /></>} />
 
-          {/* HOME — public, guests can browse */}
-          <Route
-            path="/home"
-            element={
-              <>
-                <Navbar />
-                <Home />
-                <Footer />
-              </>
-            }
-          />
+          {/* HOME — public: visitors see the marketing page, members see My Courses */}
+          <Route path="/home" element={<RootRoute />} />
 
           {/* ABOUT — public */}
           <Route

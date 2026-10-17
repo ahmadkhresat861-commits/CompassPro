@@ -23,7 +23,7 @@ const Home = ({ variant = 'home' }) => {
     title: 'Online Courses & Learning Platform',
     description:
       "CompassPro is Jordan's premier online learning platform. Learn React, JavaScript, Python, HTML & CSS from expert instructors.",
-    path: isLanding ? '/' : '/home',
+    path: '/home',
   });
 
   const [statsLoading, setStatsLoading] = useState(true);

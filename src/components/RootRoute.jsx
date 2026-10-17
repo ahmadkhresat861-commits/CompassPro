@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import Home from '../PAGES/Home';
 
-// "/" → marketing landing page for visitors; logged-in members go to /home.
+// "/home": marketing page for visitors (editable from Admin); members get their own version (My Courses).
 const RootRoute = () => {
   const [state, setState] = useState('loading'); // loading | guest | member
 
@@ -14,15 +13,18 @@ const RootRoute = () => {
     supabase.auth.getSession().then(({ data }) => {
       if (alive) setState(data?.session ? 'member' : 'guest');
     }).catch(() => alive && setState('guest'));
-    return () => { alive = false; };
+    // follow login / logout without a reload
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (alive) setState(session ? 'member' : 'guest');
+    });
+    return () => { alive = false; sub?.subscription?.unsubscribe(); };
   }, []);
 
   if (state === 'loading') return <div style={{ minHeight: '100vh' }} />;
-  if (state === 'member') return <Navigate to="/home" replace />;
   return (
     <>
       <Navbar />
-      <Home variant="landing" />
+      <Home key={state} variant={state === 'member' ? 'home' : 'landing'} />
       <Footer />
     </>
   );
