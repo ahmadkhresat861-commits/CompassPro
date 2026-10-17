@@ -666,8 +666,3 @@ nav div a i { display: none; }
 @media (max-width: 900px) { .cp-mkt-steps { grid-template-columns: minmax(0, 1fr); } .cp-mkt { padding: 36px 20px; border-radius: 24px; } }
 
 .cp-badge-hot { display: inline-block; background: var(--cp-gold); color: #002347; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 999px; vertical-align: middle; margin-inline-end: 8px; }
-
-.cp-progress { height: 8px; border-radius: 999px; background: #E6F0FB; overflow: hidden; margin: 10px 0 8px; }
-.cp-progress span { display: block; height: 100%; background: var(--cp-gold); border-radius: 999px; }
-.cp-empty { background: var(--cp-card); border-radius: 20px; padding: 28px; box-shadow: var(--cp-shadow); text-align: center; display: grid; gap: 14px; justify-items: center; color: var(--cp-muted); }
-.cp-mycourses { padding-top: 8px; }

@@ -32,7 +32,6 @@ const Home = ({ variant = 'home' }) => {
   const [totalEnrollments, setTotalEnrollments] = useState(null);
   const [avgRating, setAvgRating] = useState(null);
   const [allForHome, setAllForHome] = useState([]);
-  const [myCourses, setMyCourses] = useState(null); // null = not loaded / guest
   const popularCourses = hs.popularIds
     .map((id) => allForHome.find((c) => String(c.id) === String(id)))
     .filter(Boolean);
@@ -116,23 +115,6 @@ const Home = ({ variant = 'home' }) => {
     </article>
   );
 
-  // Members: show the courses they enrolled in, with progress
-  useEffect(() => {
-    if (isLanding) return undefined;
-    let alive = true;
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-      const { data, error } = await supabase
-        .from('enrollments')
-        .select('id, course_id, progress, completed, enrolled_at, courses (id, title, category, image_url)')
-        .eq('user_id', session.user.id)
-        .order('enrolled_at', { ascending: false });
-      if (alive && !error) setMyCourses(data || []);
-    })();
-    return () => { alive = false; };
-  }, [isLanding]);
-
   const stats = [
     totalCourses !== null
       ? { value: totalCourses, label: t.courses, icon: 'fas fa-book' }
@@ -211,49 +193,6 @@ const Home = ({ variant = 'home' }) => {
           </div>
         </div>
       </section>
-
-      {/* Members: my enrolled courses (click -> Courses page) */}
-      {!isLanding && myCourses !== null && (
-        <section className="cp-section cp-mycourses">
-          <div className="cp-section-head">
-            <h2>{t.myCourses}</h2>
-            <a href="/dashboard" onClick={(e) => { e.preventDefault(); navigate('/dashboard'); }}>
-              {t.dashboard}
-            </a>
-          </div>
-          {myCourses.length === 0 ? (
-            <div className="cp-empty">
-              <p>{t.noEnrolled}</p>
-              <button type="button" className="cp-mkt-btn primary" onClick={() => navigate('/courses')}>
-                {t.browseCourses}
-              </button>
-            </div>
-          ) : (
-            <div className="cp-grid-3">
-              {myCourses.map((en) => {
-                const c = en.courses;
-                if (!c) return null;
-                const pct = en.completed ? 100 : Math.min(100, Number(en.progress) || 0);
-                return (
-                  <article key={en.id} className="cp-course-card" onClick={() => navigate('/courses')}>
-                    <CourseCover src={c.image_url} category={c.category} alt={c.title} height={150} />
-                    <div className="cp-course-body">
-                      <h3>{c.title}</h3>
-                      <div className="cp-progress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={c.title}>
-                        <span style={{ width: `${pct}%` }} />
-                      </div>
-                      <div className="cp-course-meta">
-                        <span>{en.completed ? t.completedLabel : `${pct}%`}</span>
-                        <strong>{en.completed ? '✓' : t.continueLearning}</strong>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      )}
 
       {/* Stats (only real numbers) */}
       {hs.sections.stats && !statsLoading && stats.length > 0 && (
