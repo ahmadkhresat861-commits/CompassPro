@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy } from 'react';
 import { supabase } from '../supabase';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import Home from '../PAGES/Home';
 
-// "/home": marketing page for visitors (editable from Admin); members get the regular home.
-// The student dashboard stays on /dashboard.
+const Dashboard = lazy(() => import('../PAGES/Dashboard'));
+
+// "/home": marketing page for visitors (editable from Admin); members get their student dashboard
+// (welcome, stats, enrolled courses with progress, certificates).
 const RootRoute = () => {
   const [state, setState] = useState('loading'); // loading | guest | member
 
@@ -25,7 +27,7 @@ const RootRoute = () => {
   return (
     <>
       <Navbar />
-      <Home key={state} variant={state === 'member' ? 'home' : 'landing'} />
+      {state === 'member' ? <Dashboard key="member" /> : <Home key="guest" variant="landing" />}
       <Footer />
     </>
   );
