@@ -330,12 +330,19 @@ const Admin = () => {
     setCoursesLoading(true);
 
     try {
-      const { data, error } = await supabase
+      const baseCols = 'id, title, category, students, rating, description, image_url, price, instructor';
+      let { data, error } = await supabase
         .from('courses')
-        .select(
-          'id, title, category, students, rating, description, image_url, price, instructor, instructor_id'
-        )
+        .select(`${baseCols}, instructor_id`)
         .order('id', { ascending: false });
+
+      // instructor_id exists only after supabase/sql/instructor_role.sql was run: fall back without it
+      if (error && /instructor_id/.test(error.message || '')) {
+        ({ data, error } = await supabase
+          .from('courses')
+          .select(baseCols)
+          .order('id', { ascending: false }));
+      }
 
       if (error) throw error;
 
@@ -381,7 +388,7 @@ const Admin = () => {
         image_url: courseImageUrl.trim(),
         price: Number(coursePrice) || 0,
         instructor: courseInstructor.trim(),
-        instructor_id: courseInstructorId || null,
+        ...(courseInstructorId ? { instructor_id: courseInstructorId } : {}),
       };
 
       let error;
