@@ -235,6 +235,36 @@ const Home = () => {
           ))}
         </div>
       </section>
+
+      {/* Marketing CTA */}
+      <section className="cp-section">
+        <div className="cp-mkt">
+          <div className="cp-mkt-head">
+            <h2>{t.mktTitle}</h2>
+            <p>{t.mktSub}</p>
+          </div>
+          <div className="cp-mkt-steps">
+            {[
+              { n: 1, to: '/signup' },
+              { n: 2, to: '/courses' },
+              { n: 3, to: '/contact' },
+            ].map((s) => (
+              <div className="cp-mkt-step" key={s.n}>
+                <span className="cp-mkt-num" aria-hidden="true">{s.n}</span>
+                <h3>{t[`mkt${s.n}Title`]}</h3>
+                <p>{t[`mkt${s.n}Desc`]}</p>
+                <button
+                  type="button"
+                  className={s.n === 1 ? 'cp-mkt-btn primary' : 'cp-mkt-btn'}
+                  onClick={() => navigate(s.to)}
+                >
+                  {t[`mkt${s.n}Btn`]}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
