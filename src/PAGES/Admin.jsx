@@ -70,6 +70,7 @@ const Admin = () => {
   const [courseImageUrl, setCourseImageUrl] = useState('');
   const [coursePrice, setCoursePrice] = useState(0);
   const [courseInstructor, setCourseInstructor] = useState('');
+  const [courseInstructorId, setCourseInstructorId] = useState('');
 
   const [editingCourseId, setEditingCourseId] = useState(null);
   const [courseStatus, setCourseStatus] = useState('');
@@ -246,8 +247,17 @@ const Admin = () => {
         username:
           newUserUsername.trim() ||
           newUserEmail.trim().split('@')[0],
-        type: newUserType,
+        type: newUserType === 'instructor' ? 'user' : newUserType,
       });
+
+      // The server function creates admin/user; promote to instructor here (admin-only policy + trigger allow it)
+      if (newUserType === 'instructor' && data?.user?.id) {
+        const { error: roleError } = await supabase
+          .from('profiles')
+          .update({ type: 'instructor' })
+          .eq('id', data.user.id);
+        if (roleError) throw new Error('User created, but setting role failed: ' + roleError.message + ' (run supabase/sql/instructor_role.sql)');
+      }
 
       setUserStatus(
         data?.message ||
@@ -323,7 +333,7 @@ const Admin = () => {
       const { data, error } = await supabase
         .from('courses')
         .select(
-          'id, title, category, students, rating, description, image_url, price, instructor'
+          'id, title, category, students, rating, description, image_url, price, instructor, instructor_id'
         )
         .order('id', { ascending: false });
 
@@ -371,6 +381,7 @@ const Admin = () => {
         image_url: courseImageUrl.trim(),
         price: Number(coursePrice) || 0,
         instructor: courseInstructor.trim(),
+        instructor_id: courseInstructorId || null,
       };
 
       let error;
@@ -462,6 +473,7 @@ const Admin = () => {
     setCourseImageUrl(course.image_url || '');
     setCoursePrice(course.price || 0);
     setCourseInstructor(course.instructor || '');
+    setCourseInstructorId(course.instructor_id || '');
     setCourseStatus('');
 
     window.scrollTo({
@@ -483,6 +495,7 @@ const Admin = () => {
     setCourseImageUrl('');
     setCoursePrice(0);
     setCourseInstructor('');
+    setCourseInstructorId('');
     setCourseStatus('');
   };
 
@@ -835,6 +848,15 @@ const Admin = () => {
   // =========================
   // Fetch Profiles
   // =========================
+  const changeProfileRole = async (id, type) => {
+    const { error } = await supabase.from('profiles').update({ type }).eq('id', id);
+    if (error) {
+      alert('Could not change role: ' + error.message + ' (run supabase/sql/instructor_role.sql)');
+      return;
+    }
+    setProfiles((prev) => prev.map((p) => (p.id === id ? { ...p, type } : p)));
+  };
+
   const fetchProfiles = async () => {
     setProfilesLoading(true);
 
@@ -948,6 +970,7 @@ const Admin = () => {
 
     if (activeTab === 'courses') {
       fetchCourses();
+      fetchProfiles();
     }
 
     if (activeTab === 'users') {
@@ -1608,6 +1631,31 @@ const Admin = () => {
                       borderRadius: '14px',
                     }}
                   />
+
+                  <select
+                    value={courseInstructorId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setCourseInstructorId(id);
+                      const ins = profiles.find((x) => x.id === id);
+                      if (ins) setCourseInstructor(ins.username || '');
+                    }}
+                    style={{
+                      padding: '14px',
+                      border: '1px solid #CBD7E8',
+                      borderRadius: '14px',
+                      background: 'white',
+                    }}
+                  >
+                    <option value="">No instructor account (name only)</option>
+                    {profiles
+                      .filter((x) => x.type === 'instructor')
+                      .map((x) => (
+                        <option key={x.id} value={x.id}>
+                          {x.username || x.id}
+                        </option>
+                      ))}
+                  </select>
 
                   <input
                     type="text"
@@ -2655,6 +2703,10 @@ const Admin = () => {
                       User
                     </option>
 
+                    <option value="instructor">
+                      Instructor
+                    </option>
+
                     <option value="admin">
                       Admin
                     </option>
@@ -3180,8 +3232,18 @@ const Admin = () => {
                         </td>
 
                         <td style={{ padding: '15px' }}>
-                          {profile.type ||
-                            '-'}
+                          {profile.type === 'admin' ? (
+                            'admin'
+                          ) : (
+                            <select
+                              value={profile.type === 'instructor' ? 'instructor' : 'user'}
+                              onChange={(e) => changeProfileRole(profile.id, e.target.value)}
+                              style={{ padding: '8px 12px', border: '1px solid #CBD7E8', borderRadius: 10, background: 'white' }}
+                            >
+                              <option value="user">user</option>
+                              <option value="instructor">instructor</option>
+                            </select>
+                          )}
                         </td>
 
                         <td style={{ padding: '15px' }}>

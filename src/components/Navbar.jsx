@@ -107,9 +107,9 @@ const Navbar = () => {
     const fetchProfile = async () => {
       const { data } = await supabase
         .from('profiles')
-        .select('username, avatar_url')
-        .eq('user_id', user.id)
-        .single();
+        .select('username, avatar_url, type')
+        .eq('id', user.id)
+        .maybeSingle();
 
       if (data) setProfile(data);
     };
@@ -393,6 +393,11 @@ const Navbar = () => {
                 <button type="button" className="cp-dd-item" onClick={() => navigate('/profile')}>
                   <i className="fas fa-user"></i> {t.profile}
                 </button>
+                {(profile?.type === 'instructor' || profile?.type === 'admin') && (
+                  <button type="button" className="cp-dd-item" onClick={() => navigate('/instructor')}>
+                    <i className="fas fa-chalkboard-teacher"></i> {lang === 'ar' ? 'لوحة المدرب' : 'Instructor Dashboard'}
+                  </button>
+                )}
                 <button type="button" className="cp-dd-item" onClick={() => navigate('/dashboard')}>
                   <i className="fas fa-chart-bar"></i> {t.dashboard}
                 </button>

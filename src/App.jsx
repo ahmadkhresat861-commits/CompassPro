@@ -13,6 +13,7 @@ const Dashboard = lazy(() => import('./PAGES/Dashboard'))
 const Profile = lazy(() => import('./PAGES/Profile'))
 const Contact = lazy(() => import('./PAGES/Contact'))
 const Admin = lazy(() => import('./PAGES/Admin'))
+const Instructor = lazy(() => import('./PAGES/Instructor'))
 const Sessions = lazy(() => import('./PAGES/Sessions'))
 const Verify = lazy(() => import('./PAGES/Verify'))
 const Legal = lazy(() => import('./PAGES/Legal'))
@@ -21,6 +22,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
+import InstructorRoute from './components/InstructorRoute'
 import AIAssistant from './components/AIAssistant'
 
 import { LanguageProvider } from './LanguageContext'
@@ -182,6 +184,16 @@ function App() {
                   <Footer />
                 </>
               </ProtectedRoute>
+            }
+          />
+
+          {/* INSTRUCTOR */}
+          <Route
+            path="/instructor"
+            element={
+              <InstructorRoute>
+                <Instructor />
+              </InstructorRoute>
             }
           />
 

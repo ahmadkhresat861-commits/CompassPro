@@ -69,8 +69,8 @@ const Profile = () => {
       const { data } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
-        .single();
+        .eq('id', user.id)
+        .maybeSingle();
 
       if (data) {
         setProfile(data);
