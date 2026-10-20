@@ -46,16 +46,26 @@ create policy "Admins can update profiles"
   on public.profiles for update to authenticated
   using (public.is_admin()) with check (public.is_admin());
 
+-- NOTE: the student policy must go through a SECURITY DEFINER function. A direct subquery on
+-- enrollments here causes "infinite recursion detected in policy for relation profiles".
+create or replace function public.is_my_student(p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select public.is_instructor() and exists (
+    select 1 from public.enrollments e
+    join public.courses c on c.id = e.course_id
+    where e.user_id = p_user_id and c.instructor_id = auth.uid()
+  );
+$$;
+
 drop policy if exists "Instructors can read their students" on public.profiles;
 create policy "Instructors can read their students"
   on public.profiles for select to authenticated
-  using (
-    public.is_instructor() and exists (
-      select 1 from public.enrollments e
-      join public.courses c on c.id = e.course_id
-      where e.user_id = profiles.id and c.instructor_id = auth.uid()
-    )
-  );
+  using (public.is_my_student(id));
 
 -- 5) courses: instructors manage only their own courses (admins keep full control via existing policies)
 drop policy if exists "Instructors can insert own courses" on public.courses;
