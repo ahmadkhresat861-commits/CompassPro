@@ -112,6 +112,7 @@ const Courses = () => {
 
   const [courses, setCourses] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [instructorCard, setInstructorCard] = useState(null);
 
   useSEO(
     selected
@@ -399,6 +400,20 @@ const Courses = () => {
     }
   };
 
+  // Instructor card (public info the instructor filled in from their dashboard)
+  useEffect(() => {
+    let alive = true;
+    setInstructorCard(null);
+    if (!selected?.instructor_id) return undefined;
+    supabase
+      .from('instructor_public')
+      .select('display_name, headline, bio, avatar_url, contact_email')
+      .eq('user_id', selected.instructor_id)
+      .maybeSingle()
+      .then(({ data, error }) => { if (alive && !error && data) setInstructorCard(data); });
+    return () => { alive = false; };
+  }, [selected?.id, selected?.instructor_id]);
+
   // ============================================================
   // FETCH LESSONS
   // ============================================================
@@ -415,28 +430,23 @@ const Courses = () => {
       // GET LESSONS
       // --------------------------------------------------------
 
-      const {
-        data: lessonsData,
-        error: lessonsError,
-      } = await supabase
+      const lessonCols =
+        'id, course_id, title, description, content, lesson_order, video_url, pdf_url, created_at';
+
+      let { data: lessonsData, error: lessonsError } = await supabase
         .from('lessons')
-        .select(
-          `
-            id,
-            course_id,
-            title,
-            description,
-            content,
-            lesson_order,
-            video_url,
-            pdf_url,
-            created_at
-          `
-        )
+        .select(`${lessonCols}, chapter`)
         .eq('course_id', selected.id)
-        .order('lesson_order', {
-          ascending: true,
-        });
+        .order('lesson_order', { ascending: true });
+
+      // "chapter" exists only after supabase/sql/instructor_phase1.sql was run
+      if (lessonsError && /chapter/.test(lessonsError.message || '')) {
+        ({ data: lessonsData, error: lessonsError } = await supabase
+          .from('lessons')
+          .select(lessonCols)
+          .eq('course_id', selected.id)
+          .order('lesson_order', { ascending: true }));
+      }
 
       if (lessonsError) {
         console.error(
@@ -1269,6 +1279,56 @@ progressData = data;
             </p>
           )}
 
+          {instructorCard && (
+            <div
+              style={{
+                display: 'flex',
+                gap: '16px',
+                alignItems: 'center',
+                textAlign: 'left',
+                maxWidth: '560px',
+                margin: '20px auto 0',
+                padding: '16px 18px',
+                borderRadius: '18px',
+                background: dm.reviewBg,
+                boxShadow: dm.shadow,
+                color: dm.text,
+              }}
+            >
+              {instructorCard.avatar_url ? (
+                <img
+                  src={instructorCard.avatar_url}
+                  alt={instructorCard.display_name || selected.instructor}
+                  style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                />
+              ) : (
+                <span
+                  aria-hidden="true"
+                  style={{ width: 64, height: 64, borderRadius: '50%', background: dm.btnBack, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', flexShrink: 0 }}
+                >
+                  <i className="fas fa-chalkboard-teacher" />
+                </span>
+              )}
+              <div style={{ minWidth: 0 }}>
+                <strong style={{ color: dm.heading }}>{instructorCard.display_name || selected.instructor}</strong>
+                {instructorCard.headline && (
+                  <div style={{ color: dm.subtext, fontSize: '0.85rem' }}>{instructorCard.headline}</div>
+                )}
+                {instructorCard.bio && (
+                  <p style={{ margin: '6px 0 0', fontSize: '0.9rem', lineHeight: 1.6 }}>{instructorCard.bio}</p>
+                )}
+                {instructorCard.contact_email && (
+                  <a
+                    href={`mailto:${instructorCard.contact_email}`}
+                    style={{ display: 'inline-block', marginTop: 6, color: dm.heading, fontWeight: 600, fontSize: '0.9rem' }}
+                  >
+                    <i className="fas fa-envelope" /> {instructorCard.contact_email}
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* STATS */}
 
           <div
@@ -1688,11 +1748,26 @@ className={
                         selectedLesson?.id ===
                         lesson.id;
 
+                      const showChapter =
+                        lesson.chapter &&
+                        lesson.chapter !== lessons[index - 1]?.chapter;
+
                       return (
+                        <React.Fragment key={lesson.id}>
+                        {showChapter && (
+                          <div
+                            style={{
+                              marginTop: index === 0 ? 0 : '10px',
+                              fontWeight: 800,
+                              fontSize: '0.85rem',
+                              letterSpacing: '0.3px',
+                              color: dm.heading,
+                            }}
+                          >
+                            {lesson.chapter}
+                          </div>
+                        )}
                         <button
-                          key={
-                            lesson.id
-                          }
                           onClick={() =>
 setSelectedLesson(
                               lesson
@@ -1775,6 +1850,7 @@ setSelectedLesson(
                             </span>
                           </div>
                         </button>
+                        </React.Fragment>
                       );
                     }
                   )}
