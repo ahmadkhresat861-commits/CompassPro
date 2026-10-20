@@ -407,7 +407,7 @@ const Courses = () => {
     if (!selected?.instructor_id) return undefined;
     supabase
       .from('instructor_public')
-      .select('display_name, headline, bio, avatar_url, contact_email')
+      .select('*')
       .eq('user_id', selected.instructor_id)
       .maybeSingle()
       .then(({ data, error }) => { if (alive && !error && data) setInstructorCard(data); });
@@ -1313,6 +1313,11 @@ progressData = data;
                 <div style={{ padding: '12px 18px', background: 'rgba(0,51,102,0.05)', fontWeight: 700, color: dm.heading, textAlign: 'center', fontSize: '0.9rem' }}>
                   {t.instructorEmail}
                 </div>
+                {instructorCard.office_hours && (
+                  <div style={{ padding: '12px 18px', background: 'rgba(0,51,102,0.05)', fontWeight: 700, color: dm.heading, textAlign: 'center', fontSize: '0.9rem' }}>
+                    {t.instructorHours}
+                  </div>
+                )}
                 <div style={{ padding: '18px', display: 'flex', alignItems: 'center', gap: 14, justifyContent: 'center', flexWrap: 'wrap', textAlign: 'center' }}>
                   {instructorCard.avatar_url ? (
                     <img
@@ -1346,6 +1351,11 @@ progressData = data;
                     <span style={{ color: dm.subtext }}>—</span>
                   )}
                 </div>
+                {instructorCard.office_hours && (
+                  <div style={{ padding: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', whiteSpace: 'pre-line', fontSize: '0.92rem' }}>
+                    {instructorCard.office_hours}
+                  </div>
+                )}
               </div>
               {instructorCard.bio && (
                 <div style={{ borderTop: '1px solid rgba(0,51,102,0.10)' }}>

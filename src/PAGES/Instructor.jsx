@@ -16,7 +16,7 @@ const th = { padding: '12px 14px', textAlign: 'left', color: '#fff', fontWeight:
 const td = { padding: '12px 14px', borderBottom: '1px solid #E6F0FB', fontSize: 14 };
 
 const emptyLesson = { title: '', chapter: '', description: '', content: '', video_url: '', lesson_order: 1 };
-const emptyCard = { display_name: '', headline: '', bio: '', avatar_url: '', contact_email: '' };
+const emptyCard = { display_name: '', headline: '', bio: '', avatar_url: '', contact_email: '', office_hours: '' };
 
 const Kpi = ({ label, value, bg }) => (
   <div style={{ background: bg, borderRadius: 20, padding: '18px 22px' }}>
@@ -48,6 +48,7 @@ const Instructor = () => {
   // public instructor card
   const [card_, setCard] = useState(emptyCard);
   const [showEmail, setShowEmail] = useState(false);
+  const [hoursCol, setHoursCol] = useState(false);
   const [pMsg, setPMsg] = useState(null);
   const [avatarFile, setAvatarFile] = useState(null);
 
@@ -78,8 +79,9 @@ const Instructor = () => {
     }
     const { data: cardRow } = await supabase.from('instructor_public').select('*').eq('user_id', user.id).maybeSingle();
     if (cardRow) {
-      setCard({ display_name: cardRow.display_name || '', headline: cardRow.headline || '', bio: cardRow.bio || '', avatar_url: cardRow.avatar_url || '', contact_email: cardRow.contact_email || '' });
+      setCard({ display_name: cardRow.display_name || '', headline: cardRow.headline || '', bio: cardRow.bio || '', avatar_url: cardRow.avatar_url || '', contact_email: cardRow.contact_email || '', office_hours: cardRow.office_hours || '' });
       setShowEmail(!!cardRow.contact_email);
+      setHoursCol('office_hours' in cardRow);
     }
     setLoading(false);
   };
@@ -135,6 +137,7 @@ const Instructor = () => {
       avatar_url: avatar_url || null,
       contact_email: showEmail ? (card_.contact_email.trim() || me.email || null) : null,
       updated_at: new Date().toISOString(),
+      ...((card_.office_hours.trim() || hoursCol) ? { office_hours: card_.office_hours.trim() || null } : {}),
     };
     const { error: err } = await supabase.from('instructor_public').upsert(row);
     setBusy(false);
@@ -291,6 +294,8 @@ const Instructor = () => {
             <input id="p-head" style={input} value={card_.headline} onChange={(e) => setCard({ ...card_, headline: e.target.value })} placeholder="e.g. Senior software engineer" />
             <label style={lbl} htmlFor="p-bio">About me</label>
             <textarea id="p-bio" rows={4} style={input} value={card_.bio} onChange={(e) => setCard({ ...card_, bio: e.target.value })} />
+            <label style={lbl} htmlFor="p-hours">Office hours (optional)</label>
+            <input id="p-hours" style={input} value={card_.office_hours} onChange={(e) => setCard({ ...card_, office_hours: e.target.value })} placeholder="e.g. Sun & Tue 10:00–12:00" />
             <label style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 4px', fontSize: 14, cursor: 'pointer' }}>
               <input type="checkbox" checked={showEmail} onChange={(e) => setShowEmail(e.target.checked)} />
               Show my email to students
