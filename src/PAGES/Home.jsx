@@ -6,8 +6,18 @@ import { useSEO } from '../hooks/useSEO';
 import { useHomeSettings } from '../hooks/useHomeSettings';
 import CourseCover from '../components/CourseCover';
 
-const Home = ({ variant = 'home', showSignupCta = true }) => {
-  const isLanding = variant === 'landing';
+const Home = () => {
+  const isLanding = true; // content comes from Admin > Home
+  // Visitors see the marketing sections; logged-in members don't (they already signed up)
+  const [auth, setAuth] = useState('checking'); // checking | guest | member
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getSession().then(({ data }) => { if (alive) setAuth(data?.session ? 'member' : 'guest'); })
+      .catch(() => { if (alive) setAuth('guest'); });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => { if (alive) setAuth(session ? 'member' : 'guest'); });
+    return () => { alive = false; sub?.subscription?.unsubscribe(); };
+  }, []);
+  const showMarketing = auth === 'guest';
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
   const { t, isAr } = useLang();
@@ -208,7 +218,7 @@ const Home = ({ variant = 'home', showSignupCta = true }) => {
       )}
 
       {/* Most requested courses (chosen by admin) */}
-      {isLanding && hs.sections.popular && popularCourses.length > 0 && (
+      {showMarketing && hs.sections.popular && popularCourses.length > 0 && (
         <section className="cp-section">
           <div className="cp-section-head">
             <h2><span className="cp-badge-hot">{t.hot}</span> {t.popularCourses}</h2>
@@ -221,7 +231,7 @@ const Home = ({ variant = 'home', showSignupCta = true }) => {
       )}
 
       {/* Available courses */}
-      {hs.sections.available && availableCourses.length > 0 && (
+      {showMarketing && hs.sections.available && availableCourses.length > 0 && (
         <section className="cp-section">
           <div className="cp-section-head">
             <h2>{isLanding ? t.availableCourses : t.featuredCourses}</h2>
@@ -252,7 +262,7 @@ const Home = ({ variant = 'home', showSignupCta = true }) => {
       )}
 
       {/* Marketing CTA */}
-      {isLanding && showSignupCta && hs.sections.cta && (
+      {showMarketing && hs.sections.cta && (
       <section className="cp-section">
         <div className="cp-mkt">
           <div className="cp-mkt-head">
