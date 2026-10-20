@@ -1343,9 +1343,9 @@ progressData = data;
                   {instructorCard.contact_email ? (
                     <a
                       href={`mailto:${instructorCard.contact_email}`}
-                      style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 18px', borderRadius: 999, background: 'linear-gradient(135deg,#003366,#0A5AA8)', color: '#fff', fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,51,102,0.25)', wordBreak: 'break-all' }}
+                      style={{ color: dm.text, fontSize: '0.92rem', textDecoration: 'none', wordBreak: 'break-all' }}
                     >
-                      <i className="fas fa-envelope" /> {instructorCard.contact_email}
+                      {instructorCard.contact_email}
                     </a>
                   ) : (
                     <span style={{ color: dm.subtext }}>—</span>
