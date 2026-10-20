@@ -67,17 +67,10 @@ create policy "Instructors can read their students"
   on public.profiles for select to authenticated
   using (public.is_my_student(id));
 
--- 5) courses: instructors manage only their own courses (admins keep full control via existing policies)
+-- 5) courses: instructors do NOT create or edit courses (the admin does, and assigns them via instructor_id).
+--    They only read courses (existing select policy) and manage the lessons of courses assigned to them.
 drop policy if exists "Instructors can insert own courses" on public.courses;
-create policy "Instructors can insert own courses"
-  on public.courses for insert to authenticated
-  with check (public.is_instructor() and instructor_id = auth.uid());
-
 drop policy if exists "Instructors can update own courses" on public.courses;
-create policy "Instructors can update own courses"
-  on public.courses for update to authenticated
-  using (public.is_instructor() and instructor_id = auth.uid())
-  with check (public.is_instructor() and instructor_id = auth.uid());
 
 -- 6) lessons: instructors manage lessons of their own courses
 drop policy if exists "Instructors can insert lessons" on public.lessons;

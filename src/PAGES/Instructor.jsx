@@ -15,7 +15,6 @@ const btn = (primary) => ({
 const th = { padding: '12px 14px', textAlign: 'left', color: '#fff', fontWeight: 700, fontSize: 13 };
 const td = { padding: '12px 14px', borderBottom: '1px solid #E6F0FB', fontSize: 14 };
 
-const emptyCourse = { title: '', category: '', description: '', image_url: '', price: 0 };
 const emptyLesson = { title: '', description: '', content: '', video_url: '', lesson_order: 1 };
 
 const Kpi = ({ label, value, bg }) => (
@@ -35,11 +34,6 @@ const Instructor = () => {
   const [reviews, setReviews] = useState([]);
   const [students, setStudents] = useState({});
   const [error, setError] = useState('');
-
-  // course form
-  const [cForm, setCForm] = useState(emptyCourse);
-  const [cEditing, setCEditing] = useState(null);
-  const [cMsg, setCMsg] = useState(null);
 
   // lessons
   const [courseId, setCourseId] = useState('');
@@ -104,32 +98,6 @@ const Instructor = () => {
   const allRatings = reviews.map((r) => r.rating).filter(Boolean);
   const overallRating = allRatings.length ? (allRatings.reduce((a, b) => a + b, 0) / allRatings.length).toFixed(1) : '–';
   const completionRate = enrollments.length ? Math.round((enrollments.filter((e) => e.completed).length / enrollments.length) * 100) : 0;
-
-  // ---------- courses ----------
-  const saveCourse = async (e) => {
-    e.preventDefault();
-    setCMsg(null);
-    if (!cForm.title.trim()) { setCMsg({ ok: false, text: 'Title is required.' }); return; }
-    setBusy(true);
-    const payload = {
-      title: cForm.title.trim(), category: cForm.category.trim(), description: cForm.description.trim(),
-      image_url: cForm.image_url.trim(), price: Number(cForm.price) || 0,
-    };
-    const q = cEditing
-      ? supabase.from('courses').update(payload).eq('id', cEditing).eq('instructor_id', me.id)
-      : supabase.from('courses').insert([{ ...payload, instructor_id: me.id, instructor: me.username || me.name }]);
-    const { error: err } = await q;
-    setBusy(false);
-    if (err) { setCMsg({ ok: false, text: err.message }); return; }
-    setCMsg({ ok: true, text: cEditing ? 'Course updated.' : 'Course created.' });
-    setCForm(emptyCourse); setCEditing(null);
-    loadAll();
-  };
-  const editCourse = (c) => {
-    setCEditing(c.id);
-    setCForm({ title: c.title || '', category: c.category || '', description: c.description || '', image_url: c.image_url || '', price: c.price || 0 });
-    setCMsg(null);
-  };
 
   // ---------- lessons ----------
   const saveLesson = async (e) => {
@@ -212,7 +180,7 @@ const Instructor = () => {
             </div>
             <div style={{ ...card, overflowX: 'auto' }}>
               <h2 style={{ color: NAVY, margin: '0 0 16px', fontSize: '1.2rem' }}>Courses</h2>
-              {perCourse.length === 0 ? <p style={{ color: '#4A5D78' }}>No courses assigned to you yet. Create one in "My Courses".</p> : (
+              {perCourse.length === 0 ? <p style={{ color: '#4A5D78' }}>No courses assigned to you yet. The admin will assign courses to you.</p> : (
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 560 }}>
                   <thead><tr style={{ background: NAVY }}>
                     {['Course', 'Students', 'Avg progress', 'Completed', 'Rating'].map((h) => <th key={h} style={th}>{h}</th>)}
@@ -243,39 +211,18 @@ const Instructor = () => {
         )}
 
         {tab === 'courses' && (
-          <>
-            <form style={card} onSubmit={saveCourse}>
-              <h2 style={{ color: NAVY, margin: '0 0 4px', fontSize: '1.2rem' }}>{cEditing ? 'Edit course' : 'New course'}</h2>
-              <label style={lbl} htmlFor="c-title">Title</label>
-              <input id="c-title" style={input} value={cForm.title} onChange={(e) => setCForm({ ...cForm, title: e.target.value })} />
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-                <div><label style={lbl} htmlFor="c-cat">Category</label>
-                  <input id="c-cat" style={input} value={cForm.category} onChange={(e) => setCForm({ ...cForm, category: e.target.value })} /></div>
-                <div><label style={lbl} htmlFor="c-price">Price (0 = free)</label>
-                  <input id="c-price" type="number" min="0" step="0.01" style={input} value={cForm.price} onChange={(e) => setCForm({ ...cForm, price: e.target.value })} /></div>
+          <div style={card}>
+            <h2 style={{ color: NAVY, margin: '0 0 4px', fontSize: '1.2rem' }}>My courses</h2>
+            <p style={{ color: '#4A5D78', fontSize: 13, margin: '0 0 16px' }}>Courses are created and assigned to you by the admin. You manage their lessons and follow your students.</p>
+            {perCourse.length === 0 ? <p style={{ color: '#4A5D78' }}>No course has been assigned to you yet.</p> : perCourse.map((c) => (
+              <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid #E6F0FB', flexWrap: 'wrap' }}>
+                <strong style={{ flex: 1, minWidth: 160, color: NAVY }}>{c.title}</strong>
+                <span style={{ color: '#4A5D78', fontSize: 13 }}>{c.category}</span>
+                <span style={{ color: '#4A5D78', fontSize: 13 }}>{c.enrolled} students</span>
+                <button type="button" style={btn(true)} onClick={() => { setCourseId(String(c.id)); setTab('lessons'); }}>Manage lessons</button>
               </div>
-              <label style={lbl} htmlFor="c-img">Image URL</label>
-              <input id="c-img" style={input} value={cForm.image_url} onChange={(e) => setCForm({ ...cForm, image_url: e.target.value })} placeholder="https://…" />
-              <label style={lbl} htmlFor="c-desc">Description</label>
-              <textarea id="c-desc" rows={4} style={input} value={cForm.description} onChange={(e) => setCForm({ ...cForm, description: e.target.value })} />
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 16, flexWrap: 'wrap' }}>
-                <button type="submit" style={btn(true)} disabled={busy}>{busy ? 'Saving…' : cEditing ? 'Save changes' : 'Create course'}</button>
-                {cEditing && <button type="button" style={btn(false)} onClick={() => { setCEditing(null); setCForm(emptyCourse); }}>Cancel</button>}
-                {note(cMsg)}
-              </div>
-            </form>
-            <div style={card}>
-              <h2 style={{ color: NAVY, margin: '0 0 16px', fontSize: '1.2rem' }}>My courses</h2>
-              {courses.length === 0 ? <p style={{ color: '#4A5D78' }}>Nothing here yet.</p> : courses.map((c) => (
-                <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid #E6F0FB', flexWrap: 'wrap' }}>
-                  <strong style={{ flex: 1, minWidth: 160, color: NAVY }}>{c.title}</strong>
-                  <span style={{ color: '#4A5D78', fontSize: 13 }}>{c.category}</span>
-                  <button type="button" style={btn(false)} onClick={() => editCourse(c)}>Edit</button>
-                  <button type="button" style={btn(false)} onClick={() => { setCourseId(String(c.id)); setTab('lessons'); }}>Lessons</button>
-                </div>
-              ))}
-            </div>
-          </>
+            ))}
+          </div>
         )}
 
         {tab === 'lessons' && (
