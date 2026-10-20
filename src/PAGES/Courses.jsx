@@ -1266,7 +1266,7 @@ progressData = data;
             </p>
           )}
 
-          {selected.instructor && (
+          {selected.instructor && !instructorCard && (
             <p
               style={{
                 color: dm.subtext,
@@ -1283,44 +1283,52 @@ progressData = data;
             <div
               style={{
                 display: 'flex',
-                gap: '16px',
-                alignItems: 'center',
+                gap: '18px',
+                alignItems: 'flex-start',
                 textAlign: 'left',
-                maxWidth: '560px',
-                margin: '20px auto 0',
-                padding: '16px 18px',
-                borderRadius: '18px',
+                maxWidth: '600px',
+                margin: '22px auto 0',
+                padding: '20px 22px',
+                borderRadius: '20px',
                 background: dm.reviewBg,
+                border: '1px solid rgba(0,51,102,0.10)',
+                borderTop: '4px solid #F0A500',
                 boxShadow: dm.shadow,
                 color: dm.text,
+                flexWrap: 'wrap',
               }}
             >
               {instructorCard.avatar_url ? (
                 <img
                   src={instructorCard.avatar_url}
                   alt={instructorCard.display_name || selected.instructor}
-                  style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+                  style={{ width: 84, height: 84, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '3px solid #F0A500', boxShadow: '0 4px 14px rgba(0,51,102,0.18)' }}
                 />
               ) : (
                 <span
                   aria-hidden="true"
-                  style={{ width: 64, height: 64, borderRadius: '50%', background: dm.btnBack, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', flexShrink: 0 }}
+                  style={{ width: 84, height: 84, borderRadius: '50%', background: 'linear-gradient(135deg,#003366,#0A5AA8)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.9rem', flexShrink: 0, border: '3px solid #F0A500' }}
                 >
                   <i className="fas fa-chalkboard-teacher" />
                 </span>
               )}
-              <div style={{ minWidth: 0 }}>
-                <strong style={{ color: dm.heading }}>{instructorCard.display_name || selected.instructor}</strong>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <span style={{ display: 'inline-block', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#8a5a00', background: 'rgba(240,165,0,0.16)', borderRadius: 999, padding: '3px 10px' }}>
+                  {t.instructorLabel}
+                </span>
+                <div style={{ color: dm.heading, fontWeight: 800, fontSize: '1.2rem', marginTop: 8 }}>
+                  {instructorCard.display_name || selected.instructor}
+                </div>
                 {instructorCard.headline && (
-                  <div style={{ color: dm.subtext, fontSize: '0.85rem' }}>{instructorCard.headline}</div>
+                  <div style={{ color: dm.subtext, fontSize: '0.9rem', fontWeight: 600, marginTop: 2 }}>{instructorCard.headline}</div>
                 )}
                 {instructorCard.bio && (
-                  <p style={{ margin: '6px 0 0', fontSize: '0.9rem', lineHeight: 1.6 }}>{instructorCard.bio}</p>
+                  <p style={{ margin: '10px 0 0', fontSize: '0.92rem', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{instructorCard.bio}</p>
                 )}
                 {instructorCard.contact_email && (
                   <a
                     href={`mailto:${instructorCard.contact_email}`}
-                    style={{ display: 'inline-block', marginTop: 6, color: dm.heading, fontWeight: 600, fontSize: '0.9rem' }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 14, padding: '8px 16px', borderRadius: 999, background: '#003366', color: '#fff', fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none' }}
                   >
                     <i className="fas fa-envelope" /> {instructorCard.contact_email}
                   </a>
