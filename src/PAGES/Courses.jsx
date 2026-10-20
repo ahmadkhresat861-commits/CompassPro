@@ -1282,58 +1282,79 @@ progressData = data;
           {instructorCard && (
             <div
               style={{
-                display: 'flex',
-                gap: '18px',
-                alignItems: 'flex-start',
-                textAlign: 'left',
-                maxWidth: '600px',
-                margin: '22px auto 0',
-                padding: '20px 22px',
-                borderRadius: '20px',
+                maxWidth: '760px',
+                margin: '26px auto 0',
+                borderRadius: '18px',
+                overflow: 'hidden',
                 background: dm.reviewBg,
                 border: '1px solid rgba(0,51,102,0.10)',
-                borderTop: '4px solid #F0A500',
-                boxShadow: dm.shadow,
+                boxShadow: '0 10px 30px rgba(0,51,102,0.14)',
                 color: dm.text,
-                flexWrap: 'wrap',
+                textAlign: 'start',
               }}
             >
-              {instructorCard.avatar_url ? (
-                <img
-                  src={instructorCard.avatar_url}
-                  alt={instructorCard.display_name || selected.instructor}
-                  style={{ width: 84, height: 84, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '3px solid #F0A500', boxShadow: '0 4px 14px rgba(0,51,102,0.18)' }}
-                />
-              ) : (
-                <span
-                  aria-hidden="true"
-                  style={{ width: 84, height: 84, borderRadius: '50%', background: 'linear-gradient(135deg,#003366,#0A5AA8)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.9rem', flexShrink: 0, border: '3px solid #F0A500' }}
-                >
-                  <i className="fas fa-chalkboard-teacher" />
-                </span>
-              )}
-              <div style={{ flex: 1, minWidth: 200 }}>
-                <span style={{ display: 'inline-block', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#8a5a00', background: 'rgba(240,165,0,0.16)', borderRadius: 999, padding: '3px 10px' }}>
-                  {t.instructorLabel}
-                </span>
-                <div style={{ color: dm.heading, fontWeight: 800, fontSize: '1.2rem', marginTop: 8 }}>
-                  {instructorCard.display_name || selected.instructor}
-                </div>
-                {instructorCard.headline && (
-                  <div style={{ color: dm.subtext, fontSize: '0.9rem', fontWeight: 600, marginTop: 2 }}>{instructorCard.headline}</div>
-                )}
-                {instructorCard.bio && (
-                  <p style={{ margin: '10px 0 0', fontSize: '0.92rem', lineHeight: 1.7, whiteSpace: 'pre-line' }}>{instructorCard.bio}</p>
-                )}
-                {instructorCard.contact_email && (
-                  <a
-                    href={`mailto:${instructorCard.contact_email}`}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 14, padding: '8px 16px', borderRadius: 999, background: '#003366', color: '#fff', fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none' }}
-                  >
-                    <i className="fas fa-envelope" /> {instructorCard.contact_email}
-                  </a>
-                )}
+              <div
+                style={{
+                  padding: '18px 20px',
+                  textAlign: 'center',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: '1.15rem',
+                  background: 'radial-gradient(circle at 90% 0%, rgba(240,165,0,0.40) 0, rgba(240,165,0,0) 40%), linear-gradient(135deg,#002347,#003366 55%,#0A5AA8)',
+                  borderBottom: '3px solid #F0A500',
+                }}
+              >
+                <i className="fas fa-chalkboard-teacher" /> {t.instructorInfo}
               </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+                <div style={{ padding: '12px 18px', background: 'rgba(0,51,102,0.05)', fontWeight: 700, color: dm.heading, textAlign: 'center', fontSize: '0.9rem' }}>
+                  {t.instructorName}
+                </div>
+                <div style={{ padding: '12px 18px', background: 'rgba(0,51,102,0.05)', fontWeight: 700, color: dm.heading, textAlign: 'center', fontSize: '0.9rem' }}>
+                  {t.instructorEmail}
+                </div>
+                <div style={{ padding: '18px', display: 'flex', alignItems: 'center', gap: 14, justifyContent: 'center', flexWrap: 'wrap', textAlign: 'center' }}>
+                  {instructorCard.avatar_url ? (
+                    <img
+                      src={instructorCard.avatar_url}
+                      alt={instructorCard.display_name || selected.instructor}
+                      style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '3px solid #F0A500', boxShadow: '0 4px 12px rgba(0,51,102,0.2)' }}
+                    />
+                  ) : (
+                    <span aria-hidden="true" style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#F0A500,#ffcf5a)', color: '#003366', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', border: '3px solid #fff', boxShadow: '0 0 0 2px #F0A500' }}>
+                      <i className="fas fa-user-tie" />
+                    </span>
+                  )}
+                  <div>
+                    <div style={{ color: dm.heading, fontWeight: 800, fontSize: '1.05rem' }}>
+                      {instructorCard.display_name || selected.instructor}
+                    </div>
+                    {instructorCard.headline && (
+                      <div style={{ color: '#B97A00', fontSize: '0.85rem', fontWeight: 700, marginTop: 2 }}>{instructorCard.headline}</div>
+                    )}
+                  </div>
+                </div>
+                <div style={{ padding: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                  {instructorCard.contact_email ? (
+                    <a
+                      href={`mailto:${instructorCard.contact_email}`}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 18px', borderRadius: 999, background: 'linear-gradient(135deg,#003366,#0A5AA8)', color: '#fff', fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,51,102,0.25)', wordBreak: 'break-all' }}
+                    >
+                      <i className="fas fa-envelope" /> {instructorCard.contact_email}
+                    </a>
+                  ) : (
+                    <span style={{ color: dm.subtext }}>—</span>
+                  )}
+                </div>
+              </div>
+              {instructorCard.bio && (
+                <div style={{ borderTop: '1px solid rgba(0,51,102,0.10)' }}>
+                  <div style={{ padding: '10px 18px', background: 'rgba(0,51,102,0.05)', fontWeight: 700, color: dm.heading, textAlign: 'center', fontSize: '0.9rem' }}>
+                    {t.instructorAbout}
+                  </div>
+                  <p style={{ margin: 0, padding: '16px 22px 20px', fontSize: '0.95rem', lineHeight: 1.8, whiteSpace: 'pre-line' }}>{instructorCard.bio}</p>
+                </div>
+              )}
             </div>
           )}
 
