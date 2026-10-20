@@ -6,7 +6,7 @@ import { useSEO } from '../hooks/useSEO';
 import { useHomeSettings } from '../hooks/useHomeSettings';
 import CourseCover from '../components/CourseCover';
 
-const Home = ({ variant = 'home' }) => {
+const Home = ({ variant = 'home', showSignupCta = true }) => {
   const isLanding = variant === 'landing';
   const navigate = useNavigate();
   const [fadeIn, setFadeIn] = useState(false);
@@ -252,7 +252,7 @@ const Home = ({ variant = 'home' }) => {
       )}
 
       {/* Marketing CTA */}
-      {isLanding && hs.sections.cta && (
+      {isLanding && showSignupCta && hs.sections.cta && (
       <section className="cp-section">
         <div className="cp-mkt">
           <div className="cp-mkt-head">

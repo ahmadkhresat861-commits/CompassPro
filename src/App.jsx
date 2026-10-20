@@ -23,7 +23,6 @@ import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
 import InstructorRoute from './components/InstructorRoute'
-import RootRoute from './components/RootRoute'
 import AIAssistant from './components/AIAssistant'
 
 import { LanguageProvider } from './LanguageContext'
@@ -56,8 +55,17 @@ function App() {
           <Route path="/privacy" element={<><Navbar /><Legal kind="privacy" /><Footer /></>} />
           <Route path="/terms" element={<><Navbar /><Legal kind="terms" /><Footer /></>} />
 
-          {/* HOME — public: visitors see the marketing page, members see My Courses */}
-          <Route path="/home" element={<RootRoute />} />
+          {/* HOME — public page, same for visitors and members (edited from Admin > Home) */}
+          <Route
+            path="/home"
+            element={
+              <>
+                <Navbar />
+                <Home variant="landing" />
+                <Footer />
+              </>
+            }
+          />
 
           {/* ABOUT — public */}
           <Route

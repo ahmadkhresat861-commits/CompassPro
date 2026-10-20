@@ -1138,7 +1138,7 @@ const Admin = () => {
     },
     {
       icon: 'fas fa-house',
-      label: 'Home (visitors)',
+      label: 'Home',
       tab: 'landing',
     },
     {
@@ -1351,7 +1351,7 @@ const Admin = () => {
             {activeTab === 'landing' && (
               <>
                 <i className="fas fa-house"></i>{' '}
-                Home Page (what visitors see)
+                Home Page
               </>
             )}
 
