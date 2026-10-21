@@ -1350,56 +1350,63 @@ progressData = data;
               >
                 <i className="fas fa-chalkboard-teacher" /> {t.instructorInfo}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-                <div style={{ padding: '12px 18px', background: 'rgba(0,51,102,0.05)', fontWeight: 700, color: dm.heading, textAlign: 'center', fontSize: '0.9rem' }}>
-                  {t.instructorName}
-                </div>
-                <div style={{ padding: '12px 18px', background: 'rgba(0,51,102,0.05)', fontWeight: 700, color: dm.heading, textAlign: 'center', fontSize: '0.9rem' }}>
-                  {t.instructorEmail}
-                </div>
-                {instructorCard.office_hours && (
-                  <div style={{ padding: '12px 18px', background: 'rgba(0,51,102,0.05)', fontWeight: 700, color: dm.heading, textAlign: 'center', fontSize: '0.9rem' }}>
-                    {t.instructorHours}
-                  </div>
-                )}
-                <div style={{ padding: '18px', display: 'flex', alignItems: 'center', gap: 14, justifyContent: 'center', flexWrap: 'wrap', textAlign: 'center' }}>
-                  {instructorCard.avatar_url ? (
-                    <img
-                      src={instructorCard.avatar_url}
-                      alt={instructorCard.display_name || selected.instructor}
-                      style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '3px solid #F0A500', boxShadow: '0 4px 12px rgba(0,51,102,0.2)' }}
-                    />
-                  ) : (
-                    <span aria-hidden="true" style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#F0A500,#ffcf5a)', color: '#003366', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', border: '3px solid #fff', boxShadow: '0 0 0 2px #F0A500' }}>
-                      <i className="fas fa-user-tie" />
-                    </span>
-                  )}
-                  <div>
-                    <div style={{ color: dm.heading, fontWeight: 800, fontSize: '1.05rem' }}>
-                      {instructorCard.display_name || selected.instructor}
+              <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                {[
+                  {
+                    key: 'name',
+                    head: t.instructorName,
+                    body: (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+                        {instructorCard.avatar_url ? (
+                          <img
+                            src={instructorCard.avatar_url}
+                            alt={instructorCard.display_name || selected.instructor}
+                            style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '3px solid #F0A500', boxShadow: '0 4px 12px rgba(0,51,102,0.2)' }}
+                          />
+                        ) : (
+                          <span aria-hidden="true" style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#F0A500,#ffcf5a)', color: '#003366', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', border: '3px solid #fff', boxShadow: '0 0 0 2px #F0A500' }}>
+                            <i className="fas fa-user-tie" />
+                          </span>
+                        )}
+                        <div>
+                          <div style={{ color: dm.heading, fontWeight: 800, fontSize: '1.05rem' }}>
+                            {instructorCard.display_name || selected.instructor}
+                          </div>
+                          {instructorCard.headline && (
+                            <div style={{ color: '#B97A00', fontSize: '0.85rem', fontWeight: 700, marginTop: 2 }}>{instructorCard.headline}</div>
+                          )}
+                        </div>
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'email',
+                    head: t.instructorEmail,
+                    body: instructorCard.contact_email ? (
+                      <a href={`mailto:${instructorCard.contact_email}`} style={{ color: dm.text, fontSize: '0.92rem', textDecoration: 'none', wordBreak: 'break-all' }}>
+                        {instructorCard.contact_email}
+                      </a>
+                    ) : (
+                      <span style={{ color: dm.subtext }}>—</span>
+                    ),
+                  },
+                  ...(instructorCard.office_hours
+                    ? [{
+                        key: 'hours',
+                        head: t.instructorHours,
+                        body: <span style={{ whiteSpace: 'pre-line', fontSize: '0.92rem' }}>{instructorCard.office_hours}</span>,
+                      }]
+                    : []),
+                ].map((col) => (
+                  <div key={col.key} style={{ flex: '1 1 220px', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ padding: '12px 18px', background: 'rgba(0,51,102,0.05)', fontWeight: 700, color: dm.heading, textAlign: 'center', fontSize: '0.9rem' }}>
+                      {col.head}
                     </div>
-                    {instructorCard.headline && (
-                      <div style={{ color: '#B97A00', fontSize: '0.85rem', fontWeight: 700, marginTop: 2 }}>{instructorCard.headline}</div>
-                    )}
+                    <div style={{ padding: '18px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                      {col.body}
+                    </div>
                   </div>
-                </div>
-                <div style={{ padding: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                  {instructorCard.contact_email ? (
-                    <a
-                      href={`mailto:${instructorCard.contact_email}`}
-                      style={{ color: dm.text, fontSize: '0.92rem', textDecoration: 'none', wordBreak: 'break-all' }}
-                    >
-                      {instructorCard.contact_email}
-                    </a>
-                  ) : (
-                    <span style={{ color: dm.subtext }}>—</span>
-                  )}
-                </div>
-                {instructorCard.office_hours && (
-                  <div style={{ padding: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', whiteSpace: 'pre-line', fontSize: '0.92rem' }}>
-                    {instructorCard.office_hours}
-                  </div>
-                )}
+                ))}
               </div>
               {instructorCard.bio && (
                 <div style={{ borderTop: '1px solid rgba(0,51,102,0.10)' }}>
