@@ -14,6 +14,7 @@ create table if not exists public.quizzes (
   show_answers boolean not null default true,
   published    boolean not null default true,
   anti_cheat   boolean not null default true,   -- block copy/paste, record leaving the page
+  time_limit_min int check (time_limit_min is null or time_limit_min > 0),  -- null = no timer
   has_password boolean not null default false,  -- the password itself lives (hashed) in quiz_secrets
   created_by   uuid default auth.uid(),
   created_at   timestamptz not null default now()
@@ -65,6 +66,18 @@ create table if not exists public.quiz_attempts (
   focus_lost    int not null default 0,
   submitted_at  timestamptz not null default now()
 );
+
+-- One row per time the student STARTS the quiz. The server keeps the start time, so the timer
+-- cannot be reset by refreshing the page, and an abandoned start still uses up an attempt.
+create table if not exists public.quiz_sessions (
+  id         bigint generated always as identity primary key,
+  quiz_id    bigint not null references public.quizzes(id) on delete cascade,
+  student_id uuid not null,
+  started_at timestamptz not null default now(),
+  closed     boolean not null default false
+);
+alter table public.quiz_sessions enable row level security;   -- no policies: only the functions below touch it
+create index if not exists quiz_sessions_quiz_student_idx on public.quiz_sessions(quiz_id, student_id);
 
 create index if not exists quizzes_course_idx on public.quizzes(course_id);
 create index if not exists quiz_questions_quiz_idx on public.quiz_questions(quiz_id);
@@ -156,27 +169,52 @@ begin
   return encode(sha256(convert_to(s.salt || btrim(coalesce(pwd, '')), 'UTF8')), 'hex') = s.pw_hash;
 end $$;
 
--- Questions without answers (students need the password if the quiz has one)
+-- Start (or resume) the quiz: returns the questions WITHOUT answers plus the server-side timer
 create or replace function public.get_quiz_questions(qid bigint, pwd text default null)
-returns jsonb language plpgsql stable security definer set search_path = public as $$
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare
+  q record; sess record; used int; lim interval; grace interval := interval '30 seconds';
+  started timestamptz; ends timestamptz; qs jsonb;
 begin
   if auth.uid() is null then raise exception 'Not allowed'; end if;
-  if not public.teaches_quiz(qid) then
-    if not public.is_enrolled_in_quiz(qid) then raise exception 'Not allowed'; end if;
+  select * into q from public.quizzes where id = qid;
+  if not found then raise exception 'Not allowed'; end if;
+
+  if public.teaches_quiz(qid) then
+    null; -- teachers can preview: no password, no timer, no attempt used
+  else
+    if not public.is_enrolled_in_quiz(qid) or not q.published then raise exception 'Not allowed'; end if;
     if not public.quiz_password_ok(qid, pwd) then raise exception 'Wrong quiz password'; end if;
+    if q.time_limit_min is not null then lim := make_interval(mins => q.time_limit_min); end if;
+
+    select * into sess from public.quiz_sessions
+     where quiz_id = qid and student_id = auth.uid() and not closed
+     order by started_at desc limit 1;
+
+    if found and (lim is null or now() <= sess.started_at + lim + grace) then
+      started := sess.started_at;                       -- resume the open session
+    else
+      if found then update public.quiz_sessions set closed = true where id = sess.id; end if;  -- expired: it stays counted
+      select count(*) into used from public.quiz_sessions where quiz_id = qid and student_id = auth.uid();
+      if q.max_attempts is not null and used >= q.max_attempts then raise exception 'No attempts left'; end if;
+      insert into public.quiz_sessions(quiz_id, student_id) values (qid, auth.uid()) returning started_at into started;
+    end if;
+    if lim is not null then ends := started + lim; end if;
   end if;
-  return coalesce((
-    select jsonb_agg(jsonb_build_object('id', id, 'kind', kind, 'prompt', prompt, 'options', options, 'points', points)
-                     order by position, id)
-    from public.quiz_questions where quiz_id = qid
-  ), '[]'::jsonb);
+
+  select coalesce(jsonb_agg(jsonb_build_object('id', id, 'kind', kind, 'prompt', prompt, 'options', options, 'points', points)
+                            order by position, id), '[]'::jsonb)
+    into qs from public.quiz_questions where quiz_id = qid;
+
+  return jsonb_build_object('questions', qs, 'time_limit_min', q.time_limit_min,
+                            'started_at', started, 'ends_at', ends, 'server_now', now());
 end $$;
 
 -- Grade the multiple-choice part on the server, store written answers for the instructor
 create or replace function public.submit_quiz(qid bigint, answers jsonb, pwd text default null, left_page int default 0)
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare
-  q record; r record; used int; chosen int; txt text; ok boolean;
+  q record; r record; sess record; chosen int; txt text; ok boolean;
   auto numeric := 0; maxp numeric := 0; need boolean := false;
   pct numeric; did_pass boolean; review jsonb := '[]'::jsonb; clean jsonb := '{}'::jsonb; aid bigint;
 begin
@@ -187,8 +225,18 @@ begin
   if not found or not q.published then raise exception 'Quiz not available'; end if;
   if not public.quiz_password_ok(qid, pwd) then raise exception 'Wrong quiz password'; end if;
 
-  select count(*) into used from public.quiz_attempts where quiz_id = qid and student_id = auth.uid();
-  if q.max_attempts is not null and used >= q.max_attempts then raise exception 'No attempts left'; end if;
+  select * into sess from public.quiz_sessions
+   where quiz_id = qid and student_id = auth.uid() and not closed
+   order by started_at desc limit 1;
+  if not found then raise exception 'Start the quiz first'; end if;
+
+  -- Timer: the server decides. 30 s of grace for the network.
+  if q.time_limit_min is not null
+     and now() > sess.started_at + make_interval(mins => q.time_limit_min) + interval '30 seconds' then
+    update public.quiz_sessions set closed = true where id = sess.id;
+    return jsonb_build_object('expired', true);
+  end if;
+
   if not exists (select 1 from public.quiz_questions where quiz_id = qid) then
     raise exception 'This quiz has no questions yet';
   end if;
@@ -223,6 +271,7 @@ begin
     did_pass := pct >= q.pass_score;
   end if;
 
+  update public.quiz_sessions set closed = true where id = sess.id;
   insert into public.quiz_attempts(quiz_id, student_id, answers, auto_points, max_points, score, passed, needs_grading, focus_lost)
   values (qid, auth.uid(), clean, auto, maxp, pct, did_pass, need, least(greatest(coalesce(left_page, 0), 0), 1000))
   returning id into aid;
@@ -230,6 +279,21 @@ begin
   return jsonb_build_object('attempt_id', aid, 'needs_grading', need, 'score', pct, 'passed', did_pass,
                             'auto_points', auto, 'max_points', maxp, 'pass_score', q.pass_score, 'review', review);
 end $$;
+
+-- When the instructor resets an attempt, give that attempt back (remove one closed session)
+create or replace function public.free_session_on_reset()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  delete from public.quiz_sessions
+   where id = (select id from public.quiz_sessions
+                where quiz_id = old.quiz_id and student_id = old.student_id and closed
+                order by started_at desc limit 1);
+  return old;
+end $$;
+
+drop trigger if exists free_session_on_reset_trg on public.quiz_attempts;
+create trigger free_session_on_reset_trg after delete on public.quiz_attempts
+  for each row execute function public.free_session_on_reset();
 
 -- Instructor grades the written answers (marks per question) and leaves feedback
 create or replace function public.grade_quiz_attempt(aid bigint, grades jsonb, fb text default null)
@@ -279,3 +343,4 @@ grant execute on function public.set_quiz_password(bigint, text) to authenticate
 grant execute on function public.get_quiz_questions(bigint, text) to authenticated;
 grant execute on function public.submit_quiz(bigint, jsonb, text, int) to authenticated;
 grant execute on function public.grade_quiz_attempt(bigint, jsonb, text) to authenticated;
+revoke execute on function public.free_session_on_reset() from public, anon, authenticated;

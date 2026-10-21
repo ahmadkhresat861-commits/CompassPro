@@ -12,7 +12,7 @@ const btn = (primary) => ({
 });
 const chip = (bg, color) => ({ display: 'inline-block', background: bg, color, borderRadius: 999, padding: '2px 10px', fontSize: 11, fontWeight: 800, marginInlineEnd: 6 });
 
-const emptyQuiz = { title: '', description: '', pass_score: 60, max_attempts: '', show_answers: true, published: true, anti_cheat: true, password: '', clear_password: false, has_password: false };
+const emptyQuiz = { title: '', description: '', pass_score: 60, max_attempts: '', time_limit_min: '', show_answers: true, published: true, anti_cheat: true, password: '', clear_password: false, has_password: false };
 const emptyQ = { kind: 'mcq', prompt: '', options: ['', ''], correct: 0, points: 1 };
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString() : '—');
 
@@ -83,6 +83,7 @@ const InstructorQuizzes = ({ courses, students }) => {
       description: form.description.trim() || null,
       pass_score: Math.min(100, Math.max(0, Number(form.pass_score) || 0)),
       max_attempts: form.max_attempts === '' ? null : Math.max(1, Number(form.max_attempts)),
+      time_limit_min: form.time_limit_min === '' ? null : Math.max(1, Math.round(Number(form.time_limit_min))),
       show_answers: !!form.show_answers,
       published: !!form.published,
       anti_cheat: !!form.anti_cheat,
@@ -102,7 +103,7 @@ const InstructorQuizzes = ({ courses, students }) => {
 
   const editQuiz = (q) => {
     setEditing(q.id);
-    setForm({ title: q.title, description: q.description || '', pass_score: q.pass_score, max_attempts: q.max_attempts ?? '', show_answers: q.show_answers, published: q.published, anti_cheat: q.anti_cheat !== false, password: '', clear_password: false, has_password: !!q.has_password });
+    setForm({ title: q.title, description: q.description || '', pass_score: q.pass_score, max_attempts: q.max_attempts ?? '', time_limit_min: q.time_limit_min ?? '', show_answers: q.show_answers, published: q.published, anti_cheat: q.anti_cheat !== false, password: '', clear_password: false, has_password: !!q.has_password });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -208,6 +209,10 @@ const InstructorQuizzes = ({ courses, students }) => {
             <label style={lbl} htmlFor="qz-att">Max attempts (empty = unlimited)</label>
             <input id="qz-att" type="number" min="1" style={input} value={form.max_attempts} onChange={(e) => setForm({ ...form, max_attempts: e.target.value })} />
           </div>
+          <div>
+            <label style={lbl} htmlFor="qz-time">Time limit in minutes (empty = no timer)</label>
+            <input id="qz-time" type="number" min="1" style={input} value={form.time_limit_min} onChange={(e) => setForm({ ...form, time_limit_min: e.target.value })} placeholder="e.g. 30" />
+          </div>
         </div>
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '14px 0 4px', fontSize: 14, cursor: 'pointer' }}>
           <input type="checkbox" checked={form.show_answers} onChange={(e) => setForm({ ...form, show_answers: e.target.checked })} />
@@ -248,7 +253,7 @@ const InstructorQuizzes = ({ courses, students }) => {
                 <div style={{ minWidth: 200 }}>
                   <strong style={{ color: NAVY, fontSize: 16 }}>{q.title}</strong>
                   <div style={{ fontSize: 12, color: '#4A5D78', marginTop: 4 }}>
-                    Pass: {q.pass_score}% · Attempts: {q.max_attempts ?? 'unlimited'}
+                    Pass: {q.pass_score}% · Attempts: {q.max_attempts ?? 'unlimited'} · Time: {q.time_limit_min ? `${q.time_limit_min} min` : 'no limit'}
                   </div>
                   <div style={{ marginTop: 6 }}>
                     <span style={chip('#E6F0FB', NAVY)}>{c.q} question(s)</span>

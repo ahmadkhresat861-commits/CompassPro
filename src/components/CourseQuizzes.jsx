@@ -14,6 +14,8 @@ const TXT = {
     typeHere: 'Type your answer here…', instructorNotes: 'Instructor notes', cheatTitle: 'Exam mode',
     cheatInfo: 'Copy, paste and right-click are disabled, and leaving this page is recorded for your instructor.',
     leftWarn: (n) => `You left this page ${n} time(s). This is recorded for your instructor.`,
+    timeLimit: 'Time', min: 'min', noLimit: 'no limit', timeLeft: 'Time left', timeUpAuto: 'Time is up — your answers were submitted automatically.',
+    expired: 'Time is up — this submission arrived after the time limit and was not accepted.', timerNote: 'The timer is kept by the server; refreshing the page does not reset it.',
   },
   ar: {
     title: 'الاختبارات', none: 'لا توجد اختبارات بعد.', pass: 'علامة النجاح', attempts: 'المحاولات', unlimited: 'غير محدودة', start: 'ابدأ الاختبار', retake: 'إعادة المحاولة',
@@ -26,6 +28,8 @@ const TXT = {
     typeHere: 'اكتب إجابتك هنا…', instructorNotes: 'ملاحظات المدرب', cheatTitle: 'وضع الاختبار',
     cheatInfo: 'النسخ واللصق والنقر بالزر الأيمن معطّلة، ومغادرتك لهذه الصفحة تُسجَّل للمدرب.',
     leftWarn: (n) => `غادرت هذه الصفحة ${n} مرة. يتم تسجيل ذلك للمدرب.`,
+    timeLimit: 'الوقت', min: 'دقيقة', noLimit: 'بدون حد', timeLeft: 'الوقت المتبقي', timeUpAuto: 'انتهى الوقت — تم تسليم إجاباتك تلقائياً.',
+    expired: 'انتهى الوقت — وصل هذا التسليم بعد انتهاء المدة ولم يُقبل.', timerNote: 'المؤقت محفوظ على السيرفر، وتحديث الصفحة لا يعيد ضبطه.',
   },
 };
 
@@ -51,6 +55,9 @@ const CourseQuizzes = ({ courseId, userId, dm, onStats }) => {
   const [busy, setBusy] = useState(false);
   const [leftCount, setLeftCount] = useState(0);
   const leftRef = useRef(0);
+  const activeRef = useRef(null);
+  const autoRef = useRef(false);
+  const [remaining, setRemaining] = useState(null);
 
   const load = useCallback(async () => {
     const { data: q, error } = await supabase.from('quizzes').select('*').eq('course_id', courseId).eq('published', true).order('created_at');
@@ -112,10 +119,14 @@ const CourseQuizzes = ({ courseId, userId, dm, onStats }) => {
     const { data, error } = await supabase.rpc('get_quiz_questions', { qid: quiz.id, pwd: pwd || null });
     setBusy(false);
     if (error) { setMsg({ ok: false, text: /password/i.test(error.message) ? (lang === 'ar' ? 'كلمة السر غير صحيحة.' : 'Wrong quiz password.') : error.message }); return false; }
-    if (!data?.length) { setMsg({ ok: false, text: x.empty }); return false; }
+    if (!data?.questions?.length) { setMsg({ ok: false, text: x.empty }); return false; }
     leftRef.current = 0; setLeftCount(0);
+    autoRef.current = false;
     setPwAsk(null);
-    setActive({ quiz, pwd: pwd || null, questions: quiz.anti_cheat ? shuffle(data) : data, answers: {}, result: null });
+    const offset = data.server_now ? new Date(data.server_now).getTime() - new Date().getTime() : 0;
+    const ends = data.ends_at ? new Date(data.ends_at).getTime() - offset : null;
+    setRemaining(ends ? Math.max(0, Math.ceil((ends - new Date().getTime()) / 1000)) : null);
+    setActive({ quiz, pwd: pwd || null, ends, questions: quiz.anti_cheat ? shuffle(data.questions) : data.questions, answers: {}, result: null });
     return true;
   };
 
@@ -130,16 +141,37 @@ const CourseQuizzes = ({ courseId, userId, dm, onStats }) => {
     return q.kind === 'written' ? typeof v === 'string' && v.trim() !== '' : v !== undefined;
   };
 
-  const submit = async () => {
-    if (active.questions.some((q) => !answered(q))) { setMsg({ ok: false, text: x.answerAll }); return; }
+  const submit = async (auto = false) => {
+    const cur = activeRef.current || active;
+    if (!auto && cur.questions.some((q) => !answered(q))) { setMsg({ ok: false, text: x.answerAll }); return; }
     setMsg(null);
     setBusy(true);
-    const { data, error } = await supabase.rpc('submit_quiz', { qid: active.quiz.id, answers: active.answers, pwd: active.pwd, left_page: leftRef.current });
+    const { data, error } = await supabase.rpc('submit_quiz', { qid: cur.quiz.id, answers: cur.answers, pwd: cur.pwd, left_page: leftRef.current });
     setBusy(false);
     if (error) { setMsg({ ok: false, text: error.message }); return; }
-    setActive({ ...active, result: data });
+    setRemaining(null);
+    setActive({ ...cur, result: data, auto });
     load();
   };
+
+  useEffect(() => { activeRef.current = active; }, [active]);
+
+  // Countdown (server decides; this is only the display + auto-submit at zero)
+  const timed = !!(active && !active.result && active.ends);
+  useEffect(() => {
+    if (!timed) return undefined;
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((activeRef.current.ends - new Date().getTime()) / 1000));
+      setRemaining(left);
+      if (left === 0 && !autoRef.current) { autoRef.current = true; submit(true); }
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timed]);
+
+  const clock = (sec) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
 
   if (broken) return null;
   const chip = (bg, color) => ({ display: 'inline-block', background: bg, color, borderRadius: 999, padding: '2px 10px', fontSize: 12, fontWeight: 800, marginInlineEnd: 6 });
@@ -164,7 +196,7 @@ const CourseQuizzes = ({ courseId, userId, dm, onStats }) => {
             <strong style={{ color: dm.heading, fontSize: '1.05rem' }}>{q.title}</strong>{' '}
             {q.has_password && <i className="fas fa-lock" title={x.pwTitle} style={{ color: dm.subtext }} />}
             <div style={{ fontSize: 13, color: dm.subtext, marginTop: 4 }}>
-              {x.pass}: {q.pass_score}% · {x.attempts}: {at?.n || 0}/{q.max_attempts ?? x.unlimited}
+              {x.pass}: {q.pass_score}% · {x.attempts}: {at?.n || 0}/{q.max_attempts ?? x.unlimited} · {x.timeLimit}: {q.time_limit_min ? `${q.time_limit_min} ${x.min}` : x.noLimit}
             </div>
             {q.description && <p style={{ whiteSpace: 'pre-line', lineHeight: 1.7, margin: '10px 0' }}>{q.description}</p>}
             <div style={{ margin: '8px 0' }}>
@@ -209,6 +241,12 @@ const CourseQuizzes = ({ courseId, userId, dm, onStats }) => {
                 onContextMenu={q.anti_cheat ? block : undefined}
                 onDragStart={q.anti_cheat ? block : undefined}
               >
+                {remaining !== null && (
+                  <div role="timer" aria-live="off" style={{ position: 'sticky', top: 8, zIndex: 5, display: 'inline-block', background: remaining <= 60 ? '#b3261e' : '#003366', color: '#fff', borderRadius: 999, padding: '6px 16px', fontWeight: 800, marginBottom: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}>
+                    <i className="fas fa-clock" /> {x.timeLeft}: {clock(remaining)}
+                    <div style={{ fontWeight: 500, fontSize: 11, opacity: 0.85 }}>{x.timerNote}</div>
+                  </div>
+                )}
                 {q.anti_cheat && (
                   <div role="note" style={{ background: 'rgba(240,165,0,0.15)', borderRadius: 10, padding: '8px 12px', fontSize: 13, marginBottom: 12 }}>
                     <strong><i className="fas fa-shield-alt" /> {x.cheatTitle}:</strong> {x.cheatInfo}
@@ -238,7 +276,7 @@ const CourseQuizzes = ({ courseId, userId, dm, onStats }) => {
                   </fieldset>
                 ))}
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <button type="button" style={btnStyle} disabled={busy} onClick={submit}>{busy ? x.loading : x.submit}</button>
+                  <button type="button" style={btnStyle} disabled={busy} onClick={() => submit(false)}>{busy ? x.loading : x.submit}</button>
                   <button type="button" style={ghost} onClick={() => { setActive(null); setMsg(null); }}>{x.cancel}</button>
                   {msg && <span role="status" style={{ color: msg.ok ? '#0a7a43' : '#b3261e', fontWeight: 600, fontSize: 14 }}>{msg.text}</span>}
                 </div>
@@ -247,7 +285,9 @@ const CourseQuizzes = ({ courseId, userId, dm, onStats }) => {
 
             {isActive && active.result && (
               <div style={{ marginTop: 12, background: 'rgba(0,51,102,0.05)', borderRadius: 12, padding: 14 }}>
-                {active.result.needs_grading ? (
+                {active.result.expired ? (
+                  <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#b3261e' }}>{x.expired}</div>
+                ) : active.result.needs_grading ? (
                   <>
                     <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#b35c00' }}>{x.submittedWritten}</div>
                     <div style={{ fontSize: 14, marginTop: 4 }}>{x.mcqPoints}: {active.result.auto_points}/{active.result.max_points}</div>
@@ -257,7 +297,8 @@ const CourseQuizzes = ({ courseId, userId, dm, onStats }) => {
                     {x.result}: {active.result.score}% · {active.result.passed ? x.passed : x.notPassed}
                   </div>
                 )}
-                {active.result.review.filter((r) => r.kind === 'mcq').map((r) => {
+                {active.auto && !active.result.expired && <div style={{ fontSize: 13, color: '#b35c00', margin: '6px 0' }}>{x.timeUpAuto}</div>}
+                {(active.result.review || []).filter((r) => r.kind === 'mcq').map((r) => {
                   const qq = active.questions.find((k) => k.id === r.question_id);
                   if (!qq) return null;
                   return (
