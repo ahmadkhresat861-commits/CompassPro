@@ -702,7 +702,8 @@ const Courses = () => {
     ) {
       return;
     }
-    const done = calculatedProgress >= 100;
+    // "completed" is sticky: a new assignment added later never revokes it
+    const done = calculatedProgress >= 100 || !!enrollment.completed;
     if (
       Number(enrollment.progress || 0) === calculatedProgress &&
       !!enrollment.completed === done
@@ -876,7 +877,7 @@ progressData = data;
           : 100;
 
       const courseCompleted =
-        newProgress >= 100;
+        newProgress >= 100 || !!enrollment.completed;
 
       // --------------------------------------------------------
       // UPDATE ENROLLMENT
