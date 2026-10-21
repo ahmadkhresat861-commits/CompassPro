@@ -12,8 +12,8 @@ const btn = (primary) => ({
 });
 const chip = (bg, color) => ({ display: 'inline-block', background: bg, color, borderRadius: 999, padding: '2px 10px', fontSize: 11, fontWeight: 800, marginInlineEnd: 6 });
 
-const emptyQuiz = { title: '', description: '', pass_score: 60, max_attempts: '', show_answers: true, published: true };
-const emptyQ = { prompt: '', options: ['', ''], correct: 0 };
+const emptyQuiz = { title: '', description: '', pass_score: 60, max_attempts: '', show_answers: true, published: true, anti_cheat: true, password: '', clear_password: false, has_password: false };
+const emptyQ = { kind: 'mcq', prompt: '', options: ['', ''], correct: 0, points: 1 };
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString() : '—');
 
 const InstructorQuizzes = ({ courses, students }) => {
@@ -30,6 +30,7 @@ const InstructorQuizzes = ({ courses, students }) => {
   const [qEditing, setQEditing] = useState(null);
   const [msg, setMsg] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [marks, setMarks] = useState({}); // attemptId -> { qid: points, fb: text }
 
   const load = useCallback(async () => {
     if (!courseId) return;
@@ -40,12 +41,12 @@ const InstructorQuizzes = ({ courses, students }) => {
     if (!ids.length) { setCounts({}); return; }
     const [{ data: qs }, { data: at }] = await Promise.all([
       supabase.from('quiz_questions').select('quiz_id').in('quiz_id', ids),
-      supabase.from('quiz_attempts').select('quiz_id').in('quiz_id', ids),
+      supabase.from('quiz_attempts').select('quiz_id, needs_grading').in('quiz_id', ids),
     ]);
     const c = {};
-    ids.forEach((id) => { c[id] = { q: 0, a: 0 }; });
+    ids.forEach((id) => { c[id] = { q: 0, a: 0, g: 0 }; });
     (qs || []).forEach((r) => { c[r.quiz_id].q += 1; });
-    (at || []).forEach((r) => { c[r.quiz_id].a += 1; });
+    (at || []).forEach((r) => { c[r.quiz_id].a += 1; if (r.needs_grading) c[r.quiz_id].g += 1; });
     setCounts(c);
   }, [courseId]);
 
@@ -54,10 +55,9 @@ const InstructorQuizzes = ({ courses, students }) => {
 
   const loadPanel = useCallback(async (p) => {
     if (!p) return;
-    if (p.mode === 'questions') {
-      const { data } = await supabase.from('quiz_questions').select('*').eq('quiz_id', p.id).order('position').order('id');
-      setQuestions(data || []);
-    } else {
+    const { data: qs } = await supabase.from('quiz_questions').select('*').eq('quiz_id', p.id).order('position').order('id');
+    setQuestions(qs || []);
+    if (p.mode === 'results') {
       const { data } = await supabase.from('quiz_attempts').select('*').eq('quiz_id', p.id).order('submitted_at', { ascending: false });
       setAttempts(data || []);
     }
@@ -85,19 +85,24 @@ const InstructorQuizzes = ({ courses, students }) => {
       max_attempts: form.max_attempts === '' ? null : Math.max(1, Number(form.max_attempts)),
       show_answers: !!form.show_answers,
       published: !!form.published,
+      anti_cheat: !!form.anti_cheat,
     };
-    const { error } = editing
-      ? await supabase.from('quizzes').update(row).eq('id', editing)
-      : await supabase.from('quizzes').insert(row);
+    const res = editing
+      ? await supabase.from('quizzes').update(row).eq('id', editing).select('id').single()
+      : await supabase.from('quizzes').insert(row).select('id').single();
+    if (res.error) { setBusy(false); setMsg({ ok: false, text: res.error.message }); return; }
+    if (form.password.trim() || form.clear_password) {
+      const { error: pwErr } = await supabase.rpc('set_quiz_password', { qid: res.data.id, pwd: form.clear_password ? '' : form.password.trim() });
+      if (pwErr) { setBusy(false); setMsg({ ok: false, text: `Quiz saved, but the password failed: ${pwErr.message}` }); load(); return; }
+    }
     setBusy(false);
-    if (error) { setMsg({ ok: false, text: error.message }); return; }
     setMsg({ ok: true, text: editing ? 'Quiz updated.' : 'Quiz created. Now add questions.' });
     resetQuiz(); load();
   };
 
   const editQuiz = (q) => {
     setEditing(q.id);
-    setForm({ title: q.title, description: q.description || '', pass_score: q.pass_score, max_attempts: q.max_attempts ?? '', show_answers: q.show_answers, published: q.published });
+    setForm({ title: q.title, description: q.description || '', pass_score: q.pass_score, max_attempts: q.max_attempts ?? '', show_answers: q.show_answers, published: q.published, anti_cheat: q.anti_cheat !== false, password: '', clear_password: false, has_password: !!q.has_password });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -121,11 +126,14 @@ const InstructorQuizzes = ({ courses, students }) => {
   const saveQuestion = async (e) => {
     e.preventDefault();
     setMsg(null);
+    const written = qForm.kind === 'written';
     const options = qForm.options.map((o) => o.trim());
     if (!qForm.prompt.trim()) { setMsg({ ok: false, text: 'Write the question.' }); return; }
-    if (options.some((o) => !o)) { setMsg({ ok: false, text: 'Fill in every option (or remove the empty ones).' }); return; }
+    if (!written && options.some((o) => !o)) { setMsg({ ok: false, text: 'Fill in every option (or remove the empty ones).' }); return; }
+    const points = Number(qForm.points);
+    if (!(points > 0)) { setMsg({ ok: false, text: 'Points must be greater than 0.' }); return; }
     setBusy(true);
-    const row = { quiz_id: panel.id, prompt: qForm.prompt.trim(), options, correct_index: qForm.correct };
+    const row = { quiz_id: panel.id, kind: qForm.kind, prompt: qForm.prompt.trim(), points, options: written ? null : options, correct_index: written ? null : qForm.correct };
     const { error } = qEditing
       ? await supabase.from('quiz_questions').update(row).eq('id', qEditing)
       : await supabase.from('quiz_questions').insert({ ...row, position: questions.length + 1 });
@@ -138,13 +146,30 @@ const InstructorQuizzes = ({ courses, students }) => {
 
   const editQuestion = (q) => {
     setQEditing(q.id);
-    setQForm({ prompt: q.prompt, options: [...q.options], correct: q.correct_index });
+    setQForm({ kind: q.kind, prompt: q.prompt, options: q.options ? [...q.options] : ['', ''], correct: q.correct_index ?? 0, points: q.points });
   };
 
   const removeQuestion = async (q) => {
     if (!window.confirm('Delete this question?')) return;
     const { error } = await supabase.from('quiz_questions').delete().eq('id', q.id);
     if (error) { setMsg({ ok: false, text: error.message }); return; }
+    loadPanel(panel); load();
+  };
+
+  const saveGrade = async (a) => {
+    const m = marks[a.id] || {};
+    const written = questions.filter((k) => k.kind === 'written');
+    const grades = {};
+    for (const k of written) {
+      const v = m[k.id] !== undefined ? m[k.id] : (a.grades?.[k.id] ?? '');
+      if (v === '' || Number.isNaN(Number(v))) continue;
+      if (Number(v) < 0 || Number(v) > Number(k.points)) { setMsg({ ok: false, text: `A mark must be between 0 and ${k.points}.` }); return; }
+      grades[k.id] = Number(v);
+    }
+    const { error } = await supabase.rpc('grade_quiz_attempt', { aid: a.id, grades, fb: (m.fb !== undefined ? m.fb : (a.feedback || '')) });
+    if (error) { setMsg({ ok: false, text: error.message }); return; }
+    setMsg({ ok: true, text: 'Grade saved.' });
+    setMarks((p) => { const n = { ...p }; delete n[a.id]; return n; });
     loadPanel(panel); load();
   };
 
@@ -189,6 +214,18 @@ const InstructorQuizzes = ({ courses, students }) => {
           Show the correct answers to students after they submit
         </label>
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '8px 0 4px', fontSize: 14, cursor: 'pointer' }}>
+          <input type="checkbox" checked={form.anti_cheat} onChange={(e) => setForm({ ...form, anti_cheat: e.target.checked })} />
+          Anti-cheat mode: block copy / paste / right-click, shuffle question order, and record when the student leaves the page
+        </label>
+        <label style={lbl} htmlFor="qz-pw">Quiz password {form.has_password ? '(a password is set — type a new one to replace it)' : '(optional — students must enter it to start)'}</label>
+        <input id="qz-pw" type="text" autoComplete="off" style={input} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value, clear_password: false })} placeholder={form.has_password ? '••••••••' : 'e.g. midterm2026'} />
+        {form.has_password && (
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '8px 0 4px', fontSize: 14, cursor: 'pointer' }}>
+            <input type="checkbox" checked={form.clear_password} onChange={(e) => setForm({ ...form, clear_password: e.target.checked, password: '' })} />
+            Remove the password
+          </label>
+        )}
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '8px 0 4px', fontSize: 14, cursor: 'pointer' }}>
           <input type="checkbox" checked={form.published} onChange={(e) => setForm({ ...form, published: e.target.checked })} />
           Published (visible to students)
         </label>
@@ -216,6 +253,8 @@ const InstructorQuizzes = ({ courses, students }) => {
                   <div style={{ marginTop: 6 }}>
                     <span style={chip('#E6F0FB', NAVY)}>{c.q} question(s)</span>
                     <span style={chip('#FFF2D6', '#8a5a00')}>{c.a} attempt(s)</span>
+                    {c.g > 0 && <span style={chip('#FFF2D6', '#b35c00')}>{c.g} to grade</span>}
+                    {q.has_password && <span style={chip('#F0E8FA', '#5b2d91')}>password</span>}
                     {!q.published && <span style={chip('#FDE7E7', '#b3261e')}>draft</span>}
                   </div>
                 </div>
@@ -231,9 +270,10 @@ const InstructorQuizzes = ({ courses, students }) => {
                 <div style={{ marginTop: 14 }}>
                   {questions.map((qq, n) => (
                     <div key={qq.id} style={{ background: '#F7FAFE', borderRadius: 14, padding: 12, marginBottom: 8 }}>
-                      <strong>{n + 1}. {qq.prompt}</strong>
+                      <strong>{n + 1}. {qq.prompt}</strong> <span style={chip(qq.kind === 'written' ? '#F0E8FA' : '#E6F0FB', qq.kind === 'written' ? '#5b2d91' : NAVY)}>{qq.kind === 'written' ? 'written' : 'multiple choice'} · {qq.points} pt</span>
+                      {qq.kind === 'written' && <div style={{ fontSize: 13, color: '#4A5D78', margin: '6px 0' }}>Graded manually by you.</div>}
                       <ul style={{ margin: '6px 0', paddingInlineStart: 20, fontSize: 14 }}>
-                        {qq.options.map((o, i) => (
+                        {(qq.options || []).map((o, i) => (
                           <li key={i} style={{ color: i === qq.correct_index ? '#0a7a43' : 'inherit', fontWeight: i === qq.correct_index ? 700 : 400 }}>
                             {o}{i === qq.correct_index ? ' ✓' : ''}
                           </li>
@@ -245,10 +285,23 @@ const InstructorQuizzes = ({ courses, students }) => {
                   ))}
                   <form onSubmit={saveQuestion} style={{ border: '1px dashed #CBD7E8', borderRadius: 14, padding: 14, marginTop: 10 }}>
                     <strong style={{ color: NAVY }}>{qEditing ? 'Edit question' : 'Add a question'}</strong>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 14 }}>
+                      <div>
+                        <label style={lbl} htmlFor="qq-kind">Type</label>
+                        <select id="qq-kind" style={input} value={qForm.kind} onChange={(e) => setQForm({ ...qForm, kind: e.target.value })}>
+                          <option value="mcq">Multiple choice (auto-graded)</option>
+                          <option value="written">Written answer (you grade it)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={lbl} htmlFor="qq-points">Points</label>
+                        <input id="qq-points" type="number" min="0.5" step="0.5" style={input} value={qForm.points} onChange={(e) => setQForm({ ...qForm, points: e.target.value })} />
+                      </div>
+                    </div>
                     <label style={lbl} htmlFor="qq-prompt">Question</label>
                     <textarea id="qq-prompt" rows={2} style={input} value={qForm.prompt} onChange={(e) => setQForm({ ...qForm, prompt: e.target.value })} />
-                    <div style={{ ...lbl, marginTop: 14 }}>Options — select the correct one</div>
-                    {qForm.options.map((o, i) => (
+                    {qForm.kind === 'mcq' && <div style={{ ...lbl, marginTop: 14 }}>Options — select the correct one</div>}
+                    {qForm.kind === 'mcq' && qForm.options.map((o, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
                         <input type="radio" name="qq-correct" aria-label={`Option ${i + 1} is correct`} checked={qForm.correct === i} onChange={() => setQForm({ ...qForm, correct: i })} />
                         <input style={input} aria-label={`Option ${i + 1}`} value={o} onChange={(e) => setOpt(i, e.target.value)} placeholder={`Option ${i + 1}`} />
@@ -256,7 +309,7 @@ const InstructorQuizzes = ({ courses, students }) => {
                       </div>
                     ))}
                     <div style={{ display: 'flex', gap: 10, marginTop: 8, flexWrap: 'wrap' }}>
-                      {qForm.options.length < 6 && <button type="button" style={btn(false)} onClick={addOpt}>+ Add option</button>}
+                      {qForm.kind === 'mcq' && qForm.options.length < 6 && <button type="button" style={btn(false)} onClick={addOpt}>+ Add option</button>}
                       <button type="submit" style={btn(true)} disabled={busy}>{qEditing ? 'Save question' : 'Add question'}</button>
                       {qEditing && <button type="button" style={btn(false)} onClick={() => { setQEditing(null); setQForm(emptyQ); }}>Cancel</button>}
                     </div>
@@ -267,18 +320,46 @@ const InstructorQuizzes = ({ courses, students }) => {
               {open && panel.mode === 'results' && (
                 <div style={{ marginTop: 14 }}>
                   {!attempts.length && <p style={{ color: '#4A5D78', margin: 0 }}>No attempts yet.</p>}
-                  {attempts.map((a) => (
-                    <div key={a.id} style={{ background: '#F7FAFE', borderRadius: 14, padding: 12, marginBottom: 8, display: 'flex', gap: 10, justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
-                      <div>
-                        <strong>{students[a.student_id] || a.student_id.slice(0, 8)}</strong>
-                        <div style={{ fontSize: 12, color: '#4A5D78' }}>{fmt(a.submitted_at)}</div>
+                  {attempts.map((a) => {
+                    const written = questions.filter((k) => k.kind === 'written');
+                    const m = marks[a.id] || {};
+                    return (
+                      <div key={a.id} style={{ background: '#F7FAFE', borderRadius: 14, padding: 12, marginBottom: 8 }}>
+                        <div style={{ display: 'flex', gap: 10, justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <div>
+                            <strong>{students[a.student_id] || a.student_id.slice(0, 8)}</strong>
+                            <div style={{ fontSize: 12, color: '#4A5D78' }}>{fmt(a.submitted_at)}</div>
+                            {a.focus_lost > 0 && <div style={{ fontSize: 12, color: '#b3261e', fontWeight: 700 }}>⚠ Left the page {a.focus_lost} time(s)</div>}
+                          </div>
+                          <div>
+                            {a.needs_grading
+                              ? <span style={chip('#FFF2D6', '#b35c00')}>waiting for your grading</span>
+                              : <span style={chip(a.passed ? '#E8F6EE' : '#FDE7E7', a.passed ? '#0a7a43' : '#b3261e')}>{a.score}% · {a.passed ? 'passed' : 'not passed'}</span>}
+                            <button type="button" style={btn(false)} onClick={() => resetAttempt(a)}>Reset</button>
+                          </div>
+                        </div>
+                        {written.length > 0 && (
+                          <div style={{ marginTop: 10 }}>
+                            {written.map((k) => (
+                              <div key={k.id} style={{ borderTop: '1px solid #E6F0FB', paddingTop: 8, marginTop: 8 }}>
+                                <div style={{ fontWeight: 700, fontSize: 14 }}>{k.prompt}</div>
+                                <div style={{ whiteSpace: 'pre-wrap', background: '#fff', border: '1px solid #E6F0FB', borderRadius: 10, padding: 10, margin: '6px 0', fontSize: 14 }}>
+                                  {a.answers?.[k.id] || <em style={{ color: '#4A5D78' }}>No answer</em>}
+                                </div>
+                                <label style={{ ...lbl, marginTop: 0 }} htmlFor={`mk-${a.id}-${k.id}`}>Mark / {k.points}</label>
+                                <input id={`mk-${a.id}-${k.id}`} type="number" min="0" max={k.points} step="0.5" style={{ ...input, maxWidth: 140 }}
+                                  value={m[k.id] !== undefined ? m[k.id] : (a.grades?.[k.id] ?? '')}
+                                  onChange={(e) => setMarks({ ...marks, [a.id]: { ...m, [k.id]: e.target.value } })} />
+                              </div>
+                            ))}
+                            <label style={lbl} htmlFor={`fb-${a.id}`}>Notes for the student (optional)</label>
+                            <input id={`fb-${a.id}`} style={input} value={m.fb !== undefined ? m.fb : (a.feedback || '')} onChange={(e) => setMarks({ ...marks, [a.id]: { ...m, fb: e.target.value } })} />
+                            <button type="button" style={{ ...btn(true), marginTop: 10 }} onClick={() => saveGrade(a)}>{a.graded_at ? 'Update grade' : 'Save grade'}</button>
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <span style={chip(a.passed ? '#E8F6EE' : '#FDE7E7', a.passed ? '#0a7a43' : '#b3261e')}>{a.score}% ({a.correct}/{a.total}) · {a.passed ? 'passed' : 'not passed'}</span>
-                        <button type="button" style={btn(false)} onClick={() => resetAttempt(a)}>Reset</button>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
