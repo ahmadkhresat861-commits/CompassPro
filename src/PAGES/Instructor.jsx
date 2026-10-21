@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import DualOrbitLoader from '../components/DualOrbitLoader';
+import InstructorAssignments from '../components/InstructorAssignments';
 
 const NAVY = '#003366';
 const GOLD = '#F0A500';
@@ -196,7 +197,7 @@ const Instructor = () => {
     </div>
   );
 
-  const tabs = [['overview', 'Overview'], ['courses', 'My Courses'], ['lessons', 'Lessons'], ['profile', 'My Profile']];
+  const tabs = [['overview', 'Overview'], ['courses', 'My Courses'], ['lessons', 'Lessons'], ['assignments', 'Assignments'], ['profile', 'My Profile']];
   const chapters = [...new Set(lessons.map((l) => l.chapter).filter(Boolean))];
   const note = (m) => m && <span role="status" style={{ color: m.ok ? '#0a7a43' : '#b3261e', fontWeight: 600, fontSize: 14 }}>{m.text}</span>;
 
@@ -274,6 +275,8 @@ const Instructor = () => {
             ))}
           </div>
         )}
+
+        {tab === 'assignments' && <InstructorAssignments courses={courses} students={students} />}
 
         {tab === 'profile' && (
           <form style={card} onSubmit={saveCard}>

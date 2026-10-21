@@ -5,6 +5,7 @@ import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
 import DualOrbitLoader from '../components/DualOrbitLoader';
 import CourseCover from '../components/CourseCover';
+import CourseAssignments from '../components/CourseAssignments';
 
 // ============================================================
 // STAR RATING
@@ -2245,6 +2246,10 @@ lesson.id ===
               )}
             </main>
           </div>
+        )}
+
+        {enrollment && user && selected && (
+          <CourseAssignments courseId={selected.id} userId={user.id} dm={dm} />
         )}
 
         {/* ================================================== */}
