@@ -74,9 +74,10 @@ const InstructorAssignments = ({ courses, students }) => {
       if (f.size > 50 * 1048576) { setBusy(false); setMsg({ ok: false, text: `"${f.name}" is larger than 50MB.` }); return; }
     }
     const res = editing
-      ? await supabase.from('assignments').update(row).eq('id', editing).select('id').single()
+      ? await supabase.from('assignments').update(row).eq('id', editing).select('id').maybeSingle()
       : await supabase.from('assignments').insert(row).select('id').single();
     if (res.error) { setBusy(false); setMsg({ ok: false, text: res.error.message }); return; }
+    if (!res.data) { setBusy(false); reset(); load(); setMsg({ ok: false, text: 'This assignment no longer exists (it was deleted). The form was reset — create it again.' }); return; }
     const aid = res.data.id;
     const failed = [];
     for (const f of newFiles) {
@@ -108,6 +109,7 @@ const InstructorAssignments = ({ courses, students }) => {
     const { error } = await supabase.from('assignments').delete().eq('id', a.id);
     if (!error && paths.length) await supabase.storage.from('assignment-files').remove(paths);
     if (error) { setMsg({ ok: false, text: error.message }); return; }
+    if (editing === a.id) reset();
     load();
   };
 

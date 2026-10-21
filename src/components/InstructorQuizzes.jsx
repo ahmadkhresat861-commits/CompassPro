@@ -89,9 +89,14 @@ const InstructorQuizzes = ({ courses, students }) => {
       anti_cheat: !!form.anti_cheat,
     };
     const res = editing
-      ? await supabase.from('quizzes').update(row).eq('id', editing).select('id').single()
+      ? await supabase.from('quizzes').update(row).eq('id', editing).select('id').maybeSingle()
       : await supabase.from('quizzes').insert(row).select('id').single();
     if (res.error) { setBusy(false); setMsg({ ok: false, text: res.error.message }); return; }
+    if (!res.data) {
+      setBusy(false); resetQuiz(); load();
+      setMsg({ ok: false, text: 'This quiz no longer exists (it was deleted). The form was reset — create it again.' });
+      return;
+    }
     if (form.password.trim() || form.clear_password) {
       const { error: pwErr } = await supabase.rpc('set_quiz_password', { qid: res.data.id, pwd: form.clear_password ? '' : form.password.trim() });
       if (pwErr) { setBusy(false); setMsg({ ok: false, text: `Quiz saved, but the password failed: ${pwErr.message}` }); load(); return; }
@@ -112,6 +117,7 @@ const InstructorQuizzes = ({ courses, students }) => {
     const { error } = await supabase.from('quizzes').delete().eq('id', q.id);
     if (error) { setMsg({ ok: false, text: error.message }); return; }
     if (panel?.id === q.id) setPanel(null);
+    if (editing === q.id) resetQuiz();
     load();
   };
 
