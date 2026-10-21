@@ -9,7 +9,7 @@ const TXT = {
     submit: 'Submit', resubmit: 'Replace submission', uploading: 'Uploading…', feedback: 'Instructor notes',
     chooseFile: 'Choose a file first.', tooBig: (m) => `File is too large (max ${m}MB).`, videoOk: 'Video allowed (up to 50MB). Other files up to 10MB.',
     filesOnly: 'Files up to 10MB.', noVideo: 'Video files are not allowed for this assignment.', open: 'Open my file', done: 'Submitted successfully.',
-    locked: 'Graded submissions can no longer be changed.', attached: 'Files from your instructor', setup: 'Assignments are not set up yet.',
+    locked: 'Graded submissions can no longer be changed.', counts: (a, b) => `${a} of ${b} submitted — each submission counts toward your course progress.`, attached: 'Files from your instructor', setup: 'Assignments are not set up yet.',
   },
   ar: {
     title: 'الواجبات', none: 'لا توجد واجبات بعد.', due: 'آخر موعد', max: 'العلامة العظمى', late: 'متأخر', graded: 'تم التصحيح',
@@ -17,13 +17,13 @@ const TXT = {
     submit: 'تسليم', resubmit: 'استبدال التسليم', uploading: 'جاري الرفع…', feedback: 'ملاحظات المدرب',
     chooseFile: 'اختر ملفاً أولاً.', tooBig: (m) => `حجم الملف كبير (الحد الأقصى ${m} ميغابايت).`, videoOk: 'يُسمح بالفيديو (حتى 50 ميغابايت). باقي الملفات حتى 10 ميغابايت.',
     filesOnly: 'ملفات حتى 10 ميغابايت.', noVideo: 'ملفات الفيديو غير مسموحة في هذا الواجب.', open: 'فتح ملفي', done: 'تم التسليم بنجاح.',
-    locked: 'لا يمكن تعديل تسليم تم تصحيحه.', attached: 'ملفات من المدرب', setup: 'الواجبات غير مفعّلة بعد.',
+    locked: 'لا يمكن تعديل تسليم تم تصحيحه.', counts: (a, b) => `تم تسليم ${a} من ${b} — كل واجب تسلّمه يُحتسب ضمن تقدمك في المادة.`, attached: 'ملفات من المدرب', setup: 'الواجبات غير مفعّلة بعد.',
   },
 };
 
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString() : '—');
 
-const CourseAssignments = ({ courseId, userId, dm }) => {
+const CourseAssignments = ({ courseId, userId, dm, onStats }) => {
   const { lang } = useLang();
   const x = TXT[lang] || TXT.en;
   const [items, setItems] = useState([]);
@@ -34,20 +34,22 @@ const CourseAssignments = ({ courseId, userId, dm }) => {
   const [msg, setMsg] = useState({});
   const [busy, setBusy] = useState(null);
   const [broken, setBroken] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
     const { data: a, error } = await supabase.from('assignments').select('*').eq('course_id', courseId).order('created_at', { ascending: false });
-    if (error) { setBroken(true); return; }
+    if (error) { setBroken(true); setLoaded(true); return; }
     setBroken(false);
     setItems(a || []);
     const ids = (a || []).map((r) => r.id);
-    if (!ids.length) { setSubs({}); setAtts({}); return; }
+    if (!ids.length) { setSubs({}); setAtts({}); setLoaded(true); return; }
     const { data: af } = await supabase.from('assignment_files').select('*').in('assignment_id', ids).order('created_at');
     const by = {};
     (af || []).forEach((f) => { (by[f.assignment_id] = by[f.assignment_id] || []).push(f); });
     setAtts(by);
     const { data: s } = await supabase.from('submissions').select('*').eq('student_id', userId).in('assignment_id', ids);
     setSubs(Object.fromEntries((s || []).map((r) => [r.assignment_id, r])));
+    setLoaded(true);
   }, [courseId, userId]);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -92,6 +94,11 @@ const CourseAssignments = ({ courseId, userId, dm }) => {
     if (data?.signedUrl) window.open(data.signedUrl, '_blank', 'noopener');
   };
 
+  useEffect(() => {
+    if (!onStats || broken) return;
+    onStats({ loaded: loaded, total: items.length, submitted: items.filter((a) => subs[a.id]).length });
+  }, [items, subs, broken, loaded, onStats]);
+
   if (broken) return null;
   const chip = (bg, color) => ({ display: 'inline-block', background: bg, color, borderRadius: 999, padding: '2px 10px', fontSize: 12, fontWeight: 800, marginInlineEnd: 6 });
 
@@ -99,6 +106,7 @@ const CourseAssignments = ({ courseId, userId, dm }) => {
     <section aria-label={x.title} style={{ background: dm.reviewBg, borderRadius: 15, padding: 22, boxShadow: dm.shadow, marginBottom: 40, color: dm.text }}>
       <h2 style={{ color: dm.heading, margin: '0 0 14px', fontSize: '1.3rem' }}><i className="fas fa-tasks" /> {x.title}</h2>
       {!items.length && <p style={{ color: dm.subtext, margin: 0 }}>{x.none}</p>}
+      {items.length > 0 && <p style={{ color: dm.subtext, margin: '0 0 14px', fontSize: 13 }}>{x.counts(items.filter((a) => subs[a.id]).length, items.length)}</p>}
       {items.map((a) => {
         const s = subs[a.id];
         const late = s && a.due_at && new Date(s.submitted_at).getTime() > new Date(a.due_at).getTime();

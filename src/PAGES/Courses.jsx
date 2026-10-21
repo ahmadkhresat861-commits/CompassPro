@@ -114,6 +114,8 @@ const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [selected, setSelected] = useState(null);
   const [instructorCard, setInstructorCard] = useState(null);
+  const [aStats, setAStats] = useState({ loaded: false, total: 0, submitted: 0 });
+  const [progressReady, setProgressReady] = useState(false);
 
   useSEO(
     selected
@@ -425,6 +427,7 @@ const Courses = () => {
     }
 
     setLessonsLoading(true);
+    setProgressReady(false);
 
     try {
       // --------------------------------------------------------
@@ -529,6 +532,7 @@ const Courses = () => {
       );
     } finally {
       setLessonsLoading(false);
+      setProgressReady(true);
     }
   };
 
@@ -661,7 +665,10 @@ const Courses = () => {
   // ============================================================
 
   const calculatedProgress = useMemo(() => {
-    if (!lessons.length) {
+    // Course progress = (completed lessons + submitted assignments)
+    //                   / (all lessons + all assignments)
+    const totalItems = lessons.length + aStats.total;
+    if (!totalItems) {
       return Number(
         enrollment?.progress || 0
       );
@@ -673,15 +680,46 @@ const Courses = () => {
       ).length;
 
     return Math.round(
-      (completedCount /
-        lessons.length) *
+      ((completedCount + aStats.submitted) /
+        totalItems) *
         100
     );
   }, [
     lessons,
     lessonProgress,
     enrollment,
+    aStats,
   ]);
+
+  // Keep enrollments.progress/completed in sync (instructor dashboard and
+  // certificate read them) when lessons or assignments change.
+  useEffect(() => {
+    if (
+      !enrollment ||
+      !progressReady ||
+      !aStats.loaded ||
+      lessons.length + aStats.total === 0
+    ) {
+      return;
+    }
+    const done = calculatedProgress >= 100;
+    if (
+      Number(enrollment.progress || 0) === calculatedProgress &&
+      !!enrollment.completed === done
+    ) {
+      return;
+    }
+    supabase
+      .from('enrollments')
+      .update({ progress: calculatedProgress, completed: done })
+      .eq('id', enrollment.id)
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (!error && data) setEnrollment(data);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calculatedProgress, progressReady, aStats.loaded, enrollment?.id]);
 
   // ============================================================
   // MARK LESSON COMPLETED
@@ -824,11 +862,15 @@ progressData = data;
           );
         }).length;
 
+      const totalItems =
+        lessons.length + aStats.total;
+
       const newProgress =
-        lessons.length > 0
+        totalItems > 0
           ? Math.round(
-              (completedCount /
-                lessons.length) *
+              ((completedCount +
+                aStats.submitted) /
+                totalItems) *
                 100
             )
           : 100;
@@ -2249,7 +2291,7 @@ lesson.id ===
         )}
 
         {enrollment && user && selected && (
-          <CourseAssignments courseId={selected.id} userId={user.id} dm={dm} />
+          <CourseAssignments courseId={selected.id} userId={user.id} dm={dm} onStats={setAStats} />
         )}
 
         {/* ================================================== */}
