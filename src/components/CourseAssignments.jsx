@@ -9,7 +9,7 @@ const TXT = {
     submit: 'Submit', resubmit: 'Replace submission', uploading: 'Uploading…', feedback: 'Instructor notes',
     chooseFile: 'Choose a file first.', tooBig: (m) => `File is too large (max ${m}MB).`, videoOk: 'Video allowed (up to 50MB). Other files up to 10MB.',
     filesOnly: 'Files up to 10MB.', noVideo: 'Video files are not allowed for this assignment.', open: 'Open my file', done: 'Submitted successfully.',
-    locked: 'Graded submissions can no longer be changed.', setup: 'Assignments are not set up yet.',
+    locked: 'Graded submissions can no longer be changed.', attached: 'Files from your instructor', setup: 'Assignments are not set up yet.',
   },
   ar: {
     title: 'الواجبات', none: 'لا توجد واجبات بعد.', due: 'آخر موعد', max: 'العلامة العظمى', late: 'متأخر', graded: 'تم التصحيح',
@@ -17,7 +17,7 @@ const TXT = {
     submit: 'تسليم', resubmit: 'استبدال التسليم', uploading: 'جاري الرفع…', feedback: 'ملاحظات المدرب',
     chooseFile: 'اختر ملفاً أولاً.', tooBig: (m) => `حجم الملف كبير (الحد الأقصى ${m} ميغابايت).`, videoOk: 'يُسمح بالفيديو (حتى 50 ميغابايت). باقي الملفات حتى 10 ميغابايت.',
     filesOnly: 'ملفات حتى 10 ميغابايت.', noVideo: 'ملفات الفيديو غير مسموحة في هذا الواجب.', open: 'فتح ملفي', done: 'تم التسليم بنجاح.',
-    locked: 'لا يمكن تعديل تسليم تم تصحيحه.', setup: 'الواجبات غير مفعّلة بعد.',
+    locked: 'لا يمكن تعديل تسليم تم تصحيحه.', attached: 'ملفات من المدرب', setup: 'الواجبات غير مفعّلة بعد.',
   },
 };
 
@@ -28,6 +28,7 @@ const CourseAssignments = ({ courseId, userId, dm }) => {
   const x = TXT[lang] || TXT.en;
   const [items, setItems] = useState([]);
   const [subs, setSubs] = useState({});
+  const [atts, setAtts] = useState({});
   const [files, setFiles] = useState({});
   const [notes, setNotes] = useState({});
   const [msg, setMsg] = useState({});
@@ -40,7 +41,11 @@ const CourseAssignments = ({ courseId, userId, dm }) => {
     setBroken(false);
     setItems(a || []);
     const ids = (a || []).map((r) => r.id);
-    if (!ids.length) { setSubs({}); return; }
+    if (!ids.length) { setSubs({}); setAtts({}); return; }
+    const { data: af } = await supabase.from('assignment_files').select('*').in('assignment_id', ids).order('created_at');
+    const by = {};
+    (af || []).forEach((f) => { (by[f.assignment_id] = by[f.assignment_id] || []).push(f); });
+    setAtts(by);
     const { data: s } = await supabase.from('submissions').select('*').eq('student_id', userId).in('assignment_id', ids);
     setSubs(Object.fromEntries((s || []).map((r) => [r.assignment_id, r])));
   }, [courseId, userId]);
@@ -77,6 +82,11 @@ const CourseAssignments = ({ courseId, userId, dm }) => {
     load();
   };
 
+  const openAtt = async (f) => {
+    const { data } = await supabase.storage.from('assignment-files').createSignedUrl(f.file_path, 3600, { download: f.file_name || true });
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank', 'noopener');
+  };
+
   const open = async (s) => {
     const { data } = await supabase.storage.from('submissions').createSignedUrl(s.file_path, 3600, { download: s.file_name || true });
     if (data?.signedUrl) window.open(data.signedUrl, '_blank', 'noopener');
@@ -100,6 +110,17 @@ const CourseAssignments = ({ courseId, userId, dm }) => {
               {x.due}: {fmt(a.due_at)} · {x.max}: {a.max_score}
             </div>
             {a.description && <p style={{ whiteSpace: 'pre-line', lineHeight: 1.7, margin: '10px 0' }}>{a.description}</p>}
+            {(atts[a.id] || []).length > 0 && (
+              <div style={{ margin: '10px 0' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: dm.subtext, marginBottom: 6 }}>{x.attached}</div>
+                {atts[a.id].map((f) => (
+                  <button key={f.id} type="button" onClick={() => openAtt(f)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, margin: '0 8px 8px 0', padding: '7px 14px', borderRadius: 999, border: '1px solid rgba(0,51,102,0.18)', background: 'rgba(0,51,102,0.05)', color: dm.heading, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                    <i className="fas fa-paperclip" /> {f.file_name}
+                  </button>
+                ))}
+              </div>
+            )}
             {s && (
               <div style={{ background: 'rgba(0,51,102,0.05)', borderRadius: 12, padding: 12, margin: '10px 0' }}>
                 <span style={chip('#E6F0FB', '#003366')}>{x.submitted} · {fmt(s.submitted_at)}</span>

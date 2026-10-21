@@ -27,6 +27,8 @@ const InstructorAssignments = ({ courses, students }) => {
   const courseId = pickedCourse || String(courses[0]?.id ?? '');
   const [items, setItems] = useState([]);
   const [subs, setSubs] = useState([]);
+  const [filesBy, setFilesBy] = useState({});
+  const [newFiles, setNewFiles] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState(null);
   const [openId, setOpenId] = useState(null);
@@ -43,13 +45,17 @@ const InstructorAssignments = ({ courses, students }) => {
     if (ids.length) {
       const { data: s } = await supabase.from('submissions').select('*').in('assignment_id', ids).order('submitted_at', { ascending: false });
       setSubs(s || []);
-    } else setSubs([]);
+      const { data: af } = await supabase.from('assignment_files').select('*').in('assignment_id', ids).order('created_at');
+      const by = {};
+      (af || []).forEach((f) => { (by[f.assignment_id] = by[f.assignment_id] || []).push(f); });
+      setFilesBy(by);
+    } else { setSubs([]); setFilesBy({}); }
   }, [courseId]);
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
-  const reset = () => { setForm(emptyForm); setEditing(null); };
+  const reset = () => { setForm(emptyForm); setEditing(null); setNewFiles([]); };
 
   const save = async (e) => {
     e.preventDefault();
@@ -64,11 +70,27 @@ const InstructorAssignments = ({ courses, students }) => {
       max_score: Number(form.max_score) || 100,
       allow_video: !!form.allow_video,
     };
-    const { error } = editing
-      ? await supabase.from('assignments').update(row).eq('id', editing)
-      : await supabase.from('assignments').insert(row);
+    for (const f of newFiles) {
+      if (f.size > 50 * 1048576) { setBusy(false); setMsg({ ok: false, text: `"${f.name}" is larger than 50MB.` }); return; }
+    }
+    const res = editing
+      ? await supabase.from('assignments').update(row).eq('id', editing).select('id').single()
+      : await supabase.from('assignments').insert(row).select('id').single();
+    if (res.error) { setBusy(false); setMsg({ ok: false, text: res.error.message }); return; }
+    const aid = res.data.id;
+    const failed = [];
+    for (const f of newFiles) {
+      const path = `${aid}/${new Date().getTime()}-${f.name.replace(/[^\w.-]+/g, '_')}`;
+      const { error: upErr } = await supabase.storage.from('assignment-files').upload(path, f, { contentType: f.type || undefined });
+      if (upErr) { failed.push(f.name); continue; }
+      const { error: rowErr } = await supabase.from('assignment_files').insert({ assignment_id: aid, file_path: path, file_name: f.name, file_type: f.type || null, file_size: f.size });
+      if (rowErr) { failed.push(f.name); await supabase.storage.from('assignment-files').remove([path]); }
+    }
     setBusy(false);
-    if (error) { setMsg({ ok: false, text: error.message }); return; }
+    if (failed.length) {
+      setMsg({ ok: false, text: `Saved, but these files failed: ${failed.join(', ')} (run supabase/sql/instructor_phase2b.sql)` });
+      setNewFiles([]); load(); return;
+    }
     setMsg({ ok: true, text: editing ? 'Assignment updated.' : 'Assignment published.' });
     reset();
     load();
@@ -82,9 +104,25 @@ const InstructorAssignments = ({ courses, students }) => {
 
   const remove = async (a) => {
     if (!window.confirm(`Delete "${a.title}" and all its submissions?`)) return;
+    const paths = (filesBy[a.id] || []).map((f) => f.file_path);
     const { error } = await supabase.from('assignments').delete().eq('id', a.id);
+    if (!error && paths.length) await supabase.storage.from('assignment-files').remove(paths);
     if (error) { setMsg({ ok: false, text: error.message }); return; }
     load();
+  };
+
+  const removeAttachment = async (f) => {
+    if (!window.confirm(`Remove "${f.file_name}"?`)) return;
+    const { error } = await supabase.from('assignment_files').delete().eq('id', f.id);
+    if (error) { setMsg({ ok: false, text: error.message }); return; }
+    await supabase.storage.from('assignment-files').remove([f.file_path]);
+    load();
+  };
+
+  const openAttachment = async (f) => {
+    const { data, error } = await supabase.storage.from('assignment-files').createSignedUrl(f.file_path, 3600, { download: f.file_name || true });
+    if (error) { setMsg({ ok: false, text: `Could not open file: ${error.message}` }); return; }
+    window.open(data.signedUrl, '_blank', 'noopener');
   };
 
   const download = async (s) => {
@@ -136,6 +174,15 @@ const InstructorAssignments = ({ courses, students }) => {
             <input id="as-max" type="number" min="1" style={input} value={form.max_score} onChange={(e) => setForm({ ...form, max_score: e.target.value })} />
           </div>
         </div>
+        <label style={lbl} htmlFor="as-files">Attach files for students (instructions, templates, data — up to 50MB each)</label>
+        <input id="as-files" type="file" multiple onChange={(e) => setNewFiles(Array.from(e.target.files || []))} key={`${editing}-${items.length}-${busy}`} />
+        {editing && (filesBy[editing] || []).length > 0 && (
+          <ul style={{ margin: '10px 0 0', paddingInlineStart: 18, fontSize: 13 }}>
+            {filesBy[editing].map((f) => (
+              <li key={f.id}><button type="button" onClick={() => openAttachment(f)} style={{ background: 'none', border: 'none', color: NAVY, cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>{f.file_name}</button> <button type="button" onClick={() => removeAttachment(f)} style={{ background: 'none', border: 'none', color: '#b3261e', cursor: 'pointer', fontWeight: 700 }}>Remove</button></li>
+            ))}
+          </ul>
+        )}
         <label style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '16px 0 4px', fontSize: 14, cursor: 'pointer' }}>
           <input type="checkbox" checked={form.allow_video} onChange={(e) => setForm({ ...form, allow_video: e.target.checked })} />
           Students may upload a video (up to 50MB). Other files: up to 10MB.
@@ -166,6 +213,7 @@ const InstructorAssignments = ({ courses, students }) => {
                     <span style={chip('#E6F0FB', NAVY)}>{list.length} submitted</span>
                     {pending > 0 && <span style={chip('#FFF2D6', '#8a5a00')}>{pending} to grade</span>}
                     {a.allow_video && <span style={chip('#E8F6EE', '#0a7a43')}>video allowed</span>}
+                    {(filesBy[a.id] || []).length > 0 && <span style={chip('#F0E8FA', '#5b2d91')}>{filesBy[a.id].length} file(s) attached</span>}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
