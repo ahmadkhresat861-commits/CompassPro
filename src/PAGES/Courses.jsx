@@ -6,6 +6,7 @@ import { useSEO } from '../hooks/useSEO';
 import DualOrbitLoader from '../components/DualOrbitLoader';
 import CourseCover from '../components/CourseCover';
 import CourseAssignments from '../components/CourseAssignments';
+import CourseQuizzes from '../components/CourseQuizzes';
 
 // ============================================================
 // STAR RATING
@@ -115,6 +116,7 @@ const Courses = () => {
   const [selected, setSelected] = useState(null);
   const [instructorCard, setInstructorCard] = useState(null);
   const [aStats, setAStats] = useState({ loaded: false, total: 0, submitted: 0 });
+  const [qStats, setQStats] = useState({ loaded: false, total: 0, done: 0 });
   const [progressReady, setProgressReady] = useState(false);
 
   useSEO(
@@ -667,7 +669,7 @@ const Courses = () => {
   const calculatedProgress = useMemo(() => {
     // Course progress = (completed lessons + submitted assignments)
     //                   / (all lessons + all assignments)
-    const totalItems = lessons.length + aStats.total;
+    const totalItems = lessons.length + aStats.total + qStats.total;
     if (!totalItems) {
       return Number(
         enrollment?.progress || 0
@@ -680,7 +682,7 @@ const Courses = () => {
       ).length;
 
     return Math.round(
-      ((completedCount + aStats.submitted) /
+      ((completedCount + aStats.submitted + qStats.done) /
         totalItems) *
         100
     );
@@ -689,6 +691,7 @@ const Courses = () => {
     lessonProgress,
     enrollment,
     aStats,
+    qStats,
   ]);
 
   // Keep enrollments.progress/completed in sync (instructor dashboard and
@@ -698,7 +701,8 @@ const Courses = () => {
       !enrollment ||
       !progressReady ||
       !aStats.loaded ||
-      lessons.length + aStats.total === 0
+      !qStats.loaded ||
+      lessons.length + aStats.total + qStats.total === 0
     ) {
       return;
     }
@@ -720,7 +724,7 @@ const Courses = () => {
         if (!error && data) setEnrollment(data);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [calculatedProgress, progressReady, aStats.loaded, enrollment?.id]);
+  }, [calculatedProgress, progressReady, aStats.loaded, qStats.loaded, enrollment?.id]);
 
   // ============================================================
   // MARK LESSON COMPLETED
@@ -864,13 +868,14 @@ progressData = data;
         }).length;
 
       const totalItems =
-        lessons.length + aStats.total;
+        lessons.length + aStats.total + qStats.total;
 
       const newProgress =
         totalItems > 0
           ? Math.round(
               ((completedCount +
-                aStats.submitted) /
+                aStats.submitted +
+                qStats.done) /
                 totalItems) *
                 100
             )
@@ -2300,6 +2305,10 @@ lesson.id ===
 
         {enrollment && user && selected && (
           <CourseAssignments courseId={selected.id} userId={user.id} dm={dm} onStats={setAStats} />
+        )}
+
+        {enrollment && user && selected && (
+          <CourseQuizzes courseId={selected.id} userId={user.id} dm={dm} onStats={setQStats} />
         )}
 
         {/* ================================================== */}

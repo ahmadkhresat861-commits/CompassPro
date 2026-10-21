@@ -95,8 +95,8 @@ const CourseAssignments = ({ courseId, userId, dm, onStats }) => {
   };
 
   useEffect(() => {
-    if (!onStats || broken) return;
-    onStats({ loaded: loaded, total: items.length, submitted: items.filter((a) => subs[a.id]).length });
+    if (!onStats) return;
+    onStats({ loaded, total: broken ? 0 : items.length, submitted: broken ? 0 : items.filter((a) => subs[a.id]).length });
   }, [items, subs, broken, loaded, onStats]);
 
   if (broken) return null;
