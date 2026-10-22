@@ -148,7 +148,15 @@ const CourseQuizzes = ({ courseId, userId, dm, onStats }) => {
     setBusy(true);
     const { data, error } = await supabase.rpc('submit_quiz', { qid: cur.quiz.id, answers: cur.answers, pwd: cur.pwd, left_page: leftRef.current });
     setBusy(false);
-    if (error) { setMsg({ ok: false, text: error.message }); return; }
+    if (error) {
+      if (/Start the quiz first/i.test(error.message)) {
+        setRemaining(null); setActive(null);
+        setMsg({ ok: false, text: lang === 'ar' ? 'انتهت جلسة الاختبار. ابدأ الاختبار من جديد.' : 'Your quiz session is no longer open. Please start the quiz again.' });
+        return;
+      }
+      setMsg({ ok: false, text: error.message });
+      return;
+    }
     setRemaining(null);
     setActive({ ...cur, result: data, auto });
     load();

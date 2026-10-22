@@ -180,9 +180,9 @@ begin
   select * into q from public.quizzes where id = qid;
   if not found then raise exception 'Not allowed'; end if;
 
-  if public.teaches_quiz(qid) then
-    null; -- teachers can preview: no password, no timer, no attempt used
-  else
+  if public.teaches_quiz(qid) and not public.is_enrolled_in_quiz(qid) then
+    null; -- a teacher who is NOT enrolled can preview: no password, no timer, no attempt used
+  else   -- students, and teachers/admins who are enrolled (testing as a student), follow the real flow
     if not public.is_enrolled_in_quiz(qid) or not q.published then raise exception 'Not allowed'; end if;
     if not public.quiz_password_ok(qid, pwd) then raise exception 'Wrong quiz password'; end if;
     if q.time_limit_min is not null then lim := make_interval(mins => q.time_limit_min); end if;
