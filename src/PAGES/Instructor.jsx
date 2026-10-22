@@ -90,7 +90,8 @@ const Instructor = () => {
     setLoading(false);
   };
 
-  useEffect(() => { loadAll(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+  // eslint-disable-next-line react-hooks/set-state-in-effect, react-hooks/exhaustive-deps
+  useEffect(() => { loadAll(); }, []);
 
   const loadLessons = async (id) => {
     if (!id) { setLessons([]); return; }
@@ -98,6 +99,7 @@ const Instructor = () => {
     setLessons(data || []);
     setLForm((f) => ({ ...f, lesson_order: (data || []).length + 1 }));
   };
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadLessons(courseId); }, [courseId]);
 
   const perCourse = useMemo(() => courses.map((c) => {
