@@ -7,6 +7,7 @@ import DualOrbitLoader from '../components/DualOrbitLoader';
 import CourseCover from '../components/CourseCover';
 import CourseAssignments from '../components/CourseAssignments';
 import CourseQuizzes from '../components/CourseQuizzes';
+import CourseSessions from '../components/CourseSessions';
 
 // ============================================================
 // STAR RATING
@@ -2301,6 +2302,10 @@ lesson.id ===
               )}
             </main>
           </div>
+        )}
+
+        {enrollment && user && selected && (
+          <CourseSessions courseId={selected.id} dm={dm} />
         )}
 
         {enrollment && user && selected && (
