@@ -1,0 +1,3004 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { supabase } from '../supabase';
+import { useLang } from '../context/LanguageContext';
+import { useSEO } from '../hooks/useSEO';
+import DualOrbitLoader from '../components/common/DualOrbitLoader';
+import CourseCover from '../components/course/CourseCover';
+import CourseAssignments from '../components/course/CourseAssignments';
+import CourseQuizzes from '../components/course/CourseQuizzes';
+import CourseSessions from '../components/course/CourseSessions';
+
+// ============================================================
+// STAR RATING
+// ============================================================
+
+const StarRating = ({ rating = 0, onRate }) => {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: '5px',
+        animation: 'fadeIn 0.5s ease both',
+      }}
+    >
+      {[1, 2, 3, 4, 5].map((star) => (
+        <i
+          key={star}
+          className={
+            star <= Number(rating)
+              ? 'fas fa-star'
+              : 'far fa-star'
+          }
+          style={{
+            color: '#f0a500',
+            cursor: onRate ? 'pointer' : 'default',
+            fontSize: '1.2rem',
+            transition: 'transform 0.2s ease',
+          }}
+          onClick={() => {
+            if (onRate) {
+              onRate(star);
+            }
+          }}
+          onMouseEnter={(e) => {
+            if (onRate) {
+              e.currentTarget.style.transform =
+                'scale(1.25)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (onRate) {
+              e.currentTarget.style.transform =
+                'scale(1)';
+            }
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+// ============================================================
+// COURSES
+// ============================================================
+
+const Courses = () => {
+  const { darkMode, t, isAr } = useLang();
+  const navigate = useNavigate();
+  const { id: courseIdParam } = useParams();
+
+  // ============================================================
+  // COLORS
+  // ============================================================
+
+  const dm = {
+    bg: darkMode ? '#0f0f0f' : '#F3F7FC',
+    card: darkMode ? '#1a1a2e' : '#ffffff',
+    cardBorder: darkMode ? '#2e3250' : '#f0f0f0',
+    heading: darkMode ? '#ffffff' : '#003366',
+    text: darkMode ? '#c8d0e0' : '#4A5D78',
+    subtext: darkMode ? '#7a8499' : '#888888',
+    input: darkMode ? '#1a1a2e' : '#ffffff',
+    inputBorder: darkMode ? '#3a4060' : '#dddddd',
+    inputColor: darkMode ? '#e0e6f0' : '#333333',
+
+    catActive: darkMode ? '#ffffff' : '#ffffff',
+    catActiveBg: darkMode ? '#003366' : '#003366',
+    catBorder: darkMode ? '#ffffff' : '#003366',
+    catInactive: darkMode ? '#ffffff' : '#003366',
+
+    reviewBg: darkMode ? '#161a28' : '#ffffff',
+    successBg: darkMode ? '#0d2318' : '#f0fff4',
+
+    shadow: darkMode
+      ? '0 4px 20px rgba(0,0,0,0.4)'
+      : '0 4px 15px rgba(0,0,0,0.08)',
+
+    tagBg: darkMode ? '#2a3050' : '#f0f0f0',
+    tagColor: darkMode ? '#ffffff' : '#4A5D78',
+
+    btnBack: darkMode ? '#003366' : '#003366',
+
+    lessonActive: darkMode
+      ? '#252c52'
+      : '#eef4ff',
+
+    lessonCompleted: darkMode
+      ? '#123525'
+      : '#ecfdf5',
+  };
+
+  // ============================================================
+  // COURSES STATE
+  // ============================================================
+
+  const [courses, setCourses] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [instructorCard, setInstructorCard] = useState(null);
+  const [aStats, setAStats] = useState({ loaded: false, total: 0, submitted: 0 });
+  const [qStats, setQStats] = useState({ loaded: false, total: 0, done: 0 });
+  const [progressReady, setProgressReady] = useState(false);
+
+  useSEO(
+    selected
+      ? {
+          title: selected.title,
+          description:
+            selected.description ||
+            `Learn ${selected.title} at CompassPro.`,
+          path: `/courses/${selected.id}`,
+          structuredData: {
+            '@context': 'https://schema.org',
+            '@type': 'Course',
+            name: selected.title,
+            description:
+              selected.description ||
+              `Learn ${selected.title} at CompassPro.`,
+            provider: {
+              '@type': 'Organization',
+              name: 'CompassPro',
+              sameAs: 'https://edu-compasspro-two.vercel.app',
+            },
+          },
+        }
+      : {
+          title: 'Courses',
+          description:
+            'Browse all courses available at CompassPro and start learning today.',
+          path: '/courses',
+        }
+  );
+
+  // ============================================================
+  // SEARCH
+  // ============================================================
+
+  const [searchParams] = useSearchParams();
+  const urlQuery = searchParams.get('q') || '';
+  const [search, setSearch] = useState(urlQuery);
+
+  // مزامنة البحث القادم من شريط البحث في الـ Navbar
+  useEffect(() => {
+    setSearch(urlQuery);
+  }, [urlQuery]);
+  const [category, setCategory] = useState('All');
+
+  // ============================================================
+  // USER
+  // ============================================================
+
+  const [user, setUser] = useState(null);
+
+  // ============================================================
+  // ENROLLMENT
+  // ============================================================
+
+  const [enrollment, setEnrollment] = useState(null);
+
+  // ============================================================
+  // LESSONS
+  // ============================================================
+
+  const [lessons, setLessons] = useState([]);
+  const [selectedLesson, setSelectedLesson] =
+    useState(null);
+
+  const [lessonProgress, setLessonProgress] =
+    useState([]);
+// ============================================================
+  // REVIEWS
+  // ============================================================
+
+  const [reviews, setReviews] = useState([]);
+
+  const [myRating, setMyRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  // ============================================================
+  // LOADING
+  // ============================================================
+
+  const [loading, setLoading] = useState(true);
+  const [reviewLoading, setReviewLoading] =
+    useState(false);
+
+  const [enrolling, setEnrolling] =
+    useState(false);
+
+  const [lessonsLoading, setLessonsLoading] =
+    useState(false);
+
+  const [lessonSaving, setLessonSaving] =
+    useState(false);
+
+  // ============================================================
+  // UI
+  // ============================================================
+
+  const [pageVisible, setPageVisible] =
+    useState(false);
+
+  const [detailsVisible, setDetailsVisible] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState('');
+
+  // ============================================================
+  // LOAD USER + COURSES
+  // ============================================================
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+
+        const {
+          data: { user: currentUser },
+        } = await supabase.auth.getUser();
+
+        setUser(currentUser || null);
+
+        const {
+          data: coursesData,
+          error: coursesError,
+        } = await supabase
+          .from('courses')
+          .select('*')
+          .order('created_at', {
+            ascending: false,
+          });
+
+        if (coursesError) {
+          console.error(
+            'Error loading courses:',
+            coursesError
+          );
+        } else {
+          setCourses(coursesData || []);
+        }
+
+        setTimeout(() => {
+          setPageVisible(true);
+        }, 100);
+      } catch (error) {
+        console.error(
+          'Unexpected loading error:',
+          error
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  // ============================================================
+  // SYNC SELECTED COURSE WITH URL (/courses/:id)
+  // ============================================================
+
+  useEffect(() => {
+    if (!courseIdParam) {
+      setSelected(null);
+      return;
+    }
+
+    if (courses.length === 0) {
+      return;
+    }
+
+    const matched = courses.find(
+      (course) => String(course.id) === String(courseIdParam)
+    );
+
+    setSelected(matched || null);
+  }, [courseIdParam, courses]);
+
+  // ============================================================
+  // WHEN COURSE SELECTED
+  // ============================================================
+
+  useEffect(() => {
+    if (!selected) {
+      return;
+    }
+
+    setDetailsVisible(false);
+
+    setTimeout(() => {
+      setDetailsVisible(true);
+    }, 100);
+
+    setSelectedLesson(null);
+    setLessons([]);
+    setLessonProgress([]);
+    setReviews([]);
+    setEnrollment(null);
+    setMessage('');
+
+    fetchReviews();
+    checkEnrollment();
+  }, [selected, user]);
+
+  // ============================================================
+  // FETCH REVIEWS
+  // ============================================================
+
+  const fetchReviews = async () => {
+    if (!selected) {
+      return;
+    }
+
+    setReviewLoading(true);
+
+    try {
+      const {
+        data,
+        error,
+      } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('course_id', selected.id)
+        .order('id', {
+          ascending: false,
+        });
+
+      if (error) {
+        console.error(
+          'Error loading reviews:',
+          error
+        );
+      }
+
+      setReviews(data || []);
+    } catch (error) {
+      console.error(
+        'Unexpected reviews error:',
+        error
+      );
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
+  // ============================================================
+  // CHECK ENROLLMENT
+  // ============================================================
+
+  const checkEnrollment = async () => {
+    if (!user || !selected) {
+      setEnrollment(null);
+      return;
+    }
+
+    try {
+      const {
+        data,
+        error,
+      } = await supabase
+        .from('enrollments')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('course_id', selected.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error(
+'Enrollment check error:',
+          error
+        );
+        return;
+      }
+
+      setEnrollment(data || null);
+
+      if (data) {
+        await fetchLessons();
+      }
+    } catch (error) {
+      console.error(
+        'Unexpected enrollment error:',
+        error
+      );
+    }
+  };
+
+  // Instructor card (public info the instructor filled in from their dashboard)
+  useEffect(() => {
+    let alive = true;
+    setInstructorCard(null);
+    if (!selected?.instructor_id) return undefined;
+    supabase
+      .from('instructor_public')
+      .select('*')
+      .eq('user_id', selected.instructor_id)
+      .maybeSingle()
+      .then(({ data, error }) => { if (alive && !error && data) setInstructorCard(data); });
+    return () => { alive = false; };
+  }, [selected?.id, selected?.instructor_id]);
+
+  // ============================================================
+  // FETCH LESSONS
+  // ============================================================
+
+  const fetchLessons = async () => {
+    if (!selected || !user) {
+      return;
+    }
+
+    setLessonsLoading(true);
+    setProgressReady(false);
+
+    try {
+      // --------------------------------------------------------
+      // GET LESSONS
+      // --------------------------------------------------------
+
+      const lessonCols =
+        'id, course_id, title, description, content, lesson_order, video_url, pdf_url, created_at';
+
+      let { data: lessonsData, error: lessonsError } = await supabase
+        .from('lessons')
+        .select(`${lessonCols}, chapter`)
+        .eq('course_id', selected.id)
+        .order('lesson_order', { ascending: true });
+
+      // "chapter" exists only after backend/sql/instructor/instructor_phase1.sql was run
+      if (lessonsError && /chapter/.test(lessonsError.message || '')) {
+        ({ data: lessonsData, error: lessonsError } = await supabase
+          .from('lessons')
+          .select(lessonCols)
+          .eq('course_id', selected.id)
+          .order('lesson_order', { ascending: true }));
+      }
+
+      if (lessonsError) {
+        console.error(
+          'Error loading lessons:',
+          lessonsError
+        );
+
+        setLessons([]);
+        return;
+      }
+
+      const loadedLessons =
+        lessonsData || [];
+
+      setLessons(loadedLessons);
+
+      // --------------------------------------------------------
+      // GET LESSON PROGRESS
+      // --------------------------------------------------------
+
+      const {
+        data: progressData,
+        error: progressError,
+      } = await supabase
+        .from('lesson_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .in(
+          'lesson_id',
+          loadedLessons.map(
+            (lesson) => lesson.id
+          )
+        );
+
+      if (progressError) {
+        console.error(
+          'Error loading lesson progress:',
+          progressError
+        );
+
+        setLessonProgress([]);
+      } else {
+        setLessonProgress(
+          progressData || []
+        );
+      }
+
+      // --------------------------------------------------------
+      // SELECT FIRST UNCOMPLETED LESSON
+      // --------------------------------------------------------
+
+      if (loadedLessons.length > 0) {
+        const progressRows =
+          progressData || [];
+
+        const firstUncompleted =
+          loadedLessons.find(
+            (lesson) => {
+              const progress =
+                progressRows.find(
+                  (item) =>
+                    item.lesson_id ===
+                    lesson.id
+                );
+
+              return !progress?.completed;
+            }
+          );
+
+        setSelectedLesson(
+          firstUncompleted ||
+            loadedLessons[0]
+        );
+      }
+    } catch (error) {
+      console.error(
+        'Unexpected lessons error:',
+        error
+      );
+    } finally {
+      setLessonsLoading(false);
+      setProgressReady(true);
+    }
+  };
+
+  // ============================================================
+  // ENROLL
+  // ============================================================
+
+  const handleEnroll = async () => {
+    setMessage('');
+
+    if (!user) {
+      setMessage(
+        'Please login first to enroll in this course.'
+      );
+      return;
+    }
+
+    if (!selected) {
+      return;
+    }
+
+    if (enrollment) {
+      setMessage(
+        'You are already enrolled in this course.'
+      );
+      return;
+    }
+
+    setEnrolling(true);
+
+    try {
+      const {
+        data,
+        error,
+      } = await supabase
+        .from('enrollments')
+        .insert([
+          {
+            user_id: user.id,
+            course_id: selected.id,
+            progress: 0,
+            completed: false,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error(
+          'Enrollment error:',
+          error
+        );
+
+        if (error.code === '23505') {
+          setMessage(
+'You are already enrolled in this course.'
+          );
+
+          await checkEnrollment();
+        } else {
+          setMessage(
+            'Something went wrong. Please try again.'
+          );
+        }
+
+        return;
+      }
+
+      setEnrollment(data);
+
+      // --------------------------------------------------------
+      // UPDATE STUDENTS COUNT
+      // --------------------------------------------------------
+
+      const currentStudents =
+        Number(selected.students) || 0;
+      // students count is maintained by a database trigger
+
+      const updatedCourse = {
+        ...selected,
+        students:
+          currentStudents + 1,
+      };
+
+      setSelected(updatedCourse);
+
+      setCourses((prevCourses) =>
+        prevCourses.map((course) =>
+          course.id === selected.id
+            ? updatedCourse
+            : course
+        )
+      );
+
+      setMessage(
+        'You have successfully enrolled in this course! 🎉'
+      );
+
+      await fetchLessons();
+    } catch (error) {
+      console.error(
+        'Unexpected enrollment error:',
+        error
+      );
+
+      setMessage(
+        'Something went wrong. Please try again.'
+      );
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
+  // ============================================================
+  // CHECK IF LESSON COMPLETED
+  // ============================================================
+
+  const isLessonCompleted = (
+    lessonId
+  ) => {
+    return lessonProgress.some(
+      (item) =>
+        item.lesson_id === lessonId &&
+        item.completed === true
+    );
+  };
+
+  // ============================================================
+  // CALCULATE COURSE PROGRESS
+  // ============================================================
+
+  const calculatedProgress = useMemo(() => {
+    // Course progress = (completed lessons + submitted assignments)
+    //                   / (all lessons + all assignments)
+    const totalItems = lessons.length + aStats.total + qStats.total;
+    if (!totalItems) {
+      return Number(
+        enrollment?.progress || 0
+      );
+    }
+
+    const completedCount =
+      lessons.filter((lesson) =>
+        isLessonCompleted(lesson.id)
+      ).length;
+
+    return Math.round(
+      ((completedCount + aStats.submitted + qStats.done) /
+        totalItems) *
+        100
+    );
+  }, [
+    lessons,
+    lessonProgress,
+    enrollment,
+    aStats,
+    qStats,
+  ]);
+
+  // Keep enrollments.progress/completed in sync (instructor dashboard and
+  // certificate read them) when lessons or assignments change.
+  useEffect(() => {
+    if (
+      !enrollment ||
+      !progressReady ||
+      !aStats.loaded ||
+      !qStats.loaded ||
+      lessons.length + aStats.total + qStats.total === 0
+    ) {
+      return;
+    }
+    // "completed" is sticky: a new assignment added later never revokes it
+    const done = calculatedProgress >= 100 || !!enrollment.completed;
+    if (
+      Number(enrollment.progress || 0) === calculatedProgress &&
+      !!enrollment.completed === done
+    ) {
+      return;
+    }
+    supabase
+      .from('enrollments')
+      .update({ progress: calculatedProgress, completed: done })
+      .eq('id', enrollment.id)
+      .select()
+      .single()
+      .then(({ data, error }) => {
+        if (!error && data) setEnrollment(data);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calculatedProgress, progressReady, aStats.loaded, qStats.loaded, enrollment?.id]);
+
+  // ============================================================
+  // MARK LESSON COMPLETED
+  // ============================================================
+
+  const handleCompleteLesson = async () => {
+    if (
+      !user ||
+      !selected ||
+      !selectedLesson ||
+      !enrollment
+    ) {
+      return;
+    }
+
+    setLessonSaving(true);
+    setMessage('');
+
+    try {
+      // --------------------------------------------------------
+      // CHECK EXISTING PROGRESS
+      // --------------------------------------------------------
+
+      const {
+        data: existingProgress,
+        error: existingError,
+      } = await supabase
+        .from('lesson_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq(
+          'lesson_id',
+          selectedLesson.id
+        )
+        .maybeSingle();
+
+      if (existingError) {
+        console.error(
+          'Progress check error:',
+          existingError
+        );
+
+        setMessage(
+          'Could not update lesson progress.'
+        );
+
+        return;
+      }
+
+      // --------------------------------------------------------
+      // INSERT OR UPDATE PROGRESS
+      // --------------------------------------------------------
+
+      let progressData;
+
+      if (existingProgress) {
+        const {
+          data,
+          error,
+        } = await supabase
+          .from('lesson_progress')
+          .update({
+            completed: true,
+          })
+          .eq(
+            'id',
+            existingProgress.id
+          )
+          .select()
+          .single();
+
+        if (error) {
+          throw error;
+        }
+progressData = data;
+      } else {
+        const {
+          data,
+          error,
+        } = await supabase
+          .from('lesson_progress')
+          .insert({
+            user_id: user.id,
+            course_id: selected.id,
+            lesson_id:
+              selectedLesson.id,
+            completed: true,
+          })
+          .select()
+          .single();
+
+        if (error) {
+          throw error;
+        }
+
+        progressData = data;
+      }
+
+      // --------------------------------------------------------
+      // UPDATE LOCAL PROGRESS
+      // --------------------------------------------------------
+
+      setLessonProgress((prev) => {
+        const exists = prev.some(
+          (item) =>
+            item.lesson_id ===
+            selectedLesson.id
+        );
+
+        if (exists) {
+          return prev.map((item) =>
+            item.lesson_id ===
+            selectedLesson.id
+              ? progressData
+              : item
+          );
+        }
+
+        return [
+          ...prev,
+          progressData,
+        ];
+      });
+
+      // --------------------------------------------------------
+      // CALCULATE NEW PROGRESS
+      // --------------------------------------------------------
+
+      const completedCount =
+        lessons.filter((lesson) => {
+          if (
+            lesson.id ===
+            selectedLesson.id
+          ) {
+            return true;
+          }
+
+          return isLessonCompleted(
+            lesson.id
+          );
+        }).length;
+
+      const totalItems =
+        lessons.length + aStats.total + qStats.total;
+
+      const newProgress =
+        totalItems > 0
+          ? Math.round(
+              ((completedCount +
+                aStats.submitted +
+                qStats.done) /
+                totalItems) *
+                100
+            )
+          : 100;
+
+      const courseCompleted =
+        newProgress >= 100 || !!enrollment.completed;
+
+      // --------------------------------------------------------
+      // UPDATE ENROLLMENT
+      // --------------------------------------------------------
+
+      const {
+        data: updatedEnrollment,
+        error: enrollmentError,
+      } = await supabase
+        .from('enrollments')
+        .update({
+          progress: newProgress,
+          completed:
+            courseCompleted,
+        })
+        .eq('id', enrollment.id)
+        .select()
+        .single();
+
+      if (enrollmentError) {
+        throw enrollmentError;
+      }
+
+      setEnrollment(
+        updatedEnrollment
+      );
+
+      setMessage(
+        courseCompleted
+          ? 'Congratulations! You completed the course! 🎉🏆'
+          : 'Lesson completed successfully! ✅'
+      );
+    } catch (error) {
+      console.error(
+        'Complete lesson error:',
+        error
+      );
+
+      setMessage(
+        'Could not save your progress. Please try again.'
+      );
+    } finally {
+      setLessonSaving(false);
+    }
+  };
+
+  // ============================================================
+  // GO TO NEXT LESSON
+  // ============================================================
+
+  const handleNextLesson = () => {
+    if (!selectedLesson) {
+      return;
+    }
+
+    const currentIndex =
+      lessons.findIndex(
+        (lesson) =>
+          lesson.id ===
+          selectedLesson.id
+      );
+
+    if (
+      currentIndex === -1 ||
+      currentIndex >=
+        lessons.length - 1
+    ) {
+      setMessage(
+        'You have reached the last lesson. 🎉'
+      );
+      return;
+    }
+
+    setSelectedLesson(
+      lessons[currentIndex + 1]
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  // ============================================================
+  // PREVIOUS LESSON
+  // ============================================================
+
+  const handlePreviousLesson = () => {
+    if (!selectedLesson) {
+      return;
+    }
+
+    const currentIndex =
+      lessons.findIndex(
+        (lesson) =>
+          lesson.id ===
+          selectedLesson.id
+      );
+
+    if (
+      currentIndex <= 0
+    ) {
+      return;
+    }
+
+    setSelectedLesson(
+      lessons[currentIndex - 1]
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  // ============================================================
+// SUBMIT REVIEW
+  // ============================================================
+
+  const handleSubmitReview = async () => {
+    if (!user) {
+      setMessage(
+        'Please login first to leave a review.'
+      );
+      return;
+    }
+
+    if (!myRating) {
+      setMessage(
+        'Please select a rating first.'
+      );
+      return;
+    }
+
+    if (!selected) {
+      return;
+    }
+
+    setReviewLoading(true);
+
+    try {
+      const {
+        error,
+      } = await supabase
+        .from('reviews')
+        .upsert(
+          {
+            course_id:
+              selected.id,
+            user_id: user.id,
+            rating: myRating,
+            comment:
+              comment.trim(),
+          },
+          {
+            onConflict:
+              'user_id,course_id',
+          }
+        );
+
+      if (error) {
+        throw error;
+      }
+
+      setSubmitted(true);
+
+      setMessage(
+        'Your review has been submitted successfully! ⭐'
+      );
+
+      await fetchReviews();
+    } catch (error) {
+      console.error(
+        'Review error:',
+        error
+      );
+
+      setMessage(
+        'Could not submit your review.'
+      );
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
+  // ============================================================
+  // BACK TO COURSES
+  // ============================================================
+
+  const handleBack = () => {
+    setDetailsVisible(false);
+    navigate('/courses');
+
+    setTimeout(() => {
+      setSelected(null);
+      setSelectedLesson(null);
+
+      setLessons([]);
+      setLessonProgress([]);
+
+      setReviews([]);
+      setEnrollment(null);
+
+      setSubmitted(false);
+      setMyRating(0);
+      setComment('');
+      setMessage('');
+    }, 250);
+  };
+
+  // ============================================================
+  // AVERAGE RATING
+  // ============================================================
+
+  const avgRating = reviews.length
+    ? (
+        reviews.reduce(
+          (total, review) =>
+            total +
+            Number(
+              review.rating || 0
+            ),
+          0
+        ) / reviews.length
+      ).toFixed(1)
+    : null;
+
+  // ============================================================
+  // CATEGORIES
+  // ============================================================
+
+  const categories = [
+    'All',
+    ...new Set(
+      courses
+        .map(
+          (course) =>
+            course.category
+        )
+        .filter(Boolean)
+    ),
+  ];
+
+  // ============================================================
+  // FILTER COURSES
+  // ============================================================
+
+  const filtered = courses.filter(
+    (course) => {
+      const matchesCategory =
+        category === 'All' ||
+        course.category ===
+          category;
+
+      const searchText =
+        search.toLowerCase();
+
+      const matchesSearch =
+        course.title
+          ?.toLowerCase()
+          .includes(searchText) ||
+        course.category
+          ?.toLowerCase()
+          .includes(searchText);
+
+      return (
+        matchesCategory &&
+        matchesSearch
+      );
+    }
+  );
+
+  // ============================================================
+  // LOADING
+  // ============================================================
+
+  if (loading) {
+    return (
+      <section
+        style={{
+          minHeight: '100vh',
+          background: dm.bg,
+          display: 'flex',
+          justifyContent:
+            'center',
+          alignItems: 'center',
+        }}
+      >
+        <div
+          style={{
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}><DualOrbitLoader size={48} /></div>
+
+          <p
+            style={{
+              color: dm.text,
+            }}
+          >
+            {t.loadingCourses}
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  // ============================================================
+  // COURSE DETAILS + LEARNING
+// ============================================================
+
+  if (selected) {
+    return (
+      <section
+        style={{
+          padding: '40px 20px 80px',
+          maxWidth:
+            enrollment
+              ? '1200px'
+              : '800px',
+          margin: '0 auto',
+          background: dm.bg,
+          minHeight: '100vh',
+
+          opacity:
+            detailsVisible
+              ? 1
+              : 0,
+
+          transform:
+            detailsVisible
+              ? 'translateY(0)'
+              : 'translateY(20px)',
+
+          transition:
+            'opacity 0.5s ease, transform 0.5s ease',
+        }}
+      >
+        {/* ================================================== */}
+        {/* BACK */}
+        {/* ================================================== */}
+
+        <button
+          onClick={handleBack}
+          style={{
+            marginBottom: '30px',
+            padding:
+              '10px 20px',
+            background:
+              dm.btnBack,
+            color: 'white',
+            border: 'none',
+            borderRadius:
+              '8px',
+            cursor:
+              'pointer',
+          }}
+        >
+          <i className="fas fa-arrow-left" />{' '}
+          {t.backToCourses}
+        </button>
+
+        {/* ================================================== */}
+        {/* COURSE HEADER */}
+        {/* ================================================== */}
+
+        <div
+          style={{
+            textAlign: 'center',
+            marginBottom: '40px',
+          }}
+        >
+          <CourseCover
+            src={selected.image_url}
+            category={selected.category}
+            alt={selected.title}
+            height={300}
+            showBadge={false}
+            style={{
+              width: '100%',
+              maxWidth: '760px',
+              margin: '0 auto 24px',
+              borderRadius: '24px',
+              boxShadow: '0 10px 30px rgba(0,51,102,0.25)',
+            }}
+          />
+
+          <h1
+            style={{
+              color:
+                dm.heading,
+            }}
+          >
+            {selected.title}
+          </h1>
+
+          {selected.category && (
+            <span
+              style={{
+                display:
+                  'inline-block',
+                marginTop:
+                  '10px',
+                padding:
+                  '6px 15px',
+                background:
+                  dm.tagBg,
+                color:
+                  dm.tagColor,
+                borderRadius:
+                  '20px',
+                fontSize:
+                  '0.85rem',
+              }}
+            >
+              {selected.category}
+            </span>
+          )}
+
+          {selected.description && (
+            <p
+              style={{
+                maxWidth: '650px',
+                margin: '18px auto 0',
+                color: dm.text,
+                lineHeight: '1.7',
+              }}
+            >
+              {selected.description}
+            </p>
+          )}
+
+          {selected.instructor && !instructorCard && (
+            <p
+              style={{
+                color: dm.subtext,
+                marginTop: '10px',
+                fontSize: '0.9rem',
+              }}
+            >
+              <i className="fas fa-chalkboard-teacher" />{' '}
+              {t.instructorLabel}: {selected.instructor}
+            </p>
+          )}
+
+          {instructorCard && (
+            <div
+              style={{
+                maxWidth: '760px',
+                margin: '26px auto 0',
+                borderRadius: '18px',
+                overflow: 'hidden',
+                background: dm.reviewBg,
+                border: '1px solid rgba(0,51,102,0.10)',
+                boxShadow: '0 10px 30px rgba(0,51,102,0.14)',
+                color: dm.text,
+                textAlign: 'start',
+              }}
+            >
+              <div
+                style={{
+                  padding: '18px 20px',
+                  textAlign: 'center',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: '1.15rem',
+                  background: 'radial-gradient(circle at 90% 0%, rgba(240,165,0,0.40) 0, rgba(240,165,0,0) 40%), linear-gradient(135deg,#002347,#003366 55%,#0A5AA8)',
+                  borderBottom: '3px solid #F0A500',
+                }}
+              >
+                <i className="fas fa-chalkboard-teacher" /> {t.instructorInfo}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                {[
+                  {
+                    key: 'name',
+                    head: t.instructorName,
+                    body: (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+                        {instructorCard.avatar_url ? (
+                          <img
+                            src={instructorCard.avatar_url}
+                            alt={instructorCard.display_name || selected.instructor}
+                            style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '3px solid #F0A500', boxShadow: '0 4px 12px rgba(0,51,102,0.2)' }}
+                          />
+                        ) : (
+                          <span aria-hidden="true" style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#F0A500,#ffcf5a)', color: '#003366', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', border: '3px solid #fff', boxShadow: '0 0 0 2px #F0A500' }}>
+                            <i className="fas fa-user-tie" />
+                          </span>
+                        )}
+                        <div>
+                          <div style={{ color: dm.heading, fontWeight: 800, fontSize: '1.05rem' }}>
+                            {instructorCard.display_name || selected.instructor}
+                          </div>
+                          {instructorCard.approved && (
+                            <a href={`/instructors/${instructorCard.user_id}`} style={{ color: '#B97A00', fontSize: '0.8rem', fontWeight: 700 }}>
+                              {isAr ? 'عرض الملف الكامل' : 'View full profile'} →
+                            </a>
+                          )}
+                          {instructorCard.headline && (
+                            <div style={{ color: '#B97A00', fontSize: '0.85rem', fontWeight: 700, marginTop: 2 }}>{instructorCard.headline}</div>
+                          )}
+                        </div>
+                      </div>
+                    ),
+                  },
+                  {
+                    key: 'email',
+                    head: t.instructorEmail,
+                    body: instructorCard.contact_email ? (
+                      <a href={`mailto:${instructorCard.contact_email}`} style={{ color: dm.text, fontSize: '0.92rem', textDecoration: 'none', wordBreak: 'break-all' }}>
+                        {instructorCard.contact_email}
+                      </a>
+                    ) : (
+                      <span style={{ color: dm.subtext }}>—</span>
+                    ),
+                  },
+                  ...(instructorCard.office_hours
+                    ? [{
+                        key: 'hours',
+                        head: t.instructorHours,
+                        body: <span style={{ whiteSpace: 'pre-line', fontSize: '0.92rem' }}>{instructorCard.office_hours}</span>,
+                      }]
+                    : []),
+                ].map((col) => (
+                  <div key={col.key} style={{ flex: '1 1 220px', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ padding: '12px 18px', background: 'rgba(0,51,102,0.05)', fontWeight: 700, color: dm.heading, textAlign: 'center', fontSize: '0.9rem' }}>
+                      {col.head}
+                    </div>
+                    <div style={{ padding: '18px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                      {col.body}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {instructorCard.bio && (
+                <div style={{ borderTop: '1px solid rgba(0,51,102,0.10)' }}>
+                  <div style={{ padding: '10px 18px', background: 'rgba(0,51,102,0.05)', fontWeight: 700, color: dm.heading, textAlign: 'center', fontSize: '0.9rem' }}>
+                    {t.instructorAbout}
+                  </div>
+                  <p style={{ margin: 0, padding: '16px 22px 20px', fontSize: '0.95rem', lineHeight: 1.8, whiteSpace: 'pre-line' }}>{instructorCard.bio}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* STATS */}
+
+          <div
+            style={{
+              display:
+                'flex',
+              justifyContent:
+                'center',
+              gap: '30px',
+              flexWrap:
+                'wrap',
+              marginTop:
+                '25px',
+            }}
+          >
+            <div>
+              <i
+                className="fas fa-users"
+                style={{
+                  color:
+                    '#10b981',
+                }}
+              />
+
+              <p
+                style={{
+                  color:
+                    dm.text,
+                  marginTop:
+                    '5px',
+                }}
+              >
+                {selected.students ||
+                  0}{' '}
+                {t.students}
+              </p>
+            </div>
+
+            <div>
+              <i
+                className="fas fa-star"
+                style={{
+                  color:
+                    '#f0a500',
+                }}
+              />
+
+              <p
+                style={{
+color:
+                    dm.text,
+                  marginTop:
+                    '5px',
+                }}
+              >
+                {avgRating ||
+                  selected.rating ||
+                  t.noRating}
+              </p>
+            </div>
+
+            <div>
+              <i
+                className="fas fa-tag"
+                style={{
+                  color: dm.heading,
+                }}
+              />
+
+              <p
+                style={{
+                  color: dm.text,
+                  marginTop: '5px',
+                  fontWeight: '700',
+                }}
+              >
+                {Number(selected.price) > 0
+                  ? `$${Number(selected.price).toFixed(2)}`
+                  : 'Free'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ================================================== */}
+        {/* ENROLLMENT */}
+        {/* ================================================== */}
+
+        <div
+          style={{
+            background:
+              dm.reviewBg,
+            borderRadius:
+              '15px',
+            padding:
+              '25px',
+            boxShadow:
+              dm.shadow,
+            marginBottom:
+              '30px',
+            textAlign:
+              'center',
+          }}
+        >
+          {enrollment ? (
+            <>
+              <div
+                style={{
+                  color:
+                    '#10b981',
+                  fontSize:
+                    '2rem',
+                  marginBottom:
+                    '10px',
+                }}
+              >
+                <i className="fas fa-check-circle" />
+              </div>
+
+              <h3
+                style={{
+                  color:
+                    dm.heading,
+                }}
+              >
+                {t.youAreEnrolled} 🎉
+              </h3>
+
+              <p
+                style={{
+                  color:
+                    dm.text,
+                  marginTop:
+                    '10px',
+                }}
+              >
+                {t.yourProgress}:{' '}
+                <strong>
+                  {calculatedProgress}%
+                </strong>
+              </p>
+
+              <div
+                style={{
+                  width:
+                    '100%',
+                  height:
+                    '10px',
+                  background:
+                    darkMode
+                      ? '#2a2d3d'
+                      : '#e5e7eb',
+                  borderRadius:
+                    '10px',
+                  overflow:
+                    'hidden',
+                  marginTop:
+                    '15px',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${calculatedProgress}%`,
+                    height:
+                      '100%',
+                    background:
+                      'linear-gradient(90deg, #003366, #f0a500)',
+                    borderRadius:
+                      '10px',
+                    transition:
+                      'width 0.5s ease',
+                  }}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <h3
+                style={{
+                  color:
+                    dm.heading,
+                }}
+              >
+                {t.readyToLearn}
+              </h3>
+
+              <p
+                style={{
+                  color:
+                    dm.text,
+                  margin:
+                    '10px 0 20px',
+                }}
+              >
+                {user
+                  ? t.enrollJourney
+                  : t.loginToEnroll}
+              </p>
+
+              {user ? (
+                <button
+                  onClick={
+                    handleEnroll
+                  }
+                  disabled={
+                    enrolling
+                  }
+                  style={{
+                    width:
+                      '100%',
+                    padding:
+                      '14px',
+                    background:
+                      enrolling
+                        ? '#888'
+                        : 'linear-gradient(90deg, #003366, #005599)',
+                    color:
+                      'white',
+                    border:
+                      'none',
+                    borderRadius:
+                      '10px',
+                    fontWeight:
+                      '700',
+                    fontSize:
+                      '1rem',
+                    cursor:
+                      enrolling
+                        ? 'not-allowed'
+                        : 'pointer',
+                  }}
+                >
+                  <i
+className={
+                      enrolling
+                        ? 'fas fa-spinner fa-spin'
+                        : 'fas fa-graduation-cap'
+                    }
+                  />{' '}
+                  {enrolling
+                    ? t.enrolling
+                    : t.enrollNow}
+                </button>
+              ) : (
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '10px',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <button
+                    onClick={() => navigate('/login')}
+                    style={{
+                      flex: '1 1 150px',
+                      padding: '14px',
+                      background:
+                        'linear-gradient(90deg, #003366, #005599)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <i className="fas fa-sign-in-alt" />{' '}
+                    {t.login}
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/signup')}
+                    style={{
+                      flex: '1 1 150px',
+                      padding: '14px',
+                      background: '#f0a500',
+                      color: '#003366',
+                      border: 'none',
+                      borderRadius: '10px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <i className="fas fa-user-plus" />{' '}
+                    {t.signUp}
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {message && (
+            <p
+              style={{
+                marginTop:
+                  '15px',
+                color:
+                  message.includes(
+                    'successfully'
+                  ) ||
+                  message.includes(
+                    'completed'
+                  ) ||
+                  message.includes(
+                    'Congratulations'
+                  )
+                    ? '#10b981'
+                    : dm.heading,
+                fontWeight:
+                  '600',
+              }}
+            >
+              {message}
+            </p>
+          )}
+        </div>
+
+        {/* ================================================== */}
+        {/* LEARNING AREA */}
+        {/* يظهر فقط بعد التسجيل */}
+        {/* ================================================== */}
+
+        {enrollment && (
+          <div
+            style={{
+              display:
+                'grid',
+              gridTemplateColumns:
+                '280px minmax(0, 1fr)',
+              gap:
+                '25px',
+              alignItems:
+                'start',
+              marginBottom:
+                '40px',
+            }}
+          >
+            {/* ================================================= */}
+            {/* LESSON SIDEBAR */}
+            {/* ================================================= */}
+
+            <aside
+              style={{
+                background:
+                  dm.reviewBg,
+                borderRadius:
+                  '15px',
+                padding:
+                  '20px',
+                boxShadow:
+                  dm.shadow,
+                position:
+                  'sticky',
+                top:
+                  '20px',
+              }}
+            >
+              <h3
+                style={{
+                  color:
+                    dm.heading,
+                  marginTop:
+                    0,
+                }}
+              >
+                <i className="fas fa-list" />{' '}
+                {t.courseLessons}
+              </h3>
+
+              {lessonsLoading ? (
+                <p
+                  style={{
+                    color:
+                      dm.subtext,
+                    textAlign:
+                      'center',
+                  }}
+                >
+                  <i className="fas fa-spinner fa-spin" />{' '}
+                  {t.loadingLessons}
+                </p>
+              ) : lessons.length ===
+                0 ? (
+                <p
+                  style={{
+                    color:
+                      dm.subtext,
+                    textAlign:
+                      'center',
+                  }}
+                >
+                  {t.noLessonsYet}
+                </p>
+              ) : (
+                <div
+                  style={{
+                    display:
+                      'flex',
+                    flexDirection:
+                      'column',
+                    gap:
+                      '10px',
+                    marginTop:
+                      '20px',
+                  }}
+                >
+                  {lessons.map(
+                    (
+                      lesson,
+                      index
+                    ) => {
+                      const completed =
+                        isLessonCompleted(
+                          lesson.id
+                        );
+
+                      const active =
+                        selectedLesson?.id ===
+                        lesson.id;
+
+                      const showChapter =
+                        lesson.chapter &&
+                        lesson.chapter !== lessons[index - 1]?.chapter;
+
+                      return (
+                        <React.Fragment key={lesson.id}>
+                        {showChapter && (
+                          <div
+                            style={{
+                              marginTop: index === 0 ? 0 : '10px',
+                              fontWeight: 800,
+                              fontSize: '0.85rem',
+                              letterSpacing: '0.3px',
+                              color: dm.heading,
+                            }}
+                          >
+                            {lesson.chapter}
+                          </div>
+                        )}
+                        <button
+                          onClick={() =>
+setSelectedLesson(
+                              lesson
+                            )
+                          }
+                          style={{
+                            width:
+                              '100%',
+                            textAlign:
+                              'left',
+                            padding:
+                              '14px',
+                            border:
+                              active
+                                ? `2px solid ${dm.heading}`
+                                : `1px solid ${dm.cardBorder}`,
+                            borderRadius:
+                              '10px',
+                            background:
+                              completed
+                                ? dm.lessonCompleted
+                                : active
+                                ? dm.lessonActive
+                                : 'transparent',
+                            color:
+                              dm.text,
+                            cursor:
+                              'pointer',
+                          }}
+                        >
+                          <div
+                            style={{
+                              display:
+                                'flex',
+                              alignItems:
+                                'center',
+                              gap:
+                                '10px',
+                            }}
+                          >
+                            <span
+                              style={{
+                                minWidth:
+                                  '28px',
+                                height:
+                                  '28px',
+                                borderRadius:
+                                  '50%',
+                                display:
+                                  'flex',
+                                alignItems:
+                                  'center',
+                                justifyContent:
+                                  'center',
+                                background:
+                                  completed
+                                    ? '#10b981'
+                                    : dm.btnBack,
+                                color:
+                                  'white',
+                                fontSize:
+                                  '0.8rem',
+                              }}
+                            >
+                              {completed ? (
+                                <i className="fas fa-check" />
+                              ) : (
+                                index +
+                                1
+                              )}
+                            </span>
+
+                            <span
+                              style={{
+                                fontWeight:
+                                  '600',
+                              }}
+                            >
+                              {lesson.title}
+                            </span>
+                          </div>
+                        </button>
+                        </React.Fragment>
+                      );
+                    }
+                  )}
+                </div>
+              )}
+            </aside>
+
+            {/* ================================================= */}
+            {/* LESSON CONTENT */}
+            {/* ================================================= */}
+
+            <main>
+              {!selectedLesson ? (
+                <div
+                  style={{
+                    background:
+                      dm.reviewBg,
+                    borderRadius:
+                      '15px',
+                    padding:
+                      '50px 30px',
+                    boxShadow:
+                      dm.shadow,
+                    textAlign:
+                      'center',
+                  }}
+                >
+                  <i
+                    className="fas fa-book-reader"
+                    style={{
+                      fontSize:
+'3rem',
+                      color:
+                        dm.heading,
+                    }}
+                  />
+
+                  <h2
+                    style={{
+                      color:
+                        dm.heading,
+                    }}
+                  >
+                    {t.startLearning}
+                  </h2>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    background:
+                      dm.reviewBg,
+                    borderRadius:
+                      '15px',
+                    padding:
+                      '30px',
+                    boxShadow:
+                      dm.shadow,
+                  }}
+                >
+                  {/* LESSON HEADER */}
+
+                  <div
+                    style={{
+                      marginBottom:
+                        '25px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        color:
+                          dm.subtext,
+                        fontSize:
+                          '0.9rem',
+                      }}
+                    >
+                      {t.lessonOf}{' '}
+                      {lessons.findIndex(
+                        (lesson) =>
+                          lesson.id ===
+                          selectedLesson.id
+                      ) + 1}{' '}
+                      {t.ofWord}{' '}
+                      {lessons.length}
+                    </span>
+
+                    <h2
+                      style={{
+                        color:
+                          dm.heading,
+                        marginTop:
+                          '8px',
+                      }}
+                    >
+                      {selectedLesson.title}
+                    </h2>
+
+                    {selectedLesson.description && (
+                      <p
+                        style={{
+                          color:
+                            dm.text,
+                          lineHeight:
+                            '1.7',
+                        }}
+                      >
+                        {
+                          selectedLesson.description
+                        }
+                      </p>
+                    )}
+                  </div>
+
+                  {/* VIDEO */}
+
+                  {selectedLesson.video_url && (
+                    <div
+                      style={{
+                        width:
+                          '100%',
+                        marginBottom:
+                          '25px',
+                        borderRadius:
+                          '12px',
+                        overflow:
+                          'hidden',
+                        background:
+                          '#000',
+                      }}
+                    >
+                      <video
+                        src={
+                          selectedLesson.video_url
+                        }
+                        controls
+                        style={{
+                          width:
+                            '100%',
+                          display:
+                            'block',
+                          maxHeight:
+                            '550px',
+                        }}
+                      >
+                        Your browser does not support video playback.
+                      </video>
+                    </div>
+                  )}
+
+                  {/* PDF ATTACHMENT */}
+
+                  {selectedLesson.pdf_url && (
+                    <a
+                      href={selectedLesson.pdf_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '12px 20px',
+                        marginBottom: '25px',
+                        background: dm.card,
+                        border: `1px solid ${dm.cardBorder}`,
+                        borderRadius: '10px',
+                        color: dm.heading,
+                        fontWeight: '600',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      <i
+                        className="fas fa-file-pdf"
+                        style={{ color: '#ef4444', fontSize: '1.3rem' }}
+                      />
+                      {t.downloadPdf}
+                    </a>
+                  )}
+
+                  {/* CONTENT */}
+
+                  {selectedLesson.content && (
+                    <div
+                      style={{
+                        color:
+                          dm.text,
+                        lineHeight:
+                          '1.8',
+                        fontSize:
+                          '1rem',
+                        whiteSpace:
+                          'pre-wrap',
+                        marginBottom:
+                          '30px',
+                      }}
+                    >
+                      {
+                        selectedLesson.content
+}
+                    </div>
+                  )}
+
+                  {/* LESSON ACTIONS */}
+
+                  <div
+                    style={{
+                      display:
+                        'flex',
+                      gap:
+                        '10px',
+                      flexWrap:
+                        'wrap',
+                      borderTop:
+                        `1px solid ${dm.cardBorder}`,
+                      paddingTop:
+                        '20px',
+                    }}
+                  >
+                    <button
+                      onClick={
+                        handlePreviousLesson
+                      }
+                      disabled={
+                        lessons.findIndex(
+                          (lesson) =>
+                            lesson.id ===
+                            selectedLesson.id
+                        ) <= 0
+                      }
+                      style={{
+                        flex:
+                          '1 1 150px',
+                        padding:
+                          '12px',
+                        border:
+                          `1px solid ${dm.cardBorder}`,
+                        borderRadius:
+                          '8px',
+                        background:
+                          'transparent',
+                        color:
+                          dm.text,
+                        cursor:
+                          'pointer',
+                        opacity:
+                          lessons.findIndex(
+                            (lesson) =>
+                              lesson.id ===
+                              selectedLesson.id
+                          ) <= 0
+                            ? 0.5
+                            : 1,
+                      }}
+                    >
+                      <i className="fas fa-arrow-left" />{' '}
+                      {t.previous}
+                    </button>
+
+                    <button
+                      onClick={
+                        handleCompleteLesson
+                      }
+                      disabled={
+                        lessonSaving ||
+                        isLessonCompleted(
+                          selectedLesson.id
+                        )
+                      }
+                      style={{
+                        flex:
+                          '2 1 200px',
+                        padding:
+                          '12px',
+                        border:
+                          'none',
+                        borderRadius:
+                          '8px',
+                        background:
+                          isLessonCompleted(
+                            selectedLesson.id
+                          )
+                            ? '#10b981'
+                            : dm.btnBack,
+                        color:
+                          'white',
+                        fontWeight:
+                          '700',
+                        cursor:
+                          'pointer',
+                      }}
+                    >
+                      <i
+                        className={
+                          lessonSaving
+                            ? 'fas fa-spinner fa-spin'
+                            : isLessonCompleted(
+                                selectedLesson.id
+                              )
+                            ? 'fas fa-check'
+                            : 'fas fa-check-circle'
+                        }
+                      />{' '}
+                      {lessonSaving
+                        ? t.savingWord
+                        : isLessonCompleted(
+                            selectedLesson.id
+                          )
+                        ? t.lessonCompleted
+                        : t.markCompleted}
+                    </button>
+
+                    <button
+                      onClick={
+                        handleNextLesson
+                      }
+                      disabled={
+                        lessons.findIndex(
+                          (lesson) =>
+lesson.id ===
+                            selectedLesson.id
+                        ) >=
+                        lessons.length - 1
+                      }
+                      style={{
+                        flex:
+                          '1 1 150px',
+                        padding:
+                          '12px',
+                        border:
+                          'none',
+                        borderRadius:
+                          '8px',
+                        background:
+                          dm.btnBack,
+                        color:
+                          'white',
+                        cursor:
+                          'pointer',
+                        opacity:
+                          lessons.findIndex(
+                            (lesson) =>
+                              lesson.id ===
+                              selectedLesson.id
+                          ) >=
+                          lessons.length - 1
+                            ? 0.5
+                            : 1,
+                      }}
+                    >
+                      {t.next}{' '}
+                      <i className="fas fa-arrow-right" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </main>
+          </div>
+        )}
+
+        {enrollment && user && selected && (
+          <CourseSessions courseId={selected.id} dm={dm} />
+        )}
+
+        {enrollment && user && selected && (
+          <CourseAssignments courseId={selected.id} userId={user.id} dm={dm} onStats={setAStats} />
+        )}
+
+        {enrollment && user && selected && (
+          <CourseQuizzes courseId={selected.id} userId={user.id} dm={dm} onStats={setQStats} />
+        )}
+
+        {/* ================================================== */}
+        {/* REVIEWS */}
+        {/* ================================================== */}
+
+        <div
+          style={{
+            background:
+              dm.reviewBg,
+            borderRadius:
+              '12px',
+            padding:
+              '30px',
+            boxShadow:
+              dm.shadow,
+            marginBottom:
+              '30px',
+          }}
+        >
+          <h2
+            style={{
+              color:
+                dm.heading,
+              marginBottom:
+                '20px',
+            }}
+          >
+            <i className="fas fa-star" />{' '}
+            {t.reviewsLabel}
+          </h2>
+
+          {reviewLoading ? (
+            <p
+              style={{
+                color:
+                  dm.subtext,
+                textAlign:
+                  'center',
+              }}
+            >
+              <i className="fas fa-spinner fa-spin" />{' '}
+              {t.loadingWord}
+            </p>
+          ) : reviews.length ===
+            0 ? (
+            <p
+              style={{
+                color:
+                  dm.subtext,
+                textAlign:
+                  'center',
+              }}
+            >
+              {t.noReviewsYet}
+            </p>
+          ) : (
+            reviews.map(
+              (review) => (
+                <div
+                  key={
+                    review.id
+                  }
+                  style={{
+                    padding:
+                      '15px 0',
+                    borderBottom:
+                      `1px solid ${dm.cardBorder}`,
+                  }}
+                >
+                  <StarRating
+                    rating={
+                      review.rating
+                    }
+                  />
+
+                  {review.comment && (
+                    <p
+                      style={{
+                        color:
+                          dm.text,
+                        marginTop:
+                          '8px',
+                      }}
+                    >
+                      {
+                        review.comment
+                      }
+                    </p>
+                  )}
+                </div>
+              )
+            )
+          )}
+        </div>
+
+        {/* ================================================== */}
+        {/* ADD REVIEW */}
+        {/* ================================================== */}
+
+        {!submitted ? (
+          <div
+            style={{
+              background:
+                dm.reviewBg,
+              borderRadius:
+                '12px',
+              padding:
+                '30px',
+              boxShadow:
+                dm.shadow,
+            }}
+          >
+<h2
+              style={{
+                color:
+                  dm.heading,
+                marginBottom:
+                  '20px',
+              }}
+            >
+              <i className="fas fa-pen" />{' '}
+              {t.addYourReview}
+            </h2>
+
+            {!user ? (
+              <p
+                style={{
+                  color:
+                    dm.subtext,
+                  textAlign:
+                    'center',
+                }}
+              >
+                {t.loginToReview}
+              </p>
+            ) : (
+              <>
+                <p
+                  style={{
+                    color:
+                      dm.heading,
+                    fontWeight:
+                      '600',
+                  }}
+                >
+                  {t.yourRating}
+                </p>
+
+                <StarRating
+                  rating={
+                    myRating
+                  }
+                  onRate={
+                    setMyRating
+                  }
+                />
+
+                <textarea
+                  value={
+                    comment
+                  }
+                  onChange={(
+                    e
+                  ) =>
+                    setComment(
+                      e.target
+                        .value
+                    )
+                  }
+                  placeholder={t.writeReviewPlaceholder}
+                  rows={4}
+                  style={{
+                    width:
+                      '100%',
+                    padding:
+                      '12px',
+                    borderRadius:
+                      '8px',
+                    border:
+                      `1px solid ${dm.inputBorder}`,
+                    fontSize:
+                      '1rem',
+                    marginTop:
+                      '15px',
+                    marginBottom:
+                      '15px',
+                    background:
+                      dm.input,
+                    color:
+                      dm.inputColor,
+                    resize:
+                      'vertical',
+                    boxSizing:
+                      'border-box',
+                  }}
+                />
+
+                <button
+                  onClick={
+                    handleSubmitReview
+                  }
+                  disabled={
+                    !myRating ||
+                    reviewLoading
+                  }
+                  style={{
+                    width:
+                      '100%',
+                    padding:
+                      '14px',
+                    background:
+                      myRating
+                        ? dm.btnBack
+                        : '#999',
+                    color:
+                      'white',
+                    border:
+                      'none',
+                    borderRadius:
+                      '8px',
+                    fontWeight:
+                      '700',
+                    cursor:
+                      myRating
+                        ? 'pointer'
+                        : 'not-allowed',
+                  }}
+                >
+                  <i className="fas fa-paper-plane" />{' '}
+                  {reviewLoading
+                    ? t.submitting
+                    : t.submitReview}
+                </button>
+              </>
+            )}
+          </div>
+        ) : (
+          <div
+            style={{
+              background:
+                dm.successBg,
+              borderRadius:
+                '12px',
+              padding:
+                '30px',
+              textAlign:
+                'center',
+            }}
+          >
+            <i
+              className="fas fa-check-circle"
+              style={{
+                fontSize:
+                  '3rem',
+                color:
+                  '#10b981',
+                marginBottom:
+                  '15px',
+              }}
+            />
+
+            <h3
+              style={{
+                color:
+                  dm.heading,
+              }}
+            >
+{t.reviewSubmitted} 🎉
+            </h3>
+          </div>
+        )}
+
+        {/* ================================================== */}
+        {/* RESPONSIVE + ANIMATIONS */}
+        {/* ================================================== */}
+
+        <style>
+          {`
+            @keyframes slideUp {
+              from {
+                opacity: 0;
+                transform: translateY(30px);
+              }
+
+              to {
+                opacity: 1;
+                transform: translateY(0);
+              }
+            }
+
+            @keyframes fadeIn {
+              from {
+                opacity: 0;
+              }
+
+              to {
+                opacity: 1;
+              }
+            }
+
+            @media (max-width: 800px) {
+              .learning-layout {
+                grid-template-columns: 1fr !important;
+              }
+            }
+          `}
+        </style>
+      </section>
+    );
+  }
+
+  // ============================================================
+  // COURSES LIST
+  // ============================================================
+
+  return (
+    <section
+      id="courses"
+      style={{
+        background:
+          dm.bg,
+        minHeight:
+          '100vh',
+        padding:
+          '40px 20px',
+
+        opacity:
+          pageVisible
+            ? 1
+            : 0,
+
+        transform:
+          pageVisible
+            ? 'translateY(0)'
+            : 'translateY(20px)',
+
+        transition:
+          'opacity 0.7s ease, transform 0.7s ease',
+      }}
+    >
+      <h1
+        style={{
+          color:
+            dm.heading,
+          textAlign:
+            'center',
+        }}
+      >
+        <i className="fas fa-book-open" />{' '}
+        {t.ourCourses}
+      </h1>
+
+      {/* SEARCH */}
+
+      <div
+        style={{
+          maxWidth:
+            '700px',
+          margin:
+            '30px auto 40px',
+        }}
+      >
+        <div
+          style={{
+            position:
+              'relative',
+            marginBottom:
+              '20px',
+          }}
+        >
+          <i
+            className="fas fa-search"
+            style={{
+              position:
+                'absolute',
+              left:
+                '15px',
+              top:
+                '50%',
+              transform:
+                'translateY(-50%)',
+              color:
+                dm.subtext,
+            }}
+          />
+
+          <input
+            type="text"
+            placeholder={t.searchCourses}
+            value={
+              search
+            }
+            onChange={(
+              e
+            ) =>
+              setSearch(
+                e.target
+                  .value
+              )
+            }
+            style={{
+              width:
+                '100%',
+              padding:
+                '14px 14px 14px 45px',
+              borderRadius:
+                '10px',
+              border:
+                `2px solid ${dm.inputBorder}`,
+              fontSize:
+                '1rem',
+              outline:
+                'none',
+              background:
+                dm.input,
+              color:
+                dm.inputColor,
+              boxSizing:
+                'border-box',
+            }}
+          />
+        </div>
+
+        {/* CATEGORIES */}
+
+        <div
+          style={{
+            display:
+              'flex',
+            gap:
+              '10px',
+            justifyContent:
+              'center',
+            flexWrap:
+              'wrap',
+          }}
+        >
+          {categories.map(
+            (cat) => (
+              <button
+                key={
+                  cat
+                }
+                onClick={() =>
+                  setCategory(
+                    cat
+                  )
+                }
+                style={{
+                  padding:
+                    '8px 20px',
+                  borderRadius:
+                    '20px',
+                  border:
+                    `2px solid ${dm.catBorder}`,
+                  background:
+                    category ===
+                    cat
+? dm.catActiveBg
+                      : 'transparent',
+                  color:
+                    category ===
+                    cat
+                      ? dm.catActive
+                      : dm.catInactive,
+                  fontWeight:
+                    '600',
+                  cursor:
+                    'pointer',
+                }}
+              >
+                {cat === 'All' ? t.allCategories : cat}
+              </button>
+            )
+          )}
+        </div>
+      </div>
+
+      {/* COURSES */}
+
+      {filtered.length ===
+      0 ? (
+        <div
+          style={{
+            textAlign:
+              'center',
+            padding:
+              '60px',
+            color:
+              dm.subtext,
+          }}
+        >
+          <i
+            className="fas fa-search"
+            style={{
+              fontSize:
+                '3rem',
+              marginBottom:
+                '15px',
+            }}
+          />
+
+          <p>
+            {t.noCoursesFound}
+          </p>
+        </div>
+      ) : (
+        <div className="courses-container">
+          {filtered.map(
+            (
+              course,
+              index
+            ) => (
+              <div
+                key={
+                  course.id
+                }
+                className="course-card"
+                onClick={() =>
+                  navigate(
+                    `/courses/${course.id}`
+                  )
+                }
+                style={{
+                  background:
+                    dm.card,
+                  boxShadow:
+                    dm.shadow,
+                  animation:
+                    'courseCardEntrance 0.7s ease both',
+                  animationDelay:
+                    `${index * 0.1}s`,
+                  cursor:
+                    'pointer',
+                }}
+              >
+                <CourseCover
+                  src={course.image_url}
+                  category={course.category}
+                  alt={course.title}
+                  height={170}
+                  style={{
+                    width: 'calc(100% + 50px)',
+                    margin: '-25px -25px 16px -25px',
+                    borderRadius: '20px 20px 0 0',
+                  }}
+                />
+
+                <h3
+                  style={{
+                    color:
+                      dm.heading,
+                  }}
+                >
+                  {
+                    course.title
+                  }
+                </h3>
+
+                <p
+                  style={{
+                    color:
+                      dm.text,
+                  }}
+                >
+                  {course.description ||
+                    t.exploreCourseFallback}
+                </p>
+
+                {course.instructor && (
+                  <p
+                    style={{
+                      color: dm.subtext,
+                      fontSize: '0.8rem',
+                      marginTop: '-8px',
+                    }}
+                  >
+                    <i className="fas fa-chalkboard-teacher" />{' '}
+                    {course.instructor}
+                  </p>
+                )}
+
+                <div
+                  style={{
+                    display:
+                      'flex',
+                    justifyContent:
+                      'space-between',
+                    margin:
+                      '15px 0',
+                    color:
+                      dm.subtext,
+                    fontSize:
+                      '0.85rem',
+                  }}
+                >
+                  <span>
+                    <i className="fas fa-users" />{' '}
+                    {course.students ||
+                      0}
+                  </span>
+
+                  <span>
+                    <i
+                      className="fas fa-star"
+                      style={{
+                        color:
+                          '#f0a500',
+                      }}
+/>{' '}
+                    {course.rating ||
+                      '0'}
+                  </span>
+
+                  <span
+                    style={{
+                      fontWeight: '700',
+                      color: dm.heading,
+                    }}
+                  >
+                    {Number(course.price) > 0
+                      ? `$${Number(course.price).toFixed(2)}`
+                      : 'Free'}
+                  </span>
+                </div>
+
+                <button
+                  onClick={(
+                    e
+                  ) => {
+                    e.stopPropagation();
+
+                    navigate(
+                      `/courses/${course.id}`
+                    );
+                  }}
+                  style={{
+                    background:
+                      dm.btnBack,
+                    color:
+                      'white',
+                    border:
+                      'none',
+                    padding:
+                      '10px 20px',
+                    borderRadius:
+                      '8px',
+                    cursor:
+                      'pointer',
+                    fontWeight:
+                      '600',
+                  }}
+                >
+                  <i className="fas fa-arrow-right" />{' '}
+                  {t.viewDetails}
+                </button>
+              </div>
+            )
+          )}
+        </div>
+      )}
+
+      <style>
+        {`
+          @keyframes courseCardEntrance {
+            from {
+              opacity: 0;
+              transform: translateY(35px) scale(0.96);
+            }
+
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+        `}
+      </style>
+    </section>
+  );
+};
+
+export default Courses;

@@ -1,0 +1,980 @@
+import Certificate from '../components/course/Certificate';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabase';
+import CourseCover from '../components/course/CourseCover';
+import { useLang } from '../context/LanguageContext';
+import Avatar from '../components/common/Avatar';
+import DualOrbitLoader from '../components/common/DualOrbitLoader';
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const { darkMode } = useLang();
+
+  // =========================
+  // STATE
+  // =========================
+
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [enrollments, setEnrollments] = useState([]);
+
+  const [pageVisible, setPageVisible] = useState(false);
+  const [progressVisible, setProgressVisible] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // =========================
+  // THEME
+  // =========================
+
+  const bg = darkMode ? '#0f0f0f' : '#F3F7FC';
+  const card = darkMode ? '#1a1a2e' : 'white';
+  const text = darkMode ? 'white' : '#003366';
+  const text2 = darkMode ? '#a8c8f0' : '#888';
+  const progressBg = darkMode ? '#2e2e4e' : '#f0f0f0';
+
+  // =========================
+  // LOAD DASHBOARD DATA
+  // =========================
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadDashboard = async () => {
+      setLoading(true);
+      setError('');
+
+      // Get logged-in user
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        navigate('/login');
+        return;
+      }
+
+      if (!mounted) return;
+
+      setUser(user);
+
+      // =========================
+      // LOAD PROFILE
+      // =========================
+
+      const { data: profileData, error: profileError } =
+        await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+      if (profileError) {
+        console.error('Profile error:', profileError);
+      }
+
+      if (mounted) {
+        setProfile(profileData || null);
+      }
+
+      // =========================
+      // LOAD ENROLLMENTS
+      // =========================
+      // Get enrollments + related course
+      // using the existing Foreign Key
+      // =========================
+
+      const {
+        data: enrollmentData,
+        error: enrollmentError,
+      } = await supabase
+        .from('enrollments')
+        .select(`
+          id,
+          user_id,
+          course_id,
+          enrolled_at,
+          progress,
+          completed,
+          courses (
+            id,
+            title,
+            category,
+            image_url,
+            students,
+            rating,
+            requires_cert_approval
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('enrolled_at', {
+          ascending: false,
+        });
+
+      if (enrollmentError) {
+        console.error(
+          'Enrollment error:',
+          enrollmentError
+        );
+
+        if (mounted) {
+          setError(
+            'Unable to load your enrolled courses.'
+          );
+        }
+      } else {
+        if (mounted) {
+          setEnrollments(enrollmentData || []);
+        }
+      }
+
+      // =========================
+      // PAGE ANIMATIONS
+      // =========================
+
+      if (mounted) {
+        setLoading(false);
+
+        setTimeout(() => {
+          if (mounted) {
+            setPageVisible(true);
+          }
+        }, 100);
+
+        setTimeout(() => {
+          if (mounted) {
+            setProgressVisible(true);
+          }
+        }, 700);
+      }
+    };
+
+    loadDashboard();
+
+    return () => {
+      mounted = false;
+    };
+  }, [navigate]);
+
+  // =========================
+  // REAL STATISTICS
+  // =========================
+
+  const enrolledCoursesCount =
+    enrollments.length;
+
+  const completedCoursesCount =
+    enrollments.filter(
+      (enrollment) =>
+        enrollment.completed === true ||
+        Number(enrollment.progress) >= 100
+    ).length;
+
+  // =========================
+  // PLACEHOLDER HOURS
+  // =========================
+  // We don't have learning-hours
+  // data in Supabase yet.
+  // =========================
+
+  const hoursLearned = 0;
+
+  const [certificateFor, setCertificateFor] = useState(null);
+  const [certInfo, setCertInfo] = useState(null); // { code, issued_on, instructor }
+  const [certStatus, setCertStatus] = useState({}); // enrollment id -> { status, note }
+
+  // Courses whose instructor must approve the certificate: ask the server for the current status.
+  useEffect(() => {
+    const need = enrollments.filter((e) => e.completed && e.courses?.requires_cert_approval);
+    if (!need.length) return;
+    let alive = true;
+    (async () => {
+      const out = {};
+      for (const e of need) {
+        const { data, error } = await supabase.rpc('my_certificate_info', { p_enrollment_id: e.id });
+        const row = Array.isArray(data) ? data[0] : data;
+        out[e.id] = error || !row ? { status: 'pending' } : { status: row.status, note: row.note };
+      }
+      if (alive) setCertStatus(out);
+    })();
+    return () => { alive = false; };
+  }, [enrollments]);
+
+  const openCertificate = async (course, enrollmentId) => {
+    setCertificateFor(course);
+    setCertInfo(null);
+    if (!enrollmentId) return;
+    try {
+      let row = null;
+      const res = await supabase.rpc('my_certificate_info', { p_enrollment_id: enrollmentId });
+      if (!res.error) {
+        const r = Array.isArray(res.data) ? res.data[0] : res.data;
+        if (r?.status === 'approved') row = r;
+      } else {
+        // phase-5 SQL not installed yet: fall back to the plain certificate
+        const old = await supabase.rpc('get_my_certificate', { p_enrollment_id: enrollmentId });
+        if (old.error) throw old.error;
+        row = Array.isArray(old.data) ? old.data[0] : old.data;
+      }
+      if (row?.code) setCertInfo(row);
+    } catch (err) {
+      console.error('Certificate info error:', err);
+    }
+  };
+
+  // =========================
+  // REAL CERTIFICATES
+  // =========================
+  // A certificate = any completed enrollment.
+  // No separate table needed.
+  // =========================
+
+  const certificates = completedCoursesCount;
+
+  // =========================
+  // STATS
+  // =========================
+
+  const stats = [
+    {
+      icon: 'fas fa-book-open',
+      label: 'Enrolled Courses',
+      value: enrolledCoursesCount,
+      color: '#003366',
+    },
+    {
+      icon: 'fas fa-check-circle',
+      label: 'Completed',
+      value: completedCoursesCount,
+      color: '#10b981',
+    },
+    {
+      icon: 'fas fa-clock',
+      label: 'Hours Learned',
+      value: hoursLearned,
+      color: '#f0a500',
+    },
+    {
+      icon: 'fas fa-certificate',
+      label: 'Certificates',
+      value: certificates,
+      color: '#6366f1',
+    },
+  ];
+
+  // =========================
+  // LOADING
+  // =========================
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          background: bg,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <div
+          style={{
+            textAlign: 'center',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '15px' }}><DualOrbitLoader size={48} /></div>
+
+          <p
+            style={{
+              color: text,
+            }}
+          >
+            Loading your dashboard...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================
+  // DASHBOARD
+  // =========================
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        background: bg,
+        padding: '40px 20px',
+        opacity: pageVisible ? 1 : 0,
+        transform: pageVisible
+          ? 'translateY(0)'
+          : 'translateY(20px)',
+        transitionProperty:
+          'opacity, transform, background',
+        transitionDuration: '0.7s',
+        transitionTimingFunction: 'ease',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: '1000px',
+          margin: '0 auto',
+        }}
+      >
+
+        {/* =========================
+            Welcome Section
+        ========================= */}
+
+        <div
+          style={{
+            background:
+              '#003366',
+            borderRadius: '24px',
+            padding: '40px',
+            color: 'white',
+            marginBottom: '30px',
+            animation:
+              'dashboardWelcome 0.8s ease both',
+            boxShadow:
+              '0 4px 20px rgba(0,51,102,0.08)',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '18px',
+              marginBottom: '10px',
+            }}
+          >
+            <Avatar
+              src={profile?.avatar_url}
+              name={profile?.username}
+              email={user?.email}
+              size={64}
+            />
+            <h1 style={{ margin: 0 }}>
+              Welcome back,{' '}
+              {profile?.username ||
+                user?.email ||
+                'Student'}!
+            </h1>
+          </div>
+
+          <p
+            style={{
+              color: '#a8c8f0',
+            }}
+          >
+            Continue your learning journey at
+            CompassPro
+          </p>
+        </div>
+
+        {/* =========================
+            ERROR MESSAGE
+        ========================= */}
+
+        {error && (
+          <div
+            style={{
+              background: darkMode
+                ? '#2a1515'
+                : '#fff1f2',
+              color: '#ef4444',
+              padding: '15px',
+              borderRadius: '14px',
+              marginBottom: '25px',
+              textAlign: 'center',
+            }}
+          >
+            <i className="fas fa-exclamation-circle"></i>{' '}
+            {error}
+          </div>
+        )}
+
+        {/* =========================
+            REAL STATS
+        ========================= */}
+
+        <div
+          style={{
+            display: 'flex',
+            gap: '20px',
+            flexWrap: 'wrap',
+            marginBottom: '30px',
+          }}
+        >
+          {stats.map((stat, i) => (
+            <div
+              key={i}
+              style={{
+                flex: '1',
+                minWidth: '200px',
+                background: darkMode ? card : ['#E6F0FB','#FFF3D6','#E3F5EC','#E6F0FB'][i % 4],
+                borderRadius: '24px',
+                padding: '25px',
+                boxShadow:
+                  '0 4px 20px rgba(0,51,102,0.08)',
+                textAlign: 'center',
+                animation:
+                  'dashboardCardEnter 0.7s ease both',
+                animationDelay:
+                  `${0.15 + i * 0.12}s`,
+                transition:
+                  'transform 0.3s ease, box-shadow 0.3s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform =
+                  'translateY(-8px)';
+
+                e.currentTarget.style.boxShadow =
+                  '0 12px 30px rgba(0,0,0,0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform =
+                  'translateY(0)';
+
+                e.currentTarget.style.boxShadow =
+                  '0 4px 15px rgba(0,0,0,0.08)';
+              }}
+            >
+              <i
+                className={stat.icon}
+                style={{
+                  fontSize: '2rem',
+                  color: stat.color,
+                  marginBottom: '10px',
+                  display: 'block',
+                }}
+              ></i>
+
+              <h2
+                style={{
+                  color: stat.color,
+                  fontSize: '2rem',
+                  margin: '0 0 5px',
+                }}
+              >
+                {stat.value}
+              </h2>
+
+              <p
+                style={{
+                  color: text2,
+                  fontSize: '0.9rem',
+                }}
+              >
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* =========================
+            MY COURSES
+        ========================= */}
+
+        <div
+          style={{
+            background: card,
+            borderRadius: '20px',
+            padding: '30px',
+            boxShadow:
+              '0 4px 15px rgba(0,0,0,0.08)',
+            marginBottom: '30px',
+            animation:
+              'dashboardSectionEnter 0.8s 0.5s ease both',
+          }}
+        >
+          <h2
+            style={{
+              color: text,
+              marginBottom: '25px',
+            }}
+          >
+            <i className="fas fa-book"></i>{' '}
+            My Courses
+          </h2>
+
+          {/* NO COURSES */}
+
+          {enrollments.length === 0 ? (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '40px 20px',
+              }}
+            >
+              <i
+                className="fas fa-book-open"
+                style={{
+                  fontSize: '3rem',
+                  color: text2,
+                  marginBottom: '15px',
+                }}
+              ></i>
+
+              <p
+                style={{
+                  color: text2,
+                  marginBottom: '20px',
+                }}
+              >
+                You haven't enrolled in any
+                courses yet.
+              </p>
+
+              <button
+                onClick={() =>
+                  navigate('/courses')
+                }
+                style={{
+                  padding: '12px 25px',
+                  background: '#003366',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '14px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                }}
+              >
+                <i className="fas fa-search"></i>{' '}
+                Browse Courses
+              </button>
+            </div>
+          ) : (
+            enrollments.map(
+              (enrollment, i) => {
+                const course =
+                  enrollment.courses;
+
+                const progress = Math.min(
+                  100,
+                  Math.max(
+                    0,
+                    Number(
+                      enrollment.progress
+                    ) || 0
+                  )
+                );
+
+                const isCompleted =
+                  enrollment.completed ===
+                    true ||
+                  progress >= 100;
+
+                return (
+                  <div
+                    key={enrollment.id}
+                    style={{
+                      marginBottom:
+                        i ===
+                        enrollments.length - 1
+                          ? '0'
+                          : '25px',
+                      animation:
+                        'courseProgressEnter 0.6s ease both',
+                      animationDelay:
+                        `${0.7 + i * 0.15}s`,
+                      cursor: course
+                        ? 'pointer'
+                        : 'default',
+                    }}
+                    onClick={() => {
+                      if (course) {
+                        navigate(
+                          `/courses?course=${course.id}`
+                        );
+                      }
+                    }}
+                  >
+
+                    {/* COURSE HEADER */}
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent:
+                          'space-between',
+                        alignItems:
+                          'center',
+                        marginBottom:
+                          '8px',
+                        gap: '15px',
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontWeight: '600',
+                          color: text,
+                        }}
+                      >
+                        <CourseCover
+                          src={course?.image_url}
+                          category={course?.category}
+                          alt=""
+                          height={44}
+                          showBadge={false}
+                          style={{
+                            display: 'inline-block',
+                            width: '68px',
+                            verticalAlign: 'middle',
+                            borderRadius: '20px',
+                            marginInlineEnd: '12px',
+                          }}
+                        />
+
+                        {course?.title ||
+                          'Course'}
+                      </span>
+
+                      <span
+                        style={{
+                          color:
+                            isCompleted
+                              ? '#10b981'
+                              : text2,
+                          fontWeight: '600',
+                          whiteSpace:
+                            'nowrap',
+                        }}
+                      >
+                        {isCompleted
+                          ? 'Completed'
+                          : `${progress}%`}
+                      </span>
+                    </div>
+
+                    {/* PROGRESS BAR */}
+
+                    <div
+                      style={{
+                        background:
+                          progressBg,
+                        borderRadius:
+                          '10px',
+                        height: '10px',
+                        overflow:
+                          'hidden',
+                      }}
+                    >
+                      <div
+                        style={{
+                          background:
+                            isCompleted
+                              ? '#10b981'
+                              : '#003366',
+                          width:
+                            progressVisible
+                              ? `${progress}%`
+                              : '0%',
+                          height: '10px',
+                          borderRadius:
+                            '10px',
+                          transition:
+                            'width 1.2s cubic-bezier(0.22, 1, 0.36, 1)',
+                        }}
+                      ></div>
+                    </div>
+
+                    {/* COURSE CATEGORY */}
+
+                    {course?.category && (
+                      <p
+                        style={{
+                          color: text2,
+                          fontSize:
+                            '0.8rem',
+                          marginTop:
+                            '6px',
+                        }}
+                      >
+                        {course.category}
+                      </p>
+                    )}
+
+                    {isCompleted && course && (() => {
+                      const cs = course.requires_cert_approval ? certStatus[enrollment.id]?.status : 'approved';
+                      if (cs === 'approved' || (!course.requires_cert_approval)) {
+                        return (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); openCertificate(course, enrollment.id); }}
+                            style={{ marginTop: '12px', padding: '8px 16px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' }}
+                          >
+                            <i className="fas fa-certificate"></i> Get Certificate
+                          </button>
+                        );
+                      }
+                      if (cs === 'rejected') {
+                        return (
+                          <p style={{ marginTop: '12px', color: '#b3261e', fontSize: '0.85rem', fontWeight: 600 }}>
+                            <i className="fas fa-circle-exclamation"></i> Your instructor has not approved the certificate yet.
+                            {certStatus[enrollment.id]?.note && <><br /><span style={{ fontWeight: 400 }}>Note: {certStatus[enrollment.id].note}</span></>}
+                          </p>
+                        );
+                      }
+                      return (
+                        <p style={{ marginTop: '12px', color: '#8a5a00', fontSize: '0.85rem', fontWeight: 600 }}>
+                          <i className="fas fa-hourglass-half"></i> Completed — waiting for your instructor to approve the certificate.
+                        </p>
+                      );
+                    })()}
+                  </div>
+                );
+              }
+            )
+          )}
+        </div>
+
+        {/* =========================
+            QUICK ACTIONS
+        ========================= */}
+
+        <div
+          style={{
+            display: 'flex',
+            gap: '20px',
+            flexWrap: 'wrap',
+            animation:
+              'dashboardSectionEnter 0.8s 0.8s ease both',
+          }}
+        >
+          <button
+            onClick={() =>
+              navigate('/courses')
+            }
+            style={{
+              flex: '1',
+              padding: '20px',
+              background: '#003366',
+              color: 'white',
+              border: 'none',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: '1rem',
+              transition:
+                'transform 0.3s ease, box-shadow 0.3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform =
+                'translateY(-5px)';
+
+              e.currentTarget.style.boxShadow =
+                '0 10px 25px rgba(0,0,0,0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform =
+                'translateY(0)';
+
+              e.currentTarget.style.boxShadow =
+                'none';
+            }}
+          >
+            <i className="fas fa-plus"></i>{' '}
+            Browse Courses
+          </button>
+
+          <button
+            onClick={() =>
+              navigate('/profile')
+            }
+            style={{
+              flex: '1',
+              padding: '20px',
+              background: '#f0a500',
+              color: '#003366',
+              border: 'none',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: '1rem',
+              transition:
+                'transform 0.3s ease, box-shadow 0.3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform =
+                'translateY(-5px)';
+
+              e.currentTarget.style.boxShadow =
+                '0 10px 25px rgba(0,0,0,0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform =
+                'translateY(0)';
+
+              e.currentTarget.style.boxShadow =
+                'none';
+            }}
+          >
+            <i className="fas fa-user"></i>{' '}
+            Edit Profile
+          </button>
+        </div>
+      </div>
+
+      {/* =========================
+          CERTIFICATE MODAL
+      ========================= */}
+
+      {certificateFor && (
+        <div
+          className="certificate-overlay"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px',
+            overflowY: 'auto',
+          }}
+          onClick={() => { setCertificateFor(null); setCertInfo(null); }}
+        >
+          <div
+            className="certificate-print-area"
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: '100%', maxWidth: '980px', background: 'transparent' }}
+          >
+            <Certificate
+              name={profile?.full_name || profile?.username || user?.email}
+              course={certificateFor.title}
+              instructor={certInfo?.instructor}
+              issuedOn={certInfo?.issued_on}
+              code={certInfo?.code}
+            />
+
+            <div
+              className="certificate-actions"
+              style={{ marginTop: '18px', display: 'flex', gap: '12px', justifyContent: 'center' }}
+            >
+              <button
+                onClick={() => window.print()}
+                style={{
+                  padding: '12px 24px',
+                  background: '#003366',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '14px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                }}
+              >
+                <i className="fas fa-print"></i> Print / Save as PDF
+              </button>
+
+              <button
+                onClick={() => { setCertificateFor(null); setCertInfo(null); }}
+                style={{
+                  padding: '12px 24px',
+                  background: '#e5e7eb',
+                  color: '#333',
+                  border: 'none',
+                  borderRadius: '14px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================
+          ANIMATIONS
+      ========================= */}
+
+      <style>
+        {`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .certificate-print-area, .certificate-print-area * {
+              visibility: visible;
+            }
+            @page { size: A4 landscape; margin: 0; }
+            .certificate-print-area {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 297mm !important;
+              max-width: none !important;
+            }
+            .certificate-actions {
+              display: none !important;
+            }
+          }
+
+          @keyframes dashboardWelcome {
+            from {
+              opacity: 0;
+              transform: translateY(-25px);
+            }
+
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          @keyframes dashboardCardEnter {
+            from {
+              opacity: 0;
+              transform: translateY(35px) scale(0.95);
+            }
+
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+
+          @keyframes dashboardSectionEnter {
+            from {
+              opacity: 0;
+              transform: translateY(30px);
+            }
+
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+
+          @keyframes courseProgressEnter {
+            from {
+              opacity: 0;
+              transform: translateX(-25px);
+            }
+
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            * {
+              animation-duration: 0.01ms !important;
+              animation-iteration-count: 1 !important;
+              transition-duration: 0.01ms !important;
+            }
+          }
+        `}
+      </style>
+    </div>
+  );
+};
+
+export default Dashboard;

@@ -41,18 +41,30 @@ in the frontend. Secrets belong in Supabase Edge Function secrets.
 ## Project structure
 
 ```
-src/
-  PAGES/        route pages (Home, Courses, Dashboard, Admin, ...)
-  components/   shared UI (Navbar, Footer, CourseCover, AuthLayout, ...)
-  hooks/        custom hooks
-  i18n.js       translations
-  redesign.css  design tokens and global overrides
-supabase/sql/   SQL scripts already applied to the database (reference only)
-public/         static files, sitemap, robots
+src/                      FRONTEND (React + Vite)
+  pages/                  route pages (Home, Courses, Dashboard, Admin, Instructor, ...)
+  components/
+    admin/                admin panel pieces (Home editor, analytics)
+    instructor/           instructor dashboard tabs (assignments, quizzes, sessions, students)
+    course/               what students see inside a course (assignments, quizzes, sessions,
+                          cover, certificate)
+    home/                 public home page blocks (instructors section, AI assistant)
+    layout/               Navbar, Footer, AuthLayout
+    guards/               route guards (Protected / Admin / Instructor)
+    common/               small shared UI (Avatar, Button, loader)
+  context/                LanguageContext (EN/AR + dark mode)
+  hooks/                  custom hooks
+  utils/                  helpers
+  supabase.js             Supabase client (public anon key only)
+  i18n.js                 translations
+  redesign.css            design tokens and global overrides
+public/                   static files, sitemap, robots
+backend/                  BACKEND (Supabase)
+  sql/                    SQL already applied to the database (reference only), see backend/sql/README.md
 ```
 
 ## Database
 
 Row Level Security is enabled on all tables. Admin checks are enforced in the
-database (`is_admin()` and policies), not only in the UI. See `supabase/sql/`
+database (`is_admin()` and policies), not only in the UI. See `backend/sql/`
 for the history of changes.

@@ -1,32 +1,32 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
-import Login from './PAGES/Login'
-import SignUp from './PAGES/SignUp'
-import ForgotPassword from './PAGES/ForgotPassword'
-import ResetPassword from './PAGES/ResetPassword'
-import Home from './PAGES/Home'
-const About = lazy(() => import('./PAGES/About'))
-const Services = lazy(() => import('./PAGES/Services'))
-const Courses = lazy(() => import('./PAGES/Courses'))
-const Dashboard = lazy(() => import('./PAGES/Dashboard'))
-const Profile = lazy(() => import('./PAGES/Profile'))
-const Contact = lazy(() => import('./PAGES/Contact'))
-const Admin = lazy(() => import('./PAGES/Admin'))
-const Instructor = lazy(() => import('./PAGES/Instructor'))
-const Sessions = lazy(() => import('./PAGES/Sessions'))
-const InstructorProfile = lazy(() => import('./PAGES/InstructorProfile'))
-const Verify = lazy(() => import('./PAGES/Verify'))
-const Legal = lazy(() => import('./PAGES/Legal'))
+import Login from './pages/Login'
+import SignUp from './pages/SignUp'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
+import Home from './pages/Home'
+const About = lazy(() => import('./pages/About'))
+const Services = lazy(() => import('./pages/Services'))
+const Courses = lazy(() => import('./pages/Courses'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Profile = lazy(() => import('./pages/Profile'))
+const Contact = lazy(() => import('./pages/Contact'))
+const Admin = lazy(() => import('./pages/Admin'))
+const Instructor = lazy(() => import('./pages/Instructor'))
+const Sessions = lazy(() => import('./pages/Sessions'))
+const InstructorProfile = lazy(() => import('./pages/InstructorProfile'))
+const Verify = lazy(() => import('./pages/Verify'))
+const Legal = lazy(() => import('./pages/Legal'))
 
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
-import ProtectedRoute from './components/ProtectedRoute'
-import AdminRoute from './components/AdminRoute'
-import InstructorRoute from './components/InstructorRoute'
-import AIAssistant from './components/AIAssistant'
+import Navbar from './components/layout/Navbar'
+import Footer from './components/layout/Footer'
+import ProtectedRoute from './components/guards/ProtectedRoute'
+import AdminRoute from './components/guards/AdminRoute'
+import InstructorRoute from './components/guards/InstructorRoute'
+import AIAssistant from './components/home/AIAssistant'
 
-import { LanguageProvider } from './LanguageContext'
+import { LanguageProvider } from './context/LanguageContext'
 
 function App() {
   return (
