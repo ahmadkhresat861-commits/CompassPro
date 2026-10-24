@@ -20,13 +20,17 @@ const InstructorStudents = ({ courses, students }) => {
   const [detail, setDetail] = useState({ assignments: [], quizzes: [] });
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
+  const [approvals, setApprovals] = useState({});
+  const [reqMap, setReqMap] = useState({});
+  const [certMsg, setCertMsg] = useState(null);
+  const required = (reqMap[courseId] ?? courses.find((c) => String(c.id) === courseId)?.requires_cert_approval) === true;
   const [names, setNames] = useState({});
 
   const load = useCallback(async () => {
     if (!courseId) return;
     setLoading(true); setErr('');
     const [{ data: en, error: e1 }, { data: ls }, { data: as }, { data: qs }] = await Promise.all([
-      supabase.from('enrollments').select('user_id, progress, completed, enrolled_at').eq('course_id', courseId),
+      supabase.from('enrollments').select('id, user_id, progress, completed, enrolled_at').eq('course_id', courseId),
       supabase.from('lessons').select('id').eq('course_id', courseId),
       supabase.from('assignments').select('id, title, max_score').eq('course_id', courseId),
       supabase.from('quizzes').select('id, title, pass_score').eq('course_id', courseId),
@@ -40,6 +44,9 @@ const InstructorStudents = ({ courses, students }) => {
       aids.length ? supabase.from('submissions').select('student_id, assignment_id, score, submitted_at, graded_at').in('assignment_id', aids) : { data: [] },
       qids.length ? supabase.from('quiz_attempts').select('student_id, quiz_id, score, passed, needs_grading, submitted_at').in('quiz_id', qids) : { data: [] },
     ]);
+    const eids = (en || []).map((e) => e.id);
+    const { data: ap } = eids.length ? await supabase.from('certificate_approvals').select('enrollment_id, approved, note').in('enrollment_id', eids) : { data: [] };
+    setApprovals(Object.fromEntries((ap || []).map((a) => [a.enrollment_id, a])));
     const uids = (en || []).map((e) => e.user_id);
     const missing = uids.filter((u) => !students[u]);
     if (missing.length) {
@@ -54,7 +61,7 @@ const InstructorStudents = ({ courses, students }) => {
       const passedIds = new Set(myAt.filter((x) => x.passed).map((x) => x.quiz_id));
       const dates = [...myL.map((x) => x.completed_at), ...mySub.map((x) => x.submitted_at), ...myAt.map((x) => x.submitted_at)].filter(Boolean).sort();
       return {
-        id: u, progress: Math.round(Number(e.progress) || 0), completed: !!e.completed, enrolled_at: e.enrolled_at,
+        id: u, eid: e.id, progress: Math.round(Number(e.progress) || 0), completed: !!e.completed, enrolled_at: e.enrolled_at,
         lessons: myL.length, submitted: mySub.length, graded: mySub.filter((x) => x.score != null).length,
         passed: passedIds.size, pendingQuiz: myAt.filter((x) => x.needs_grading).length,
         last: dates.length ? dates[dates.length - 1] : null,
@@ -69,6 +76,27 @@ const InstructorStudents = ({ courses, students }) => {
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
+
+  const toggleRequired = async (on) => {
+    setCertMsg(null);
+    const { error } = await supabase.rpc('set_course_cert_approval', { p_course_id: Number(courseId), p_required: on });
+    if (error) { setCertMsg({ ok: false, text: `${error.message} (run supabase/sql/instructor_phase5.sql)` }); return; }
+    setReqMap((m) => ({ ...m, [courseId]: on }));
+    setCertMsg({ ok: true, text: on ? 'Certificates for this course now need your approval.' : 'Certificates are issued automatically again.' });
+  };
+
+  const decide = async (r, approve) => {
+    let note = null;
+    if (!approve) {
+      note = window.prompt('Reason / what the student should fix (optional):', '');
+      if (note === null) return;
+    }
+    setCertMsg(null);
+    const { error } = await supabase.rpc('decide_certificate', { p_enrollment_id: r.eid, p_approve: approve, p_note: note });
+    if (error) { setCertMsg({ ok: false, text: error.message }); return; }
+    setApprovals((m) => ({ ...m, [r.eid]: { enrollment_id: r.eid, approved: approve, note } }));
+    setCertMsg({ ok: true, text: `${nameOf(r.id)}: certificate ${approve ? 'approved' : 'not approved'}. The student was notified.` });
+  };
 
   const nameOf = (id) => students[id] || names[id] || id.slice(0, 8);
 
@@ -106,6 +134,11 @@ const InstructorStudents = ({ courses, students }) => {
           {stat('Completed', rows.filter((r) => r.completed).length)}
           {stat('Items in course', totals.lessons + totals.assignments + totals.quizzes)}
         </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 16, fontSize: 14, cursor: 'pointer' }}>
+          <input type="checkbox" checked={required} onChange={(e) => toggleRequired(e.target.checked)} />
+          Require my approval before a student gets the certificate
+        </label>
+        {certMsg && <div role="status" style={{ color: certMsg.ok ? '#0a7a43' : '#b3261e', fontWeight: 600, fontSize: 14, marginTop: 8 }}>{certMsg.text}</div>}
       </div>
 
       <div style={card}>
@@ -121,7 +154,7 @@ const InstructorStudents = ({ courses, students }) => {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
               <thead><tr>
                 <th style={th}>Student</th><th style={th}>Progress</th>
-                <th style={th}>Lessons</th><th style={th}>Assignments</th><th style={th}>Quizzes</th><th style={th}>Last activity</th><th style={th} />
+                <th style={th}>Lessons</th><th style={th}>Assignments</th><th style={th}>Quizzes</th><th style={th}>Last activity</th><th style={th}>Certificate</th><th style={th} />
               </tr></thead>
               <tbody>
                 {rows.map((r) => (
@@ -136,10 +169,23 @@ const InstructorStudents = ({ courses, students }) => {
                       <td style={td}>{r.submitted}/{totals.assignments}{r.graded > 0 && <span style={{ color: '#4A5D78', fontSize: 12 }}> ({r.graded} graded)</span>}</td>
                       <td style={td}>{r.passed}/{totals.quizzes}{r.pendingQuiz > 0 && <span style={{ color: '#8a5a00', fontSize: 12 }}> ({r.pendingQuiz} to grade)</span>}</td>
                       <td style={td}>{fmtDate(r.last)}</td>
+                      <td style={{ ...td, whiteSpace: 'nowrap' }}>
+                        {!r.completed ? <span style={{ color: '#4A5D78', fontSize: 12 }}>—</span>
+                          : !required ? <span style={{ color: '#4A5D78', fontSize: 12 }}>automatic</span>
+                          : (
+                            <>
+                              {approvals[r.eid]?.approved === true && <span style={{ color: '#0a7a43', fontWeight: 800, fontSize: 12 }}>✓ approved </span>}
+                              {approvals[r.eid]?.approved === false && <span style={{ color: '#b3261e', fontWeight: 800, fontSize: 12 }} title={approvals[r.eid].note || ''}>✗ not approved </span>}
+                              {!approvals[r.eid] && <span style={{ color: '#8a5a00', fontWeight: 800, fontSize: 12 }}>⏳ waiting </span>}
+                              {approvals[r.eid]?.approved !== true && <button type="button" style={{ ...btn, padding: '3px 10px', fontSize: 12 }} onClick={() => decide(r, true)}>Approve</button>}
+                              {approvals[r.eid]?.approved !== false && <button type="button" style={{ ...btn, padding: '3px 10px', fontSize: 12, marginInlineStart: 4, color: '#b3261e' }} onClick={() => decide(r, false)}>Reject</button>}
+                            </>
+                          )}
+                      </td>
                       <td style={td}><button type="button" style={{ ...btn, padding: '4px 12px' }} aria-expanded={open === r.id} onClick={() => setOpen(open === r.id ? null : r.id)}>{open === r.id ? 'Hide' : 'Details'}</button></td>
                     </tr>
                     {open === r.id && (
-                      <tr><td colSpan={7} style={{ ...td, background: '#F8FAFD' }}>
+                      <tr><td colSpan={8} style={{ ...td, background: '#F8FAFD' }}>
                         <div style={{ fontWeight: 800, color: NAVY, marginBottom: 6 }}>Assignments</div>
                         {!detail.assignments.length && <div style={{ color: '#4A5D78', fontSize: 13 }}>No assignments in this course.</div>}
                         {detail.assignments.map((a) => {

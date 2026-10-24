@@ -1,3 +1,4 @@
+import Certificate from '../components/Certificate';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
@@ -104,7 +105,8 @@ const Dashboard = () => {
             category,
             image_url,
             students,
-            rating
+            rating,
+            requires_cert_approval
           )
         `)
         .eq('user_id', user.id)
@@ -181,18 +183,42 @@ const Dashboard = () => {
   const hoursLearned = 0;
 
   const [certificateFor, setCertificateFor] = useState(null);
-  const [certInfo, setCertInfo] = useState(null); // { code, issued_on }
+  const [certInfo, setCertInfo] = useState(null); // { code, issued_on, instructor }
+  const [certStatus, setCertStatus] = useState({}); // enrollment id -> { status, note }
+
+  // Courses whose instructor must approve the certificate: ask the server for the current status.
+  useEffect(() => {
+    const need = enrollments.filter((e) => e.completed && e.courses?.requires_cert_approval);
+    if (!need.length) return;
+    let alive = true;
+    (async () => {
+      const out = {};
+      for (const e of need) {
+        const { data, error } = await supabase.rpc('my_certificate_info', { p_enrollment_id: e.id });
+        const row = Array.isArray(data) ? data[0] : data;
+        out[e.id] = error || !row ? { status: 'pending' } : { status: row.status, note: row.note };
+      }
+      if (alive) setCertStatus(out);
+    })();
+    return () => { alive = false; };
+  }, [enrollments]);
 
   const openCertificate = async (course, enrollmentId) => {
     setCertificateFor(course);
     setCertInfo(null);
     if (!enrollmentId) return;
     try {
-      const { data, error } = await supabase.rpc('get_my_certificate', {
-        p_enrollment_id: enrollmentId,
-      });
-      if (error) throw error;
-      const row = Array.isArray(data) ? data[0] : data;
+      let row = null;
+      const res = await supabase.rpc('my_certificate_info', { p_enrollment_id: enrollmentId });
+      if (!res.error) {
+        const r = Array.isArray(res.data) ? res.data[0] : res.data;
+        if (r?.status === 'approved') row = r;
+      } else {
+        // phase-5 SQL not installed yet: fall back to the plain certificate
+        const old = await supabase.rpc('get_my_certificate', { p_enrollment_id: enrollmentId });
+        if (old.error) throw old.error;
+        row = Array.isArray(old.data) ? old.data[0] : old.data;
+      }
       if (row?.code) setCertInfo(row);
     } catch (err) {
       console.error('Certificate info error:', err);
@@ -673,28 +699,32 @@ const Dashboard = () => {
                       </p>
                     )}
 
-                    {isCompleted && course && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openCertificate(course, enrollment.id);
-                        }}
-                        style={{
-                          marginTop: '12px',
-                          padding: '8px 16px',
-                          background: '#6366f1',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '14px',
-                          cursor: 'pointer',
-                          fontWeight: '600',
-                          fontSize: '0.85rem',
-                        }}
-                      >
-                        <i className="fas fa-certificate"></i>{' '}
-                        Get Certificate
-                      </button>
-                    )}
+                    {isCompleted && course && (() => {
+                      const cs = course.requires_cert_approval ? certStatus[enrollment.id]?.status : 'approved';
+                      if (cs === 'approved' || (!course.requires_cert_approval)) {
+                        return (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); openCertificate(course, enrollment.id); }}
+                            style={{ marginTop: '12px', padding: '8px 16px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '14px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' }}
+                          >
+                            <i className="fas fa-certificate"></i> Get Certificate
+                          </button>
+                        );
+                      }
+                      if (cs === 'rejected') {
+                        return (
+                          <p style={{ marginTop: '12px', color: '#b3261e', fontSize: '0.85rem', fontWeight: 600 }}>
+                            <i className="fas fa-circle-exclamation"></i> Your instructor has not approved the certificate yet.
+                            {certStatus[enrollment.id]?.note && <><br /><span style={{ fontWeight: 400 }}>Note: {certStatus[enrollment.id].note}</span></>}
+                          </p>
+                        );
+                      }
+                      return (
+                        <p style={{ marginTop: '12px', color: '#8a5a00', fontSize: '0.85rem', fontWeight: 600 }}>
+                          <i className="fas fa-hourglass-half"></i> Completed — waiting for your instructor to approve the certificate.
+                        </p>
+                      );
+                    })()}
                   </div>
                 );
               }
@@ -805,78 +835,26 @@ const Dashboard = () => {
             justifyContent: 'center',
             zIndex: 1000,
             padding: '20px',
+            overflowY: 'auto',
           }}
           onClick={() => { setCertificateFor(null); setCertInfo(null); }}
         >
           <div
             className="certificate-print-area"
             onClick={(e) => e.stopPropagation()}
-            style={{
-              background: 'white',
-              width: '100%',
-              maxWidth: '750px',
-              padding: '50px',
-              borderRadius: '14px',
-              border: '10px solid #003366',
-              textAlign: 'center',
-              position: 'relative',
-            }}
+            style={{ width: '100%', maxWidth: '980px', background: 'transparent' }}
           >
-            <i
-              className="fas fa-graduation-cap"
-              style={{ fontSize: '2.5rem', color: '#f0a500', marginBottom: '15px' }}
-            ></i>
-
-            <h2 style={{ color: '#003366', letterSpacing: '2px', marginBottom: '5px' }}>
-              ZEPHYR ACADEMY
-            </h2>
-
-            <p style={{ color: '#888', marginBottom: '30px', fontSize: '0.9rem' }}>
-              Certificate of Completion
-            </p>
-
-            <p style={{ color: '#555', fontSize: '1rem' }}>This certifies that</p>
-
-            <h1
-              style={{
-                color: '#003366',
-                margin: '10px 0 25px',
-                fontSize: '2rem',
-                borderBottom: '2px solid #f0a500',
-                display: 'inline-block',
-                paddingBottom: '8px',
-              }}
-            >
-              {profile?.username || user?.email || 'Student'}
-            </h1>
-
-            <p style={{ color: '#555', fontSize: '1rem' }}>
-              has successfully completed the course
-            </p>
-
-            <h2 style={{ color: '#003366', margin: '15px 0 30px' }}>
-              {certificateFor.title}
-            </h2>
-
-            <p style={{ color: '#888', fontSize: '0.85rem' }}>
-              Issued on{' '}
-              {(certInfo?.issued_on
-                ? new Date(certInfo.issued_on)
-                : new Date()
-              ).toLocaleDateString()}
-            </p>
-
-            {certInfo?.code && (
-              <p style={{ color: '#888', fontSize: '0.8rem', marginTop: '6px' }}>
-                Certificate No: <strong style={{ color: '#003366' }}>{certInfo.code}</strong>
-                <br />
-                Verify at {window.location.origin}/verify
-              </p>
-            )}
+            <Certificate
+              name={profile?.full_name || profile?.username || user?.email}
+              course={certificateFor.title}
+              instructor={certInfo?.instructor}
+              issuedOn={certInfo?.issued_on}
+              code={certInfo?.code}
+            />
 
             <div
               className="certificate-actions"
-              style={{ marginTop: '35px', display: 'flex', gap: '12px', justifyContent: 'center' }}
+              style={{ marginTop: '18px', display: 'flex', gap: '12px', justifyContent: 'center' }}
             >
               <button
                 onClick={() => window.print()}
@@ -925,11 +903,13 @@ const Dashboard = () => {
             .certificate-print-area, .certificate-print-area * {
               visibility: visible;
             }
+            @page { size: A4 landscape; margin: 0; }
             .certificate-print-area {
               position: fixed;
               top: 0;
               left: 0;
-              border-width: 15px !important;
+              width: 297mm !important;
+              max-width: none !important;
             }
             .certificate-actions {
               display: none !important;
