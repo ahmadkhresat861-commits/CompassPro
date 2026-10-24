@@ -115,6 +115,7 @@ const Navbar = () => {
     };
 
     fetchProfile();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- depends on the user id only, not the whole user object
   }, [user?.id]);
 
   const handleLogout = async () => {
@@ -157,6 +158,7 @@ const Navbar = () => {
     };
 
     fetchNotifications();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- depends on the user id only, not the whole user object
   }, [user?.id, authLoading]);
 
   // ── Realtime Notifications (للمسجلين دخول فقط) ──────────────────
@@ -196,6 +198,7 @@ const Navbar = () => {
     return () => {
       supabase.removeChannel(channel);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- depends on the user id only, not the whole user object
   }, [user?.id]);
   useEffect(() => {
     if (!showNotif) return;

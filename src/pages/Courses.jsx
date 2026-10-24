@@ -321,6 +321,7 @@ const Courses = () => {
 
     fetchReviews();
     checkEnrollment();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch when the course or user changes; the fetchers are recreated on every render
   }, [selected, user]);
 
   // ============================================================
@@ -687,6 +688,7 @@ const Courses = () => {
         totalItems) *
         100
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- derived from the listed lesson fields; the helper is recreated on every render
   }, [
     lessons,
     lessonProgress,

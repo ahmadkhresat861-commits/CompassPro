@@ -49,6 +49,7 @@ const AdminHome = ({ settingsKey = 'home' }) => {
       setInstructors(ins || []);
       setLoading(false);
     })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- load once; the key never changes for a mounted editor
   }, []);
 
   const setApproved = async (userId, approved) => {

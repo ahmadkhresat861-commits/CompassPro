@@ -42,8 +42,8 @@ const Verify = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- verify the code from the URL once on load
     if (urlCode) verify(urlCode);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlCode]);
 
   const submit = (e) => {

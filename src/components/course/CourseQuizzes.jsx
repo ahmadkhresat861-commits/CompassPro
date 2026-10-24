@@ -83,7 +83,6 @@ const CourseQuizzes = ({ courseId, userId, dm, onStats }) => {
     setLoaded(true);
   }, [courseId, userId]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {

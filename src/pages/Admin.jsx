@@ -1007,6 +1007,7 @@ const Admin = () => {
     if (activeTab === 'messages') {
       fetchMessages();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when the tab changes; the fetchers are recreated on every render
   }, [activeTab]);
 
   // =========================
