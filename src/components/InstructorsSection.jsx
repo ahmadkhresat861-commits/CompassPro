@@ -20,10 +20,12 @@ const InstructorsSection = () => {
         .limit(8);
       if (!alive || error || !data?.length) return;
       const ids = data.map((d) => d.user_id);
-      const { data: cs } = await supabase.from('courses').select('instructor_id').in('instructor_id', ids);
+      const { data: cs } = await supabase.from('courses').select('instructor_id, instructor').in('instructor_id', ids);
       const count = {};
-      (cs || []).forEach((c) => { count[c.instructor_id] = (count[c.instructor_id] || 0) + 1; });
-      setList(data.filter((d) => d.display_name).map((d) => ({ ...d, courses: count[d.user_id] || 0 })));
+      const nameOf = {};
+      (cs || []).forEach((c) => { count[c.instructor_id] = (count[c.instructor_id] || 0) + 1; if (c.instructor && !nameOf[c.instructor_id]) nameOf[c.instructor_id] = c.instructor; });
+      // an instructor who did not type a display name falls back to the name written on the course
+      setList(data.map((d) => ({ ...d, display_name: d.display_name || nameOf[d.user_id] || null, courses: count[d.user_id] || 0 })).filter((d) => d.display_name));
     })();
     return () => { alive = false; };
   }, []);

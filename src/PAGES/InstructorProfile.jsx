@@ -24,9 +24,9 @@ const InstructorProfile = () => {
       const { data, error } = await supabase.from('instructor_public').select('*').eq('user_id', id).eq('approved', true).maybeSingle();
       if (!alive) return;
       if (error || !data) { setState('missing'); return; }
-      setP(data);
-      const { data: cs } = await supabase.from('courses').select('id, title, category, image_url, price, rating, students').eq('instructor_id', id).order('created_at', { ascending: false });
+      const { data: cs } = await supabase.from('courses').select('id, title, category, image_url, price, rating, students, instructor').eq('instructor_id', id).order('created_at', { ascending: false });
       if (!alive) return;
+      setP({ ...data, display_name: data.display_name || cs?.find((c) => c.instructor)?.instructor || null });
       setCourses(cs || []);
       setState('ok');
     })();
