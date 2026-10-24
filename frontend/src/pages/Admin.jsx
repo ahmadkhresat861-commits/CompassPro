@@ -27,17 +27,6 @@ const Admin = () => {
   const [profilesLoading, setProfilesLoading] = useState(false);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [sessionsLoading, setSessionsLoading] = useState(false);
-  const emptySessionForm = {
-    title: '',
-    course: '',
-    data: '',
-    time: '',
-    instructor: '',
-    zoom_link: '',
-  };
-  const [sessionForm, setSessionForm] = useState(emptySessionForm);
-  const [sessionSaving, setSessionSaving] = useState(false);
-  const [editingSessionId, setEditingSessionId] = useState(null);
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const [userActionLoading, setUserActionLoading] = useState(false);
@@ -76,28 +65,9 @@ const Admin = () => {
   const [courseStatus, setCourseStatus] = useState('');
 
   // =========================
-  // Lessons States
-  // =========================
-  const [courseOptions, setCourseOptions] = useState([]);
-  const [selectedCourseId, setSelectedCourseId] = useState('');
-  const [lessons, setLessons] = useState([]);
-  const [lessonsLoading, setLessonsLoading] = useState(false);
-
-  const [lessonTitle, setLessonTitle] = useState('');
-  const [lessonDescription, setLessonDescription] = useState('');
-  const [lessonContent, setLessonContent] = useState('');
-  const [lessonVideoUri, setLessonVideoUri] = useState('');
-  const [lessonOrder, setLessonOrder] = useState(1);
-  const [lessonPdfUrl, setLessonPdfUrl] = useState('');
-  const [lessonPdfFile, setLessonPdfFile] = useState(null);
-  const [pdfUploading, setPdfUploading] = useState(false);
-
-  const [editingLessonId, setEditingLessonId] = useState(null);
-  const [lessonStatus, setLessonStatus] = useState('');
-
-  // =========================
   // Enrollments States
   // =========================
+  const [courseOptions, setCourseOptions] = useState([]); // course titles for the enrollments table
   const [enrollments, setEnrollments] = useState([]);
   const [enrollmentsLoading, setEnrollmentsLoading] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -507,7 +477,7 @@ const Admin = () => {
   };
 
   // =========================
-  // Fetch Course Options (for Lessons dropdown)
+  // Fetch Course Titles (for the enrollments table)
   // =========================
   const fetchCourseOptions = async () => {
     try {
@@ -523,182 +493,6 @@ const Admin = () => {
       console.error('Error fetching course options:', error);
       setCourseOptions([]);
     }
-  };
-
-  // =========================
-  // Fetch Lessons for Selected Course
-  // =========================
-  const fetchLessons = async (courseId) => {
-    if (!courseId) {
-      setLessons([]);
-      return;
-    }
-
-    setLessonsLoading(true);
-
-    try {
-      const { data, error } = await supabase
-        .from('lessons')
-        .select(
-          'id, course_id, title, description, content, lesson_order, video_url, pdf_url'
-        )
-        .eq('course_id', courseId)
-        .order('lesson_order', { ascending: true });
-
-      if (error) throw error;
-
-      setLessons(data || []);
-    } catch (error) {
-      console.error('Error fetching lessons:', error);
-      alert('Failed to load lessons: ' + error.message);
-    } finally {
-      setLessonsLoading(false);
-    }
-  };
-
-  // =========================
-  // Add / Update Lesson
-  // =========================
-  const saveLesson = async (e) => {
-    e.preventDefault();
-
-    if (!selectedCourseId) {
-      setLessonStatus('Please select a course first.');
-      return;
-    }
-
-    if (!lessonTitle.trim()) {
-      setLessonStatus('Please enter a lesson title.');
-      return;
-    }
-
-    try {
-      let pdfUrl = lessonPdfUrl;
-
-      if (lessonPdfFile) {
-        setPdfUploading(true);
-
-        const fileExt = lessonPdfFile.name.split('.').pop();
-        const filePath = `${selectedCourseId}/${Date.now()}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('lesson-files')
-          .upload(filePath, lessonPdfFile);
-
-        if (uploadError) {
-          setPdfUploading(false);
-          setLessonStatus('Failed to upload PDF: ' + uploadError.message);
-          return;
-        }
-
-        const { data: publicUrlData } = supabase.storage
-          .from('lesson-files')
-          .getPublicUrl(filePath);
-
-        pdfUrl = publicUrlData?.publicUrl || '';
-        setPdfUploading(false);
-      }
-
-      const lessonData = {
-        course_id: selectedCourseId,
-        title: lessonTitle.trim(),
-        description: lessonDescription.trim(),
-        content: lessonContent.trim(),
-        video_url: lessonVideoUri.trim(),
-        lesson_order: Number(lessonOrder) || 1,
-        pdf_url: pdfUrl,
-      };
-
-      let error;
-
-      if (editingLessonId) {
-        const result = await supabase
-          .from('lessons')
-          .update(lessonData)
-          .eq('id', editingLessonId);
-
-        error = result.error;
-      } else {
-        const result = await supabase
-          .from('lessons')
-          .insert([lessonData]);
-
-        error = result.error;
-      }
-
-      if (error) throw error;
-
-      setLessonStatus(
-        editingLessonId
-          ? 'Lesson updated successfully!'
-          : 'Lesson added successfully!'
-      );
-
-      resetLessonForm();
-      await fetchLessons(selectedCourseId);
-    } catch (error) {
-      console.error('Error saving lesson:', error);
-      setLessonStatus('Failed to save lesson: ' + error.message);
-    }
-  };
-
-  // =========================
-  // Delete Lesson
-  // =========================
-  const deleteLesson = async (id) => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this lesson?'
-    );
-
-    if (!confirmed) return;
-
-    try {
-      const { error } = await supabase
-        .from('lessons')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setLessons((current) =>
-        current.filter((lesson) => lesson.id !== id)
-      );
-    } catch (error) {
-      console.error('Error deleting lesson:', error);
-      alert('Failed to delete lesson: ' + error.message);
-    }
-  };
-
-  // =========================
-  // Edit Lesson
-  // =========================
-  const editLesson = (lesson) => {
-    setEditingLessonId(lesson.id);
-    setLessonTitle(lesson.title || '');
-    setLessonDescription(lesson.description || '');
-    setLessonContent(lesson.content || '');
-    setLessonVideoUri(lesson.video_url || '');
-    setLessonOrder(lesson.lesson_order || 1);
-    setLessonPdfUrl(lesson.pdf_url || '');
-    setLessonPdfFile(null);
-    setLessonStatus('');
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // =========================
-  // Reset Lesson Form
-  // =========================
-  const resetLessonForm = () => {
-    setEditingLessonId(null);
-    setLessonTitle('');
-    setLessonDescription('');
-    setLessonContent('');
-    setLessonVideoUri('');
-    setLessonOrder(1);
-    setLessonPdfUrl('');
-    setLessonPdfFile(null);
-    setLessonStatus('');
   };
 
   // =========================
@@ -727,81 +521,6 @@ const Admin = () => {
       alert('Failed to load enrollments: ' + error.message);
     } finally {
       setEnrollmentsLoading(false);
-    }
-  };
-
-  // =========================
-  // Add / Delete Session
-  // =========================
-  const handleAddSession = async () => {
-    const f = sessionForm;
-    if (!f.title.trim() || !f.data.trim() || !f.time.trim()) {
-      alert('Title, date and time are required.');
-      return;
-    }
-
-    let link = f.zoom_link.trim();
-    if (link && !/^https?:\/\//i.test(link)) {
-      alert('Meeting link must start with http:// or https://');
-      return;
-    }
-
-    setSessionSaving(true);
-    try {
-      const payload = {
-        title: f.title.trim(),
-        course: f.course.trim() || null,
-        data: f.data.trim(),
-        time: f.time.trim(),
-        instructor: f.instructor.trim() || null,
-        zoom_link: link || null,
-      };
-
-      const { error } = editingSessionId
-        ? await supabase.from('sessions').update(payload).eq('id', editingSessionId)
-        : await supabase.from('sessions').insert([payload]);
-
-      if (error) throw error;
-
-      setSessionForm(emptySessionForm);
-      setEditingSessionId(null);
-      await fetchSessions();
-    } catch (error) {
-      console.error('Error adding session:', error);
-      alert('Failed to add session: ' + error.message);
-    } finally {
-      setSessionSaving(false);
-    }
-  };
-
-  const startEditSession = (session) => {
-    setEditingSessionId(session.id);
-    setSessionForm({
-      title: session.title || '',
-      course: session.course || '',
-      data: session.data || '',
-      time: session.time || '',
-      instructor: session.instructor || '',
-      zoom_link: session.zoom_link || '',
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const cancelEditSession = () => {
-    setEditingSessionId(null);
-    setSessionForm(emptySessionForm);
-  };
-
-  const handleDeleteSession = async (id) => {
-    if (!window.confirm('Delete this session?')) return;
-
-    try {
-      const { error } = await supabase.from('sessions').delete().eq('id', id);
-      if (error) throw error;
-      await fetchSessions();
-    } catch (error) {
-      console.error('Error deleting session:', error);
-      alert('Failed to delete session: ' + error.message);
     }
   };
 
@@ -992,14 +711,6 @@ const Admin = () => {
       fetchReviews();
     }
 
-    if (activeTab === 'sessions') {
-      fetchSessions();
-    }
-
-    if (activeTab === 'lessons') {
-      fetchCourseOptions();
-    }
-
     if (activeTab === 'enrollments') {
       fetchEnrollments();
     }
@@ -1009,18 +720,6 @@ const Admin = () => {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch when the tab changes; the fetchers are recreated on every render
   }, [activeTab]);
-
-  // =========================
-  // Load Lessons on Course Selection
-  // =========================
-  useEffect(() => {
-    if (selectedCourseId) {
-      fetchLessons(selectedCourseId);
-      resetLessonForm();
-    } else {
-      setLessons([]);
-    }
-  }, [selectedCourseId]);
 
   // =========================
   // Send Notification
@@ -1153,11 +852,6 @@ const Admin = () => {
       tab: 'courses',
     },
     {
-      icon: 'fas fa-list-ol',
-      label: 'Lessons',
-      tab: 'lessons',
-    },
-    {
       icon: 'fas fa-user-graduate',
       label: 'Enrollments',
       tab: 'enrollments',
@@ -1186,11 +880,6 @@ const Admin = () => {
       icon: 'fas fa-star',
       label: 'Reviews',
       tab: 'reviews',
-    },
-    {
-      icon: 'fas fa-video',
-      label: 'Sessions',
-      tab: 'sessions',
     },
   ];
 
@@ -1370,13 +1059,6 @@ const Admin = () => {
               </>
             )}
 
-            {activeTab === 'lessons' && (
-              <>
-                <i className="fas fa-list-ol"></i>{' '}
-                Lessons Management
-              </>
-            )}
-
             {activeTab === 'enrollments' && (
               <>
                 <i className="fas fa-user-graduate"></i>{' '}
@@ -1416,13 +1098,6 @@ const Admin = () => {
               <>
                 <i className="fas fa-star"></i>{' '}
                 Reviews Management
-              </>
-            )}
-
-            {activeTab === 'sessions' && (
-              <>
-                <i className="fas fa-video"></i>{' '}
-                Sessions Management
               </>
             )}
           </h1>
@@ -1525,7 +1200,7 @@ const Admin = () => {
                 }}
               >
                 Use the sidebar to manage courses,
-                users, profiles, reviews, sessions and
+                users, profiles, reviews and
                 notifications.
               </p>
             </div>
@@ -2049,387 +1724,6 @@ const Admin = () => {
                 </table>
               )}
             </div>
-          </>
-        )}
-
-        {/* =========================
-            Lessons
-        ========================= */}
-        {activeTab === 'lessons' && (
-          <>
-            <div
-              style={{
-                background: 'white',
-                borderRadius: '24px',
-                padding: '30px',
-                marginBottom: '30px',
-                boxShadow: '0 4px 20px rgba(0,51,102,0.08)',
-              }}
-            >
-              <h2 style={{ color: '#003366', marginTop: 0 }}>
-                <i className="fas fa-list-ol"></i> Select a Course
-              </h2>
-
-              <select
-                value={selectedCourseId}
-                onChange={(e) => setSelectedCourseId(e.target.value)}
-                style={{
-                  width: '100%',
-                  maxWidth: '400px',
-                  padding: '14px',
-                  border: '1px solid #CBD7E8',
-                  borderRadius: '14px',
-                }}
-              >
-                <option value="">-- Choose a course --</option>
-                {courseOptions.map((course) => (
-                  <option key={course.id} value={course.id}>
-                    {course.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {selectedCourseId && (
-              <>
-                <div
-                  style={{
-                    background: 'white',
-                    borderRadius: '24px',
-                    padding: '30px',
-                    marginBottom: '30px',
-                    boxShadow: '0 4px 20px rgba(0,51,102,0.08)',
-                  }}
-                >
-                  <h2 style={{ color: '#003366', marginTop: 0 }}>
-                    <i className="fas fa-plus-circle"></i>{' '}
-                    {editingLessonId ? 'Edit Lesson' : 'Add New Lesson'}
-                  </h2>
-
-                  <form onSubmit={saveLesson}>
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns:
-                          'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '15px',
-                      }}
-                    >
-                      <input
-                        type="text"
-                        placeholder="Lesson Title"
-                        value={lessonTitle}
-                        onChange={(e) => setLessonTitle(e.target.value)}
-                        style={{
-                          padding: '14px',
-                          border: '1px solid #CBD7E8',
-                          borderRadius: '14px',
-                        }}
-                      />
-
-                      <input
-                        type="number"
-                        placeholder="Lesson Order"
-                        value={lessonOrder}
-                        onChange={(e) => setLessonOrder(e.target.value)}
-                        min="1"
-                        style={{
-                          padding: '14px',
-                          border: '1px solid #CBD7E8',
-                          borderRadius: '14px',
-                        }}
-                      />
-
-                      <input
-                        type="url"
-                        placeholder="Video URL"
-                        value={lessonVideoUri}
-                        onChange={(e) => setLessonVideoUri(e.target.value)}
-                        style={{
-                          padding: '14px',
-                          border: '1px solid #CBD7E8',
-                          borderRadius: '14px',
-                        }}
-                      />
-                    </div>
-
-                    <div style={{ marginTop: '15px' }}>
-                      <label
-                        style={{
-                          display: 'block',
-                          marginBottom: '8px',
-                          fontWeight: '600',
-                          color: '#003366',
-                          fontSize: '0.9rem',
-                        }}
-                      >
-                        <i className="fas fa-file-pdf"></i>{' '}
-                        Lesson PDF (optional)
-                      </label>
-
-                      <input
-                        type="file"
-                        accept="application/pdf"
-                        onChange={(e) =>
-                          setLessonPdfFile(e.target.files?.[0] || null)
-                        }
-                        style={{
-                          padding: '10px',
-                          border: '1px solid #CBD7E8',
-                          borderRadius: '14px',
-                          width: '100%',
-                          boxSizing: 'border-box',
-                        }}
-                      />
-
-                      {lessonPdfUrl && !lessonPdfFile && (
-                        <p
-                          style={{
-                            marginTop: '8px',
-                            fontSize: '0.85rem',
-                            color: '#10b981',
-                          }}
-                        >
-                          <i className="fas fa-check-circle"></i> Current
-                          file:{' '}
-                          <a
-                            href={lessonPdfUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            View PDF
-                          </a>{' '}
-                          (choose a new file above to replace it)
-                        </p>
-                      )}
-                    </div>
-
-                    <textarea
-                      placeholder="Short Description"
-                      value={lessonDescription}
-                      onChange={(e) => setLessonDescription(e.target.value)}
-                      rows={2}
-                      style={{
-                        width: '100%',
-                        padding: '14px',
-                        border: '1px solid #CBD7E8',
-                        borderRadius: '14px',
-                        marginTop: '15px',
-                        resize: 'vertical',
-                        boxSizing: 'border-box',
-                        fontFamily: 'inherit',
-                      }}
-                    />
-
-                    <textarea
-                      placeholder="Lesson Content (text)"
-                      value={lessonContent}
-                      onChange={(e) => setLessonContent(e.target.value)}
-                      rows={5}
-                      style={{
-                        width: '100%',
-                        padding: '14px',
-                        border: '1px solid #CBD7E8',
-                        borderRadius: '14px',
-                        marginTop: '15px',
-                        resize: 'vertical',
-                        boxSizing: 'border-box',
-                        fontFamily: 'inherit',
-                      }}
-                    />
-
-                    {lessonStatus && (
-                      <p
-                        style={{
-                          color: lessonStatus.includes('successfully')
-                            ? '#10b981'
-                            : '#ef4444',
-                          marginTop: '15px',
-                        }}
-                      >
-                        {lessonStatus}
-                      </p>
-                    )}
-
-                    <div
-                      style={{
-                        marginTop: '20px',
-                        display: 'flex',
-                        gap: '10px',
-                      }}
-                    >
-                      <button
-                        type="submit"
-                        disabled={pdfUploading}
-                        style={{
-                          background: pdfUploading ? '#999' : '#003366',
-                          color: 'white',
-                          border: 'none',
-                          padding: '12px 25px',
-                          borderRadius: '14px',
-                          cursor: pdfUploading ? 'not-allowed' : 'pointer',
-                          fontWeight: '600',
-                        }}
-                      >
-                        <i
-                          className={
-                            pdfUploading
-                              ? 'fas fa-spinner fa-spin'
-                              : editingLessonId
-                              ? 'fas fa-save'
-                              : 'fas fa-plus'
-                          }
-                        ></i>{' '}
-                        {pdfUploading
-                          ? 'Uploading PDF...'
-                          : editingLessonId
-                          ? 'Update Lesson'
-                          : 'Add Lesson'}
-                      </button>
-
-                      {editingLessonId && (
-                        <button
-                          type="button"
-                          onClick={resetLessonForm}
-                          style={{
-                            background: '#999',
-                            color: 'white',
-                            border: 'none',
-                            padding: '12px 25px',
-                            borderRadius: '999px',
-                            cursor: 'pointer',
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    </div>
-                  </form>
-                </div>
-
-                <div
-                  style={{
-                    background: 'white',
-                    borderRadius: '24px',
-                    padding: '30px',
-                    boxShadow: '0 4px 20px rgba(0,51,102,0.08)',
-                    overflowX: 'auto',
-                  }}
-                >
-                  <h2 style={{ color: '#003366', marginTop: 0 }}>
-                    Lessons in this Course
-                  </h2>
-
-                  {lessonsLoading ? (
-                    <p style={{ textAlign: 'center', color: '#4A5D78' }}>
-                      <i className="fas fa-spinner fa-spin"></i> Loading
-                      lessons...
-                    </p>
-                  ) : lessons.length === 0 ? (
-                    <p
-                      style={{
-                        textAlign: 'center',
-                        color: '#4A5D78',
-                        padding: '40px',
-                      }}
-                    >
-                      No lessons yet for this course.
-                    </p>
-                  ) : (
-                    <table
-                      style={{ width: '100%', borderCollapse: 'collapse' }}
-                    >
-                      <thead>
-                        <tr style={{ background: '#003366', color: 'white' }}>
-                          <th style={{ padding: '15px' }}>Order</th>
-                          <th style={{ padding: '15px' }}>Title</th>
-                          <th style={{ padding: '15px' }}>Video</th>
-                          <th style={{ padding: '15px' }}>Actions</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {lessons.map((lesson) => (
-                          <tr
-                            key={lesson.id}
-                            style={{ borderBottom: '1px solid #f0f0f0' }}
-                          >
-                            <td style={{ padding: '15px' }}>
-                              {lesson.lesson_order}
-                            </td>
-
-                            <td
-                              style={{
-                                padding: '15px',
-                                fontWeight: '600',
-                                color: '#003366',
-                              }}
-                            >
-                              {lesson.title}
-                            </td>
-
-                            <td style={{ padding: '15px' }}>
-                              {lesson.video_url ? (
-                                <i
-                                  className="fas fa-check-circle"
-                                  style={{ color: '#10b981' }}
-                                ></i>
-                              ) : (
-                                <i
-                                  className="fas fa-minus-circle"
-                                  style={{ color: '#ccc' }}
-                                ></i>
-                              )}
-                              {lesson.pdf_url && (
-                                <i
-                                  className="fas fa-file-pdf"
-                                  style={{
-                                    color: '#ef4444',
-                                    marginLeft: '8px',
-                                  }}
-                                  title="Has PDF"
-                                ></i>
-                              )}
-                            </td>
-
-                            <td style={{ padding: '15px' }}>
-                              <button
-                                onClick={() => editLesson(lesson)}
-                                style={{
-                                  background: '#003366',
-                                  color: 'white',
-                                  border: 'none',
-                                  padding: '8px 12px',
-                                  borderRadius: '10px',
-                                  cursor: 'pointer',
-                                  marginRight: '8px',
-                                }}
-                              >
-                                <i className="fas fa-edit"></i> Edit
-                              </button>
-
-                              <button
-                                onClick={() => deleteLesson(lesson.id)}
-                                style={{
-                                  background: '#ef4444',
-                                  color: 'white',
-                                  border: 'none',
-                                  padding: '8px 12px',
-                                  borderRadius: '10px',
-                                  cursor: 'pointer',
-                                }}
-                              >
-                                <i className="fas fa-trash"></i> Delete
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </>
-            )}
           </>
         )}
 
@@ -3367,190 +2661,6 @@ const Admin = () => {
                         <td style={{ padding: '15px' }}>
                           {review.comment ||
                             '-'}
-                        </td>
-                      </tr>
-                    )
-                  )}
-                </tbody>
-              </table>
-            )}
-          </div>
-        )}
-
-        {/* =========================
-            Sessions
-        ========================= */}
-        {activeTab === 'sessions' && (
-          <div
-            style={{
-              background: 'white',
-              borderRadius: '24px',
-              padding: '30px',
-              boxShadow:
-                '0 4px 15px rgba(0,51,102,0.08)',
-              overflowX: 'auto',
-            }}
-          >
-            <h2
-              style={{
-                color: '#003366',
-              }}
-            >
-              <i className="fas fa-video"></i>{' '}
-              Sessions
-            </h2>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '12px',
-                marginBottom: '24px',
-              }}
-            >
-              {[
-                ['title', 'Title *'],
-                ['course', 'Course'],
-                ['data', 'Date * (e.g. 2026-11-20)'],
-                ['time', 'Time * (e.g. 7:00 PM)'],
-                ['instructor', 'Instructor'],
-                ['zoom_link', 'Meeting link (https://...)'],
-              ].map(([key, label]) => (
-                <input
-                  key={key}
-                  type="text"
-                  placeholder={label}
-                  value={sessionForm[key]}
-                  onChange={(e) =>
-                    setSessionForm({ ...sessionForm, [key]: e.target.value })
-                  }
-                  style={{
-                    padding: '12px',
-                    border: '1px solid #d8dee6',
-                    borderRadius: '14px',
-                    fontSize: '0.9rem',
-                  }}
-                />
-              ))}
-              <Button
-                variant="primary"
-                icon={editingSessionId ? 'fas fa-check' : 'fas fa-plus'}
-                loading={sessionSaving}
-                onClick={handleAddSession}
-              >
-                {editingSessionId ? 'Save Changes' : 'Add Session'}
-              </Button>
-              {editingSessionId && (
-                <Button variant="outline" onClick={cancelEditSession}>
-                  Cancel
-                </Button>
-              )}
-            </div>
-
-            {sessionsLoading ? (
-              <p>Loading sessions...</p>
-            ) : sessions.length === 0 ? (
-              <p
-                style={{
-                  textAlign: 'center',
-                  color: '#4A5D78',
-                  padding: '40px',
-                }}
-              >
-                No sessions found.
-              </p>
-            ) : (
-              <table
-                style={{
-                  width: '100%',
-                  borderCollapse:
-                    'collapse',
-                }}
-              >
-                <thead>
-                  <tr
-                    style={{
-                      background:
-                        '#003366',
-                      color: 'white',
-                    }}
-                  >
-                    <th style={{ padding: '15px' }}>
-                      ID
-                    </th>
-
-                    <th style={{ padding: '15px' }}>
-                      Title
-                    </th>
-
-                    <th style={{ padding: '15px' }}>
-                      Course
-                    </th>
-
-                    <th style={{ padding: '15px' }}>
-                      Date
-                    </th>
-
-                    <th style={{ padding: '15px' }}>
-                      Time
-                    </th>
-
-                    <th style={{ padding: '15px' }}>
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {sessions.map(
-                    (session) => (
-                      <tr
-                        key={
-                          session.id
-                        }
-                      >
-                        <td style={{ padding: '15px' }}>
-                          {session.id}
-                        </td>
-
-                        <td style={{ padding: '15px' }}>
-                          {session.title ||
-                            '-'}
-                        </td>
-
-                        <td style={{ padding: '15px' }}>
-                          {session.course ||
-                            '-'}
-                        </td>
-
-                        <td style={{ padding: '15px' }}>
-                          {session.data ||
-                            '-'}
-                        </td>
-
-                        <td style={{ padding: '15px' }}>
-                          {session.time ||
-                            '-'}
-                        </td>
-
-                        <td style={{ padding: '15px', whiteSpace: 'nowrap' }}>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            icon="fas fa-pen"
-                            onClick={() => startEditSession(session)}
-                            style={{ marginInlineEnd: 8 }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            icon="fas fa-trash"
-                            onClick={() => handleDeleteSession(session.id)}
-                          >
-                            Delete
-                          </Button>
                         </td>
                       </tr>
                     )
