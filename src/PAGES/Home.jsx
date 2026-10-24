@@ -5,6 +5,7 @@ import { useLang } from '../LanguageContext';
 import { useSEO } from '../hooks/useSEO';
 import { useHomeSettings } from '../hooks/useHomeSettings';
 import CourseCover from '../components/CourseCover';
+import InstructorsSection from '../components/InstructorsSection';
 
 const Home = () => {
   const isLanding = true; // content comes from Admin > Home
@@ -242,6 +243,9 @@ const Home = () => {
           <div className="cp-grid-3">{availableCourses.map(renderCourse)}</div>
         </section>
       )}
+
+      {/* Instructors approved by the admin */}
+      {hs.sections.instructors && <InstructorsSection />}
 
       {/* Why us */}
       {hs.sections.why && (

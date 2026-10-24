@@ -15,6 +15,7 @@ const Contact = lazy(() => import('./PAGES/Contact'))
 const Admin = lazy(() => import('./PAGES/Admin'))
 const Instructor = lazy(() => import('./PAGES/Instructor'))
 const Sessions = lazy(() => import('./PAGES/Sessions'))
+const InstructorProfile = lazy(() => import('./PAGES/InstructorProfile'))
 const Verify = lazy(() => import('./PAGES/Verify'))
 const Legal = lazy(() => import('./PAGES/Legal'))
 
@@ -66,6 +67,9 @@ function App() {
               </>
             }
           />
+
+          {/* PUBLIC INSTRUCTOR PROFILE (only admin-approved instructors) */}
+          <Route path="/instructors/:id" element={<><Navbar /><InstructorProfile /><Footer /></>} />
 
           {/* ABOUT — public */}
           <Route

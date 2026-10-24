@@ -4,7 +4,7 @@ import { supabase } from '../supabase';
 // Defaults mirror the current Home page. Empty text = use the built-in translation.
 export const HOME_DEFAULTS = {
   hero: { title1_en: '', title2_en: '', sub_en: '', title1_ar: '', title2_ar: '', sub_ar: '' },
-  sections: { stats: true, popular: true, available: true, why: true, cta: true },
+  sections: { stats: true, popular: true, available: true, why: true, instructors: true, cta: true },
   popularIds: [],
   availableCount: 6,
   cta: { title_en: '', sub_en: '', title_ar: '', sub_ar: '' },

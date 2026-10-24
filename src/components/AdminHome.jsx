@@ -16,6 +16,7 @@ const SECTION_LABELS = {
   popular: 'Most requested courses',
   available: 'Available courses',
   why: 'Why CompassPro?',
+  instructors: 'Meet our instructors',
   cta: 'Call to action (3 steps)',
 };
 
@@ -31,6 +32,8 @@ const AdminHome = ({ settingsKey = 'home' }) => {
   const [s, setS] = useState(() => defaultsFor(settingsKey));
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [instructors, setInstructors] = useState([]);
+  const [instMsg, setInstMsg] = useState(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
 
@@ -42,9 +45,19 @@ const AdminHome = ({ settingsKey = 'home' }) => {
       ]);
       if (cfg?.value) setS(mergeHome(cfg.value, settingsKey));
       setCourses(cs || []);
+      const { data: ins } = await supabase.from('instructor_public').select('user_id, display_name, headline, avatar_url, approved').order('updated_at', { ascending: false });
+      setInstructors(ins || []);
       setLoading(false);
     })();
   }, []);
+
+  const setApproved = async (userId, approved) => {
+    setInstMsg(null);
+    const { data, error } = await supabase.from('instructor_public').update({ approved }).eq('user_id', userId).select('user_id').maybeSingle();
+    if (error || !data) { setInstMsg({ ok: false, text: error?.message || 'Could not update (run supabase/sql/instructor_phase6.sql first).' }); return; }
+    setInstructors((list) => list.map((i) => (i.user_id === userId ? { ...i, approved } : i)));
+    setInstMsg({ ok: true, text: approved ? 'Instructor is now public.' : 'Instructor hidden from the public.' });
+  };
 
   const setHero = (k, v) => setS((p) => ({ ...p, hero: { ...p.hero, [k]: v } }));
   const setCta = (k, v) => setS((p) => ({ ...p, cta: { ...p.cta, [k]: v } }));
@@ -149,6 +162,23 @@ const AdminHome = ({ settingsKey = 'home' }) => {
           {[3, 6, 9, 12].map((n) => <option key={n} value={n}>{n}</option>)}
         </select>
       </div>
+
+      {isLanding && (
+      <div style={card}>
+        <h3 style={h3}>Instructors on the public pages</h3>
+        <p style={hint}>Only approved instructors appear in "Meet our instructors" on Home and get a public profile page. An instructor appears here after saving their profile card from their dashboard.</p>
+        {instructors.length === 0 && <div style={{ color: '#4A5D78', fontSize: 14 }}>No instructor has filled in a profile yet.</div>}
+        {instructors.map((i) => (
+          <label key={i.user_id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 4px', borderTop: '1px solid #E6F0FB', cursor: 'pointer', fontSize: 14 }}>
+            <input type="checkbox" checked={!!i.approved} onChange={(e) => setApproved(i.user_id, e.target.checked)} />
+            <span style={{ flex: 1 }}><strong>{i.display_name || '(no name)'}</strong>{i.headline && <span style={{ color: '#4A5D78' }}> — {i.headline}</span>}</span>
+            <span style={{ fontSize: 12, fontWeight: 800, color: i.approved ? '#0a7a43' : '#8a5a00' }}>{i.approved ? 'Public' : 'Hidden'}</span>
+            {i.approved && <a href={`/instructors/${i.user_id}`} target="_blank" rel="noopener noreferrer" style={{ color: NAVY, fontSize: 12, fontWeight: 700 }}>View ↗</a>}
+          </label>
+        ))}
+        {instMsg && <div role="status" style={{ color: instMsg.ok ? '#0a7a43' : '#b3261e', fontWeight: 600, fontSize: 14, marginTop: 10 }}>{instMsg.text}</div>}
+      </div>
+      )}
 
       {isLanding && (
       <div style={card}>

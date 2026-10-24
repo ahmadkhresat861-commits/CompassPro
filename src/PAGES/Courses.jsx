@@ -64,7 +64,7 @@ const StarRating = ({ rating = 0, onRate }) => {
 // ============================================================
 
 const Courses = () => {
-  const { darkMode, t } = useLang();
+  const { darkMode, t, isAr } = useLang();
   const navigate = useNavigate();
   const { id: courseIdParam } = useParams();
 
@@ -1378,6 +1378,11 @@ progressData = data;
                           <div style={{ color: dm.heading, fontWeight: 800, fontSize: '1.05rem' }}>
                             {instructorCard.display_name || selected.instructor}
                           </div>
+                          {instructorCard.approved && (
+                            <a href={`/instructors/${instructorCard.user_id}`} style={{ color: '#B97A00', fontSize: '0.8rem', fontWeight: 700 }}>
+                              {isAr ? 'عرض الملف الكامل' : 'View full profile'} →
+                            </a>
+                          )}
                           {instructorCard.headline && (
                             <div style={{ color: '#B97A00', fontSize: '0.85rem', fontWeight: 700, marginTop: 2 }}>{instructorCard.headline}</div>
                           )}
