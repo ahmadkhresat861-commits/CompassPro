@@ -19,20 +19,21 @@ Bilingual (English / Arabic with RTL).
 - Courses, lessons, progress, reviews, certificates (`/verify`)
 - Live sessions (Zoom links), notifications, contact form
 - Admin panel: courses, lessons, enrollments, users, messages, analytics
-- EN/AR UI (`src/i18n.js`), dark mode, SEO (sitemap, robots, meta)
+- EN/AR UI (`frontend/src/i18n.js`), dark mode, SEO (sitemap, robots, meta)
 
 ## Getting started
 
 ```bash
+cd frontend
 npm install
 npm run dev        # http://localhost:5173
-npm run build      # production build to dist/
+npm run build      # production build to frontend/dist/
 npm run lint
 ```
 
 ## Configuration
 
-The Supabase project URL and the **public anon key** are in `src/supabase.js`.
+The Supabase project URL and the **public anon key** are in `frontend/src/supabase.js`.
 The anon key is safe to expose; data access is protected by Row Level Security.
 
 Never put the `service_role` key or any secret (e.g. API keys for AI features)
@@ -41,24 +42,24 @@ in the frontend. Secrets belong in Supabase Edge Function secrets.
 ## Project structure
 
 ```
-src/                      FRONTEND (React + Vite)
-  pages/                  route pages (Home, Courses, Dashboard, Admin, Instructor, ...)
-  components/
-    admin/                admin panel pieces (Home editor, analytics)
-    instructor/           instructor dashboard tabs (assignments, quizzes, sessions, students)
-    course/               what students see inside a course (assignments, quizzes, sessions,
-                          cover, certificate)
-    home/                 public home page blocks (instructors section, AI assistant)
-    layout/               Navbar, Footer, AuthLayout
-    guards/               route guards (Protected / Admin / Instructor)
-    common/               small shared UI (Avatar, Button, loader)
-  context/                LanguageContext (EN/AR + dark mode)
-  hooks/                  custom hooks
-  utils/                  helpers
-  supabase.js             Supabase client (public anon key only)
-  i18n.js                 translations
-  redesign.css            design tokens and global overrides
-public/                   static files, sitemap, robots
+frontend/                 FRONTEND (React + Vite): package.json, vite config, index.html, public/
+  src/
+    pages/                  route pages (Home, Courses, Dashboard, Admin, Instructor, ...)
+    components/
+      admin/                admin panel pieces (Home editor, analytics)
+      instructor/           instructor dashboard tabs (assignments, quizzes, sessions, students)
+      course/               what students see inside a course (assignments, quizzes, sessions,
+                            cover, certificate)
+      home/                 public home page blocks (instructors section, AI assistant)
+      layout/               Navbar, Footer, AuthLayout
+      guards/               route guards (Protected / Admin / Instructor)
+      common/               small shared UI (Avatar, Button, loader)
+    context/                LanguageContext (EN/AR + dark mode)
+    hooks/                  custom hooks
+    utils/                  helpers
+    supabase.js             Supabase client (public anon key only)
+    i18n.js                 translations
+    redesign.css            design tokens and global overrides
 backend/                  BACKEND (Supabase)
   sql/                    SQL already applied to the database (reference only), see backend/sql/README.md
 ```
