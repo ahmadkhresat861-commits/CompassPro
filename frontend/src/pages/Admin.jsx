@@ -27,6 +27,19 @@ const Admin = () => {
   const [profilesLoading, setProfilesLoading] = useState(false);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [sessionsLoading, setSessionsLoading] = useState(false);
+  // Course sessions are managed by each course's instructor; the admin only manages general ones.
+  const generalSessions = sessions.filter((x) => !x.course_id);
+  const emptySessionForm = {
+    title: '',
+    course: '',
+    data: '',
+    time: '',
+    instructor: '',
+    zoom_link: '',
+  };
+  const [sessionForm, setSessionForm] = useState(emptySessionForm);
+  const [sessionSaving, setSessionSaving] = useState(false);
+  const [editingSessionId, setEditingSessionId] = useState(null);
   const [coursesLoading, setCoursesLoading] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const [userActionLoading, setUserActionLoading] = useState(false);
@@ -525,6 +538,81 @@ const Admin = () => {
   };
 
   // =========================
+  // Add / Delete Session
+  // =========================
+  const handleAddSession = async () => {
+    const f = sessionForm;
+    if (!f.title.trim() || !f.data.trim() || !f.time.trim()) {
+      alert('Title, date and time are required.');
+      return;
+    }
+
+    let link = f.zoom_link.trim();
+    if (link && !/^https?:\/\//i.test(link)) {
+      alert('Meeting link must start with http:// or https://');
+      return;
+    }
+
+    setSessionSaving(true);
+    try {
+      const payload = {
+        title: f.title.trim(),
+        course: f.course.trim() || null,
+        data: f.data.trim(),
+        time: f.time.trim(),
+        instructor: f.instructor.trim() || null,
+        zoom_link: link || null,
+      };
+
+      const { error } = editingSessionId
+        ? await supabase.from('sessions').update(payload).eq('id', editingSessionId)
+        : await supabase.from('sessions').insert([payload]);
+
+      if (error) throw error;
+
+      setSessionForm(emptySessionForm);
+      setEditingSessionId(null);
+      await fetchSessions();
+    } catch (error) {
+      console.error('Error adding session:', error);
+      alert('Failed to add session: ' + error.message);
+    } finally {
+      setSessionSaving(false);
+    }
+  };
+
+  const startEditSession = (session) => {
+    setEditingSessionId(session.id);
+    setSessionForm({
+      title: session.title || '',
+      course: session.course || '',
+      data: session.data || '',
+      time: session.time || '',
+      instructor: session.instructor || '',
+      zoom_link: session.zoom_link || '',
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEditSession = () => {
+    setEditingSessionId(null);
+    setSessionForm(emptySessionForm);
+  };
+
+  const handleDeleteSession = async (id) => {
+    if (!window.confirm('Delete this session?')) return;
+
+    try {
+      const { error } = await supabase.from('sessions').delete().eq('id', id);
+      if (error) throw error;
+      await fetchSessions();
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      alert('Failed to delete session: ' + error.message);
+    }
+  };
+
+  // =========================
   // Fetch Contact Messages (read-only)
   // =========================
   const fetchMessages = async () => {
@@ -711,6 +799,10 @@ const Admin = () => {
       fetchReviews();
     }
 
+    if (activeTab === 'sessions') {
+      fetchSessions();
+    }
+
     if (activeTab === 'enrollments') {
       fetchEnrollments();
     }
@@ -880,6 +972,11 @@ const Admin = () => {
       icon: 'fas fa-star',
       label: 'Reviews',
       tab: 'reviews',
+    },
+    {
+      icon: 'fas fa-video',
+      label: 'General Sessions',
+      tab: 'sessions',
     },
   ];
 
@@ -1098,6 +1195,12 @@ const Admin = () => {
               <>
                 <i className="fas fa-star"></i>{' '}
                 Reviews Management
+              </>
+            )}
+            {activeTab === 'sessions' && (
+              <>
+                <i className="fas fa-video"></i>{' '}
+                General Sessions
               </>
             )}
           </h1>
@@ -2661,6 +2764,189 @@ const Admin = () => {
                         <td style={{ padding: '15px' }}>
                           {review.comment ||
                             '-'}
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+        {/* =========================
+            Sessions
+        ========================= */}
+        {activeTab === 'sessions' && (
+          <div
+            style={{
+              background: 'white',
+              borderRadius: '24px',
+              padding: '30px',
+              boxShadow:
+                '0 4px 15px rgba(0,51,102,0.08)',
+              overflowX: 'auto',
+            }}
+          >
+            <h2
+              style={{
+                color: '#003366',
+              }}
+            >
+              <i className="fas fa-video"></i>{' '}
+              Sessions
+            </h2>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '12px',
+                marginBottom: '24px',
+              }}
+            >
+              {[
+                ['title', 'Title *'],
+                ['course', 'Course'],
+                ['data', 'Date * (e.g. 2026-11-20)'],
+                ['time', 'Time * (e.g. 7:00 PM)'],
+                ['instructor', 'Instructor'],
+                ['zoom_link', 'Meeting link (https://...)'],
+              ].map(([key, label]) => (
+                <input
+                  key={key}
+                  type="text"
+                  placeholder={label}
+                  value={sessionForm[key]}
+                  onChange={(e) =>
+                    setSessionForm({ ...sessionForm, [key]: e.target.value })
+                  }
+                  style={{
+                    padding: '12px',
+                    border: '1px solid #d8dee6',
+                    borderRadius: '14px',
+                    fontSize: '0.9rem',
+                  }}
+                />
+              ))}
+              <Button
+                variant="primary"
+                icon={editingSessionId ? 'fas fa-check' : 'fas fa-plus'}
+                loading={sessionSaving}
+                onClick={handleAddSession}
+              >
+                {editingSessionId ? 'Save Changes' : 'Add Session'}
+              </Button>
+              {editingSessionId && (
+                <Button variant="outline" onClick={cancelEditSession}>
+                  Cancel
+                </Button>
+              )}
+            </div>
+
+            {sessionsLoading ? (
+              <p>Loading sessions...</p>
+            ) : generalSessions.length === 0 ? (
+              <p
+                style={{
+                  textAlign: 'center',
+                  color: '#4A5D78',
+                  padding: '40px',
+                }}
+              >
+                No sessions found.
+              </p>
+            ) : (
+              <table
+                style={{
+                  width: '100%',
+                  borderCollapse:
+                    'collapse',
+                }}
+              >
+                <thead>
+                  <tr
+                    style={{
+                      background:
+                        '#003366',
+                      color: 'white',
+                    }}
+                  >
+                    <th style={{ padding: '15px' }}>
+                      ID
+                    </th>
+
+                    <th style={{ padding: '15px' }}>
+                      Title
+                    </th>
+
+                    <th style={{ padding: '15px' }}>
+                      Course
+                    </th>
+
+                    <th style={{ padding: '15px' }}>
+                      Date
+                    </th>
+
+                    <th style={{ padding: '15px' }}>
+                      Time
+                    </th>
+
+                    <th style={{ padding: '15px' }}>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {generalSessions.map(
+                    (session) => (
+                      <tr
+                        key={
+                          session.id
+                        }
+                      >
+                        <td style={{ padding: '15px' }}>
+                          {session.id}
+                        </td>
+
+                        <td style={{ padding: '15px' }}>
+                          {session.title ||
+                            '-'}
+                        </td>
+
+                        <td style={{ padding: '15px' }}>
+                          {session.course ||
+                            '-'}
+                        </td>
+
+                        <td style={{ padding: '15px' }}>
+                          {session.data ||
+                            '-'}
+                        </td>
+
+                        <td style={{ padding: '15px' }}>
+                          {session.time ||
+                            '-'}
+                        </td>
+
+                        <td style={{ padding: '15px', whiteSpace: 'nowrap' }}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            icon="fas fa-pen"
+                            onClick={() => startEditSession(session)}
+                            style={{ marginInlineEnd: 8 }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            icon="fas fa-trash"
+                            onClick={() => handleDeleteSession(session.id)}
+                          >
+                            Delete
+                          </Button>
                         </td>
                       </tr>
                     )
