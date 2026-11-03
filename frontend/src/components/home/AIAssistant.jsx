@@ -41,6 +41,12 @@ const AIAssistant = () => {
     setLoading(true);
 
     try {
+      const { data: sess } = await supabase.auth.getSession();
+      if (!sess?.session) {
+        setMessages(prev => [...prev, { role: 'assistant', content: '🔒 سجّل دخولك أولاً لاستخدام المساعد الذكي.' }]);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('zephyr-ai', {
         body: {
           messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
@@ -51,7 +57,11 @@ const AIAssistant = () => {
 
       const reply = data?.content?.map(b => b.text).join('') || 'عذراً، حدث خطأ. حاول مرة أخرى.';
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
-    } catch {
+    } catch (err) {
+      if (err?.context?.status === 429) {
+        setMessages(prev => [...prev, { role: 'assistant', content: '⏳ وصلت للحد الأقصى من الرسائل بهذه الساعة. جرّب لاحقاً.' }]);
+        return;
+      }
       setMessages(prev => [...prev, { role: 'assistant', content: '❌ تعذّر الاتصال. تحقق من الإنترنت وحاول مجدداً.' }]);
     } finally {
       setLoading(false);

@@ -212,9 +212,9 @@ const Admin = () => {
       return;
     }
 
-    if (newUserPassword.length < 6) {
+    if (newUserPassword.length < 8) {
       setUserStatus(
-        'Password must be at least 6 characters.'
+        'Password must be at least 8 characters.'
       );
       return;
     }
