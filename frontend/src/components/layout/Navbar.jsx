@@ -142,7 +142,8 @@ const Navbar = () => {
         const { data, error: fetchError } = await supabase
           .from('notifications')
           .select('*')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(50);
 
         if (fetchError) throw fetchError;
 

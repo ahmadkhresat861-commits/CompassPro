@@ -345,7 +345,8 @@ const Courses = () => {
         .eq('course_id', selected.id)
         .order('id', {
           ascending: false,
-        });
+        })
+        .limit(200);
 
       if (error) {
         console.error(
