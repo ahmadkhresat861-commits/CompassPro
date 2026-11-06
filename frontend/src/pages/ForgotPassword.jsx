@@ -4,6 +4,8 @@ import { supabase } from '../supabase';
 import DualOrbitLoader from '../components/common/DualOrbitLoader';
 import AuthLayout from '../components/layout/AuthLayout';
 import { useLang } from '../context/LanguageContext';
+import Captcha from '../components/common/Captcha';
+import { CAPTCHA_SITE_KEY } from '../utils/captcha';
 
 const ForgotPassword = () => {
   const { t } = useLang();
@@ -12,15 +14,20 @@ const ForgotPassword = () => {
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [capKey, setCapKey] = useState(0);
 
   const handleSubmit = async () => {
     if (!email.trim()) { setError(t.errEnterEmail); return; }
+    if (CAPTCHA_SITE_KEY && !captchaToken) { setError(t.errCaptcha); return; }
     setLoading(true);
     setError('');
     // Always show the same message so the form never reveals which emails have accounts.
     await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/reset-password`,
+      captchaToken: captchaToken || undefined,
     });
+    setCapKey((k) => k + 1);
     setSent(true);
     setLoading(false);
   };
@@ -59,6 +66,8 @@ const ForgotPassword = () => {
               />
             </span>
           </label>
+
+          <Captcha onToken={setCaptchaToken} resetKey={capKey} />
 
           <button type="submit" className="cp-auth-submit" disabled={loading}>
             {loading ? <DualOrbitLoader size={18} /> : null} {loading ? t.sendingLink : t.sendResetLink}

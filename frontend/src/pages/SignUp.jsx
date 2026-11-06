@@ -4,6 +4,8 @@ import { supabase } from '../supabase';
 import DualOrbitLoader from '../components/common/DualOrbitLoader';
 import AuthLayout from '../components/layout/AuthLayout';
 import { useLang } from '../context/LanguageContext';
+import Captcha from '../components/common/Captcha';
+import { CAPTCHA_SITE_KEY } from '../utils/captcha';
 import { isPwned, isStrongEnough } from '../utils/password';
 
 const SignUp = () => {
@@ -14,6 +16,8 @@ const SignUp = () => {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [capKey, setCapKey] = useState(0);
   const navigate = useNavigate();
 
   const handleSignUp = async () => {
@@ -21,6 +25,7 @@ const SignUp = () => {
     if (!isStrongEnough(password)) {
       setError(t.errShort); return;
     }
+    if (CAPTCHA_SITE_KEY && !captchaToken) { setError(t.errCaptcha); return; }
     setLoading(true);
     setError('');
     if (await isPwned(password)) {
@@ -28,7 +33,12 @@ const SignUp = () => {
       setLoading(false);
       return;
     }
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: captchaToken ? { captchaToken } : undefined,
+    });
+    setCapKey((k) => k + 1);
     if (error) {
       setError(error.message);
     } else if (data.user) {
@@ -92,6 +102,8 @@ const SignUp = () => {
 
           {pwField(t.password, password, setPassword, t.enterPassword, 'new-password')}
           {pwField(t.confirmPassword, confirm, setConfirm, t.confirmYourPassword, 'new-password')}
+
+          <Captcha onToken={setCaptchaToken} resetKey={capKey} />
 
           <button type="submit" className="cp-auth-submit" disabled={loading}>
             {loading ? <DualOrbitLoader size={18} /> : null} {loading ? t.creatingAccount : t.signUp}

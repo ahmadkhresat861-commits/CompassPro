@@ -4,6 +4,8 @@ import { supabase } from '../supabase';
 import DualOrbitLoader from '../components/common/DualOrbitLoader';
 import AuthLayout from '../components/layout/AuthLayout';
 import { useLang } from '../context/LanguageContext';
+import Captcha from '../components/common/Captcha';
+import { CAPTCHA_SITE_KEY } from '../utils/captcha';
 
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_TIME = 15 * 60 * 1000;
@@ -16,6 +18,8 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState('');
+  const [capKey, setCapKey] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,6 +46,11 @@ const Login = () => {
       return;
     }
 
+    if (CAPTCHA_SITE_KEY && !captchaToken) {
+      setError(t.errCaptcha);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -49,7 +58,9 @@ const Login = () => {
       await supabase.auth.signInWithPassword({
         email,
         password,
+        options: captchaToken ? { captchaToken } : undefined,
       });
+    setCapKey((k) => k + 1);
 
     if (error) {
       const attempts =
@@ -142,6 +153,8 @@ const Login = () => {
           <p className="cp-auth-foot" style={{ margin: '-4px 0 0', textAlign: 'end' }}>
             <a href="/forgot-password" onClick={(e) => { e.preventDefault(); navigate('/forgot-password'); }}>{t.forgotPassword}</a>
           </p>
+
+          <Captcha onToken={setCaptchaToken} resetKey={capKey} />
 
           <button type="submit" className="cp-auth-submit" disabled={loading}>
             {loading ? <DualOrbitLoader size={18} /> : null} {loading ? t.loggingIn : t.login}

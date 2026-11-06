@@ -192,6 +192,7 @@ export const translations = {
     resetDone: 'Password updated. Redirecting to login...',
     resetInvalid: 'This reset link is invalid or has expired. Please request a new one.',
     errEnterEmail: 'Please enter your email.',
+    errCaptcha: 'Please complete the human verification first.',
   },
   ar: {
     // Navbar
@@ -386,5 +387,6 @@ export const translations = {
     resetDone: 'تم تحديث كلمة المرور. سيتم تحويلك لتسجيل الدخول...',
     resetInvalid: 'رابط إعادة التعيين غير صالح أو منتهي الصلاحية. اطلب رابطاً جديداً.',
     errEnterEmail: 'يرجى إدخال البريد الإلكتروني.',
+    errCaptcha: 'يرجى إكمال التحقق من أنك لست روبوتاً أولاً.',
   }
 };
