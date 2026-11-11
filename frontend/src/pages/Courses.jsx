@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '../supabase';
+import { openLessonFile } from '../utils/lessonFiles';
 import { useLang } from '../context/LanguageContext';
 import { useSEO } from '../hooks/useSEO';
 import DualOrbitLoader from '../components/common/DualOrbitLoader';
@@ -2107,9 +2108,8 @@ setSelectedLesson(
 
                   {selectedLesson.pdf_url && (
                     <a
-                      href={selectedLesson.pdf_url}
-                      target="_blank"
-                      rel="noreferrer"
+                      href="#"
+                      onClick={(e) => { e.preventDefault(); openLessonFile(selectedLesson.pdf_url); }}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
+import { openLessonFile } from '../utils/lessonFiles';
 import DualOrbitLoader from '../components/common/DualOrbitLoader';
 import InstructorAssignments from '../components/instructor/InstructorAssignments';
 import InstructorQuizzes from '../components/instructor/InstructorQuizzes';
@@ -167,7 +168,7 @@ const Instructor = () => {
       const path = `${courseId}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage.from('lesson-files').upload(path, lFile);
       if (upErr) { setBusy(false); setLMsg({ ok: false, text: 'Upload failed: ' + upErr.message }); return; }
-      pdf_url = supabase.storage.from('lesson-files').getPublicUrl(path).data?.publicUrl;
+      pdf_url = path;
     }
     const payload = {
       course_id: Number(courseId), title: lForm.title.trim(), description: lForm.description.trim(),
@@ -366,7 +367,7 @@ const Instructor = () => {
                     <div key={l.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid #E6F0FB', flexWrap: 'wrap' }}>
                       <span style={{ width: 28, fontWeight: 800, color: NAVY }}>{l.lesson_order}</span>
                       <strong style={{ flex: 1, minWidth: 160 }}>{l.title}{l.chapter && <span style={{ display: 'block', fontWeight: 600, fontSize: 12, color: '#4A5D78' }}>{l.chapter}</span>}</strong>
-                      {l.pdf_url && <a href={l.pdf_url} target="_blank" rel="noopener noreferrer" style={{ color: NAVY, fontSize: 13 }}>PDF</a>}
+                      {l.pdf_url && <a href="#" onClick={(e) => { e.preventDefault(); openLessonFile(l.pdf_url); }} style={{ color: NAVY, fontSize: 13 }}>PDF</a>}
                       <button type="button" style={btn(false)} onClick={() => editLesson(l)}>Edit</button>
                       <button type="button" style={{ ...btn(false), color: '#b3261e' }} onClick={() => deleteLesson(l.id)}>Delete</button>
                     </div>
