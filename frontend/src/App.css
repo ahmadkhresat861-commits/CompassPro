@@ -53,14 +53,13 @@ body {
 }
 
 @keyframes pageFadeIn {
+  /* opacity only: a transform on #root would break position:fixed children */
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
