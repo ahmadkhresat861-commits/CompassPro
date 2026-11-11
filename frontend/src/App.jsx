@@ -24,7 +24,7 @@ import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/guards/ProtectedRoute'
 import AdminRoute from './components/guards/AdminRoute'
 import InstructorRoute from './components/guards/InstructorRoute'
-import AIAssistant from './components/home/AIAssistant'
+import WhatsAppButton from './components/common/WhatsAppButton'
 
 import { LanguageProvider } from './context/LanguageContext'
 
@@ -227,7 +227,7 @@ function App() {
         </Routes>
         </Suspense>
 
-        <AIAssistant />
+        <WhatsAppButton />
 
       </BrowserRouter>
     </LanguageProvider>
