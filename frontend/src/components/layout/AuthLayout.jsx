@@ -49,7 +49,7 @@ const AuthLayout = ({ mode, hero, children }) => {
 
         <div className="cp-auth-card">
           <div className="cp-auth-brand">
-            <img src="/logo.png" alt="CompassPro" />
+            <img src="/logo-192.png" alt="CompassPro" />
             <span>CompassPro</span>
           </div>
 
