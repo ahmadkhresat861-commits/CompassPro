@@ -1,6 +1,15 @@
 export const translations = {
   en: {
     // Navbar
+    footerTagline: "Jordan's premier online learning platform. Learn from expert instructors and grow your career.",
+    quickLinks: 'Quick Links',
+    contactUsTitle: 'Contact Us',
+    privacyPolicy: 'Privacy Policy',
+    termsOfUse: 'Terms of Use',
+    footerRights: 'All rights reserved.',
+    addressLine: 'Amman, Jordan',
+    getInTouch: 'Get in Touch',
+    footerMadeIn: 'in Jordan',
     home: 'Home',
     courses: 'Courses',
     about: 'About Us',
@@ -141,9 +150,6 @@ export const translations = {
     serviceDashboardDesc:
       'Keep track of every course you enroll in, lessons completed, and your overall learning progress in one place.',
     goToDashboard: 'Go to Dashboard',
-    serviceAiTitle: 'CompassPro AI Assistant',
-    serviceAiDesc:
-      'Get instant help navigating the platform and understanding course content with our built-in AI assistant.',
     serviceReviewsTitle: 'Course Reviews & Ratings',
     serviceReviewsDesc:
       'Read honest reviews from other students before enrolling, and share your own experience after completing a course.',
@@ -196,6 +202,15 @@ export const translations = {
   },
   ar: {
     // Navbar
+    footerTagline: 'منصة التعلّم الإلكتروني الأولى في الأردن. تعلّم من مدربين خبراء وطوّر مسيرتك المهنية.',
+    quickLinks: 'روابط سريعة',
+    contactUsTitle: 'تواصل معنا',
+    privacyPolicy: 'سياسة الخصوصية',
+    termsOfUse: 'شروط الاستخدام',
+    footerRights: 'جميع الحقوق محفوظة.',
+    addressLine: 'عمّان، الأردن',
+    getInTouch: 'تواصل معنا مباشرة',
+    footerMadeIn: 'في الأردن',
     home: 'الرئيسية',
     courses: 'الكورسات',
     about: 'من نحن',
@@ -336,9 +351,6 @@ export const translations = {
     serviceDashboardDesc:
       'تابع كل كورس مسجل فيه، الدروس المكتملة، وتقدمك التعليمي العام بمكان واحد.',
     goToDashboard: 'اذهب للوحة التحكم',
-    serviceAiTitle: 'مساعد CompassPro AI',
-    serviceAiDesc:
-      'احصل على مساعدة فورية بالتنقل بالمنصة وفهم محتوى الكورسات عبر مساعدنا الذكي المدمج.',
     serviceReviewsTitle: 'تقييمات ومراجعات الكورسات',
     serviceReviewsDesc:
       'اقرأ مراجعات صادقة من طلاب آخرين قبل التسجيل، وشارك تجربتك بعد إكمال أي كورس.',

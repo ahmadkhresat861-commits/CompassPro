@@ -1,14 +1,31 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { translations } from '../i18n';
 
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
-  const [lang, setLang] = useState('en');
-  const [darkMode, setDarkMode] = useState(false);
+  const read = (k, fallback) => {
+    try { return localStorage.getItem(k) || fallback; } catch { return fallback; }
+  };
+  const write = (k, v) => {
+    try { localStorage.setItem(k, v); } catch { /* storage unavailable */ }
+  };
+  const [lang, setLang] = useState(() => (read('cp_lang', 'en') === 'ar' ? 'ar' : 'en'));
+  const [darkMode, setDarkMode] = useState(() => read('cp_dark', '0') === '1');
   const t = translations[lang];
-  const toggleLang = () => setLang(lang === 'en' ? 'ar' : 'en');
-  const toggleDark = () => setDarkMode(!darkMode);
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  }, [lang]);
+  const toggleLang = () => {
+    const next = lang === 'en' ? 'ar' : 'en';
+    setLang(next);
+    write('cp_lang', next);
+  };
+  const toggleDark = () => {
+    write('cp_dark', darkMode ? '0' : '1');
+    setDarkMode(!darkMode);
+  };
   const isAr = lang === 'ar';
 
   return (

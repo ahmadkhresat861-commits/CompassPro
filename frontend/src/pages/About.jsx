@@ -137,12 +137,12 @@ const About = () => {
       style={{
         background: dm.bg,
         minHeight: '100vh',
-        padding: '50px 20px 70px',
+        padding: '50px clamp(16px, 4vw, 32px) 70px',
         animation: 'fadeInPage 0.6s ease both',
       }}
     >
       {/* HEADER */}
-      <div style={{ maxWidth: '1344px', margin: '0 auto 36px', padding: '0 8px' }}>
+      <div style={{ maxWidth: '1344px', margin: '0 auto 36px' }}>
         <h1 style={{ color: dm.heading, fontSize: 'clamp(2rem, 4vw, 2.75rem)', fontWeight: 800, marginBottom: '10px' }}>
           {t.aboutTitle}
         </h1>

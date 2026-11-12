@@ -131,7 +131,7 @@ nav .cp-nav-links > a[href='/login'] {
   font-weight: 700;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   nav {
     margin: 10px 12px 0;
     padding: 8px 14px;
@@ -573,6 +573,7 @@ nav div a i { display: none; }
 .cp-stat span { font-size: 13px; font-weight: 600; color: var(--cp-muted); }
 
 .cp-section { padding: 0 32px 56px; max-width: 1400px; margin: 0 auto; }
+.cp-hero + .cp-section { padding-top: 48px; }
 .cp-section-head {
   display: flex;
   justify-content: space-between;
@@ -695,3 +696,10 @@ nav div a i { display: none; }
 .cp-inst-box { background: var(--cp-card); border-radius: 24px; padding: 28px 32px; box-shadow: var(--cp-shadow); margin-top: 22px; color: var(--cp-ink); }
 .cp-inst-box h2, .cp-inst-h2 { font-size: 1.3rem; font-weight: 800; color: var(--cp-navy); margin: 0 0 8px; }
 [data-theme='dark'] .cp-inst-box h2, [data-theme='dark'] .cp-inst-h2 { color: #ffffff; }
+
+/* Keep the floating navbar on one row between tablet and wide laptop sizes */
+@media (min-width: 1101px) and (max-width: 1360px) {
+  nav .cp-nav-links { gap: 2px; }
+  nav .cp-nav-links a { padding: 9px 10px; font-size: 0.9rem; }
+  nav .cp-nav-links a i { margin-inline-end: 4px; }
+}

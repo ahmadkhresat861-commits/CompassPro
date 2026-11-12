@@ -107,14 +107,15 @@ const Contact = () => {
   // ============================================================
 
   const contactInfo = [
-    { icon: 'fas fa-envelope', text: 'support@zephyracademy.com' },
+    { icon: 'fas fa-envelope', text: 'support@compasspro.com' },
     { icon: 'fas fa-phone', text: '+962 7 9999 9999' },
-    { icon: 'fas fa-map-marker-alt', text: 'Amman, Jordan' },
+    { icon: 'fas fa-map-marker-alt', text: t?.addressLine || 'Amman, Jordan' },
   ];
 
   const socialLinks = [
     { icon: 'fab fa-facebook', color: '#1877F2', url: 'https://www.facebook.com/share/1Dn2UCTUfP/', label: 'Facebook' },
     { icon: 'fab fa-instagram', color: '#E1306C', url: 'https://www.instagram.com/compasspro.academy', label: 'Instagram' },
+    { icon: 'fab fa-linkedin', color: '#0A66C2', url: 'https://www.linkedin.com/company/compasspro-learning/', label: 'LinkedIn' },
   ];
 
   // ============================================================
@@ -183,14 +184,14 @@ const Contact = () => {
         >
           {!submitted ? (
             <>
-              <h2 style={{ color: dm.heading, marginTop: 0 }}>
-                <i className="fas fa-paper-plane" style={{ marginRight: '8px' }} />
+              <h2 style={{ color: dm.heading, marginTop: 0, marginBottom: '24px' }}>
+                <i className="fas fa-paper-plane" style={{ marginInlineEnd: '8px' }} />
                 {t?.sendMessage || 'Send us a Message'}
               </h2>
 
               <form onSubmit={handleSubmit}>
                 <div style={{ marginBottom: '18px' }}>
-                  <label
+                  <label htmlFor="contact-name"
                     style={{
                       display: 'block',
                       marginBottom: '6px',
@@ -201,7 +202,7 @@ const Contact = () => {
                   >
                     {t?.yourName || 'Your Name'}
                   </label>
-                  <input
+                  <input id="contact-name"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -221,7 +222,7 @@ const Contact = () => {
                 </div>
 
                 <div style={{ marginBottom: '18px' }}>
-                  <label
+                  <label htmlFor="contact-email"
                     style={{
                       display: 'block',
                       marginBottom: '6px',
@@ -232,7 +233,7 @@ const Contact = () => {
                   >
                     {t?.yourEmail || 'Your Email'}
                   </label>
-                  <input
+                  <input id="contact-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -252,7 +253,7 @@ const Contact = () => {
                 </div>
 
                 <div style={{ marginBottom: '22px' }}>
-                  <label
+                  <label htmlFor="contact-message"
                     style={{
                       display: 'block',
                       marginBottom: '6px',
@@ -263,7 +264,7 @@ const Contact = () => {
                   >
                     {t?.message || 'Message'}
                   </label>
-                  <textarea
+                  <textarea id="contact-message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder={t?.message || 'Message'}
@@ -383,7 +384,7 @@ const Contact = () => {
             }}
           >
             <h3 style={{ color: dm.heading, marginTop: 0, marginBottom: '18px' }}>
-              Get in Touch
+              {t?.getInTouch || 'Get in Touch'}
             </h3>
 
             {contactInfo.map((item, i) => (
@@ -411,7 +412,7 @@ const Contact = () => {
                 >
                   <i className={item.icon} />
                 </span>
-                <span style={{ color: dm.text }}>{item.text}</span>
+                <span style={{ color: dm.text }}><bdi>{item.text}</bdi></span>
               </div>
             ))}
           </div>
