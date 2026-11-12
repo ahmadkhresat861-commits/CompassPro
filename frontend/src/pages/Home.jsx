@@ -169,7 +169,7 @@ const Home = () => {
       {/* Hero */}
       <section className="cp-hero" aria-labelledby="cp-hero-title">
         <div className="cp-hero-inner">
-          <img src="/logo-192.png" alt="CompassPro" className="cp-hero-logo" />
+          <img src="/logo-192.png" width="84" height="84" alt="CompassPro" className="cp-hero-logo" />
           <h1 id="cp-hero-title">
             {heroT1} <span>{heroT2}</span>
           </h1>

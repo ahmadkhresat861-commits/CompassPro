@@ -460,6 +460,10 @@ nav div a i { display: none; }
 }
 .cp-hero::before {
   background: url('/hero-bg.jpg') center / cover no-repeat;
+  background-image: image-set(url('/hero-bg.webp') type('image/webp'), url('/hero-bg.jpg') type('image/jpeg'));
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
   filter: saturate(0.9);
 }
 .cp-hero::after {

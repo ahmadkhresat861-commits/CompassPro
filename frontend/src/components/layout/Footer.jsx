@@ -48,7 +48,7 @@ const Footer = () => {
               { label: t.contact, path: '/contact' },
             ].map((link, i) => (
               <p key={i} style={{ marginBottom: '10px' }}>
-                <a onClick={() => navigate(link.path)} style={{ color: '#a8c8f0', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.3s' }}
+                <a href={link.path} onClick={(e) => { e.preventDefault(); navigate(link.path); }} style={{ color: '#a8c8f0', textDecoration: 'none', cursor: 'pointer', transition: 'color 0.3s' }}
                   onMouseOver={e => e.currentTarget.style.color = '#f0a500'}
                   onMouseOut={e => e.currentTarget.style.color = '#a8c8f0'}>
                   <i className="fas fa-chevron-right" style={{ marginInlineEnd: '8px', fontSize: '0.8rem' }}></i>
