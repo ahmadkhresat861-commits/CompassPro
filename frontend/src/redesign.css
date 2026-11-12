@@ -578,6 +578,8 @@ nav div a i { display: none; }
 
 .cp-section { padding: 0 32px 56px; max-width: 1400px; margin: 0 auto; }
 .cp-hero + .cp-section { padding-top: 48px; }
+.cp-skel { min-height: 560px; }
+@media (max-width: 900px) { .cp-skel { min-height: 1100px; } }
 .cp-section-head {
   display: flex;
   justify-content: space-between;

@@ -218,6 +218,14 @@ const Home = () => {
         </section>
       )}
 
+      {/* Reserve space while data loads so the page below doesn't jump (CLS) */}
+      {statsLoading && auth !== 'member' && (
+        <>
+          {hs.sections.popular && <section className="cp-section cp-skel" aria-hidden="true" />}
+          {hs.sections.available && <section className="cp-section cp-skel" aria-hidden="true" />}
+        </>
+      )}
+
       {/* Most requested courses (chosen by admin) */}
       {showMarketing && hs.sections.popular && popularCourses.length > 0 && (
         <section className="cp-section">
