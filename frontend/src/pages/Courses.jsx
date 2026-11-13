@@ -164,6 +164,7 @@ const Courses = () => {
     setSearch(urlQuery);
   }, [urlQuery]);
   const [category, setCategory] = useState('All');
+  const [sort, setSort] = useState('newest');
 
   // ============================================================
   // USER
@@ -1158,7 +1159,22 @@ progressData = data;
         matchesSearch
       );
     }
-  );
+  ).sort((a, b) => {
+    const num = (v) => Number(v) || 0;
+    switch (sort) {
+      case 'rating':
+        return num(b.rating) - num(a.rating);
+      case 'popular':
+        return num(b.students) - num(a.students);
+      case 'priceLow':
+        return num(a.price) - num(b.price);
+      case 'priceHigh':
+        return num(b.price) - num(a.price);
+      default:
+        // newest first (the query already returns them in this order)
+        return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    }
+  });
 
   // ============================================================
   // LOADING
@@ -2798,6 +2814,35 @@ lesson.id ===
               </button>
             )
           )}
+        </div>
+
+        {/* SORT */}
+
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '18px' }}>
+          <label htmlFor="course-sort" style={{ color: dm.subtext, fontWeight: 600 }}>
+            {t.sortBy}
+          </label>
+          <select
+            id="course-sort"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            style={{
+              padding: '10px 14px',
+              borderRadius: '10px',
+              border: `2px solid ${dm.inputBorder}`,
+              background: dm.input,
+              color: dm.inputColor,
+              fontSize: '1rem',
+              minHeight: '44px',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="newest">{t.sortNewest}</option>
+            <option value="rating">{t.sortTopRated}</option>
+            <option value="popular">{t.sortPopular}</option>
+            <option value="priceLow">{t.sortPriceLow}</option>
+            <option value="priceHigh">{t.sortPriceHigh}</option>
+          </select>
         </div>
       </div>
 
