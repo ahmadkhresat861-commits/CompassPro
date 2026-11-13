@@ -176,11 +176,6 @@ const Navbar = () => {
           table: 'notifications',
         },
         (payload) => {
-          console.log(
-            'New notification received:',
-            payload.new
-          );
-
           // إضافة الإشعار الجديد مباشرة في أعلى القائمة
           setNotifications((current) => [
             payload.new,
@@ -188,12 +183,7 @@ const Navbar = () => {
           ]);
         }
       )
-      .subscribe((status) => {
-        console.log(
-          'Notifications Realtime status:',
-          status
-        );
-      });
+      .subscribe();
 
     // تنظيف الاتصال عند مغادرة الصفحة
     return () => {
