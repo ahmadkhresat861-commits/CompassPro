@@ -140,7 +140,7 @@ const Contact = () => {
           }}
         >
           <img
-            src="/logo-192.png"
+            src="/logo-160.webp"
             alt="CompassPro"
             style={{
               width: '90px',

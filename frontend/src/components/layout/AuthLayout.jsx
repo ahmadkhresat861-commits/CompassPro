@@ -40,7 +40,7 @@ const AuthLayout = ({ mode, hero, children }) => {
         </ul>
       </section>
 
-      <section className="cp-auth-main">
+      <main className="cp-auth-main">
         <div className="cp-auth-top">
           <button type="button" className="cp-auth-lang" onClick={toggleLang}>
             {lang === 'en' ? 'العربية' : 'English'}
@@ -49,7 +49,7 @@ const AuthLayout = ({ mode, hero, children }) => {
 
         <div className="cp-auth-card">
           <div className="cp-auth-brand">
-            <img src="/logo-192.png" alt="CompassPro" />
+            <img src="/logo-160.webp" alt="CompassPro" />
             <span>CompassPro</span>
           </div>
 
@@ -76,7 +76,7 @@ const AuthLayout = ({ mode, hero, children }) => {
 
           {children}
         </div>
-      </section>
+      </main>
     </div>
   );
 };

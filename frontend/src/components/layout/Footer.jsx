@@ -16,7 +16,7 @@ const Footer = () => {
           {/* Logo */}
           <div style={{ flex: '2', minWidth: '200px' }}>
             <h2 style={{ color: 'white', marginBottom: '15px', display: 'flex', alignItems: 'center' }}>
-              <img src="/logo-96.png" width="36" height="36" alt="CompassPro" style={{ height: '36px', width: 'auto', marginInlineEnd: '10px' }} />
+              <img src="/logo-72.webp" width="36" height="36" alt="CompassPro" style={{ height: '36px', width: 'auto', marginInlineEnd: '10px' }} />
               CompassPro
             </h2>
             <p style={{ color: '#a8c8f0', lineHeight: '1.8' }}>

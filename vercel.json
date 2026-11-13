@@ -19,7 +19,7 @@
       ]
     },
     {
-      "source": "/(logo-96\\.png|logo-192\\.png|logo\\.png|hero-bg\\.jpg|hero-bg\\.webp|icons\\.svg)",
+      "source": "/(logo-72\\.webp|logo-160\\.webp|logo-96\\.png|logo-192\\.png|logo\\.png|hero-bg\\.jpg|hero-bg\\.webp|icons\\.svg)",
       "headers": [
         {
           "key": "Cache-Control",

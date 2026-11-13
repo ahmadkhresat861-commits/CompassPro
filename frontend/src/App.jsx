@@ -53,8 +53,8 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* LEGAL — public */}
-          <Route path="/privacy" element={<><Navbar /><Legal kind="privacy" /><Footer /></>} />
-          <Route path="/terms" element={<><Navbar /><Legal kind="terms" /><Footer /></>} />
+          <Route path="/privacy" element={<><Navbar /><main id="main"><Legal kind="privacy" /></main><Footer /></>} />
+          <Route path="/terms" element={<><Navbar /><main id="main"><Legal kind="terms" /></main><Footer /></>} />
 
           {/* HOME — public page, same for visitors and members (edited from Admin > Home) */}
           <Route
@@ -62,14 +62,14 @@ function App() {
             element={
               <>
                 <Navbar />
-                <Home variant="landing" />
+                <main id="main"><Home variant="landing" /></main>
                 <Footer />
               </>
             }
           />
 
           {/* PUBLIC INSTRUCTOR PROFILE (only admin-approved instructors) */}
-          <Route path="/instructors/:id" element={<><Navbar /><InstructorProfile /><Footer /></>} />
+          <Route path="/instructors/:id" element={<><Navbar /><main id="main"><InstructorProfile /></main><Footer /></>} />
 
           {/* ABOUT — public */}
           <Route
@@ -77,7 +77,7 @@ function App() {
             element={
               <>
                 <Navbar />
-                <About />
+                <main id="main"><About /></main>
                 <Footer />
               </>
             }
@@ -89,7 +89,7 @@ function App() {
             element={
               <>
                 <Navbar />
-                <Services />
+                <main id="main"><Services /></main>
                 <Footer />
               </>
             }
@@ -101,7 +101,7 @@ function App() {
             element={
               <>
                 <Navbar />
-                <Courses />
+                <main id="main"><Courses /></main>
                 <Footer />
               </>
             }
@@ -113,7 +113,7 @@ function App() {
             element={
               <>
                 <Navbar />
-                <Courses />
+                <main id="main"><Courses /></main>
                 <Footer />
               </>
             }
@@ -126,7 +126,7 @@ function App() {
               <ProtectedRoute>
                 <>
                   <Navbar />
-                  <Dashboard />
+                  <main id="main"><Dashboard /></main>
                   <Footer />
                 </>
               </ProtectedRoute>
@@ -140,7 +140,7 @@ function App() {
               <ProtectedRoute>
                 <>
                   <Navbar />
-                  <Profile />
+                  <main id="main"><Profile /></main>
                   <Footer />
                 </>
               </ProtectedRoute>
@@ -153,7 +153,7 @@ function App() {
             element={
               <>
                 <Navbar />
-                <Contact />
+                <main id="main"><Contact /></main>
                 <Footer />
               </>
             }
@@ -167,7 +167,7 @@ function App() {
               element={
                 <>
                   <Navbar />
-                  <Verify />
+                  <main id="main"><Verify /></main>
                   <Footer />
                 </>
               }
@@ -181,7 +181,7 @@ function App() {
               <ProtectedRoute>
                 <>
                   <Navbar />
-                  <Sessions />
+                  <main id="main"><Sessions /></main>
                   <Footer />
                 </>
               </ProtectedRoute>
@@ -214,11 +214,11 @@ function App() {
             element={
               <>
                 <Navbar />
-                <div style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '120px 16px 60px' }}>
+                <main id="main"><div style={{ minHeight: '70vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '120px 16px 60px' }}>
                   <h1 style={{ fontSize: '7.5rem', lineHeight: 1, fontWeight: 800, margin: 0, color: '#003366' }}>404</h1>
                   <p style={{ color: '#4A5D78', fontSize: '1.15rem', margin: '14px 0 28px' }}>This page does not exist.</p>
                   <a href="/home" style={{ background: '#F0A500', color: '#002347', padding: '14px 32px', borderRadius: 999, textDecoration: 'none', fontWeight: 800 }}>Back to Home</a>
-                </div>
+                </div></main>
                 <Footer />
               </>
             }
