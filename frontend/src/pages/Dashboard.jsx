@@ -591,7 +591,7 @@ const Dashboard = () => {
                     onClick={() => {
                       if (course) {
                         navigate(
-                          `/courses?course=${course.id}`
+                          `/courses/${course.id}`
                         );
                       }
                     }}
