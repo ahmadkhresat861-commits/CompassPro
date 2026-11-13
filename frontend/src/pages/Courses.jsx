@@ -183,6 +183,7 @@ const Courses = () => {
   // ============================================================
 
   const [lessons, setLessons] = useState([]);
+  const [outline, setOutline] = useState([]); // public lesson titles (no content)
   const [selectedLesson, setSelectedLesson] =
     useState(null);
 
@@ -298,6 +299,23 @@ const Courses = () => {
 
     setSelected(matched || null);
   }, [courseIdParam, courses]);
+
+  // Public outline (titles only) so visitors see what a course covers before enrolling.
+  useEffect(() => {
+    if (!selected) {
+      setOutline([]);
+      return;
+    }
+    let cancelled = false;
+    supabase
+      .rpc('get_course_outline', { p_course_id: selected.id })
+      .then(({ data, error }) => {
+        if (!cancelled) setOutline(error ? [] : data || []);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selected]);
 
   // ============================================================
   // WHEN COURSE SELECTED
@@ -1770,6 +1788,42 @@ className={
         {/* LEARNING AREA */}
         {/* يظهر فقط بعد التسجيل */}
         {/* ================================================== */}
+
+        {/* COURSE OUTLINE — titles only, for visitors who are not enrolled yet */}
+        {!enrollment && outline.length > 0 && (
+          <section
+            aria-labelledby="course-outline-title"
+            style={{
+              background: dm.reviewBg,
+              borderRadius: '15px',
+              padding: '25px',
+              boxShadow: dm.shadow,
+              marginBottom: '40px',
+            }}
+          >
+            <h2 id="course-outline-title" style={{ margin: '0 0 6px', color: dm.heading, fontSize: '1.4rem' }}>
+              {t.courseContent}
+            </h2>
+            <p style={{ margin: '0 0 18px', color: dm.subtext }}>
+              {outline.length} {t.lessonsWord} — {t.outlineHint}
+            </p>
+            <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: '8px' }}>
+              {outline.map((l, i) => (
+                <li key={l.id}>
+                  {l.chapter && l.chapter !== outline[i - 1]?.chapter && (
+                    <div style={{ fontWeight: 700, color: dm.heading, margin: i ? '14px 0 8px' : '0 0 8px' }}>
+                      {l.chapter}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', borderRadius: '10px', border: `1px solid ${dm.inputBorder}`, color: dm.text }}>
+                    <i className="fas fa-lock" aria-hidden="true" style={{ color: dm.subtext, fontSize: '0.85rem' }} />
+                    <span>{l.title}</span>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         {enrollment && (
           <div
