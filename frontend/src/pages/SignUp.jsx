@@ -8,7 +8,9 @@ import Captcha from '../components/common/Captcha';
 import { CAPTCHA_SITE_KEY } from '../utils/captcha';
 import { isPwned, isStrongEnough } from '../utils/password';
 
+import { useSEO } from '../hooks/useSEO';
 const SignUp = () => {
+  useSEO({ title: 'Create account', description: 'Create your free CompassPro account and start learning today.', path: '/signup', noindex: true });
   const { t } = useLang();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

@@ -8,6 +8,7 @@ import InstructorQuizzes from '../components/instructor/InstructorQuizzes';
 import InstructorSessions from '../components/instructor/InstructorSessions';
 import InstructorStudents from '../components/instructor/InstructorStudents';
 
+import { useSEO } from '../hooks/useSEO';
 const NAVY = '#003366';
 const GOLD = '#F0A500';
 const card = { background: '#fff', borderRadius: 24, padding: 24, boxShadow: '0 4px 20px rgba(0,51,102,0.08)', marginBottom: 20 };
@@ -31,6 +32,7 @@ const Kpi = ({ label, value, bg }) => (
 );
 
 const Instructor = () => {
+  useSEO({ title: 'Instructor', description: 'Manage your courses, lessons and students.', path: '/instructor', noindex: true });
   const navigate = useNavigate();
   const [tab, setTab] = useState('overview');
   const [me, setMe] = useState(null);

@@ -7,7 +7,9 @@ import { useLang } from '../context/LanguageContext';
 import Captcha from '../components/common/Captcha';
 import { CAPTCHA_SITE_KEY } from '../utils/captcha';
 
+import { useSEO } from '../hooks/useSEO';
 const ForgotPassword = () => {
+  useSEO({ title: 'Forgot password', description: 'Reset your CompassPro password.', path: '/forgot-password', noindex: true });
   const { t } = useLang();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');

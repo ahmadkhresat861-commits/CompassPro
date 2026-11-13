@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useLang } from '../context/LanguageContext';
 
+import { useSEO } from '../hooks/useSEO';
 const Sessions = () => {
+  useSEO({ title: 'Live sessions', description: 'Join live sessions with expert instructors.', path: '/sessions' });
   const { darkMode } = useLang();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);

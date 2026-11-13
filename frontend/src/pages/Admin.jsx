@@ -6,7 +6,9 @@ import Button from '../components/common/Button';
 import AdminAnalytics from '../components/admin/AdminAnalytics';
 import AdminHome from '../components/admin/AdminHome';
 
+import { useSEO } from '../hooks/useSEO';
 const Admin = () => {
+  useSEO({ title: 'Admin', description: 'CompassPro administration.', path: '/admin', noindex: true });
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('overview');

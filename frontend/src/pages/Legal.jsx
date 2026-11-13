@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLang } from '../context/LanguageContext';
 
+import { useSEO } from '../hooks/useSEO';
 // Privacy Policy and Terms of Use (EN / AR). Content lives here so the
 // wording stays next to the page; update LAST_UPDATED when it changes.
 const LAST_UPDATED = { en: 'October 2026', ar: 'أكتوبر 2026' };
@@ -252,6 +253,13 @@ const Legal = ({ kind }) => {
   const navigate = useNavigate();
   const c = CONTENT[kind][lang === 'ar' ? 'ar' : 'en'];
   const isAr = lang === 'ar';
+  useSEO({
+    title: kind === 'privacy' ? 'Privacy Policy' : 'Terms of Use',
+    description: kind === 'privacy'
+      ? 'How CompassPro collects, uses and protects your data.'
+      : 'The terms for using the CompassPro learning platform.',
+    path: kind === 'privacy' ? '/privacy' : '/terms',
+  });
   const dm = {
     bg: darkMode ? '#0f0f0f' : '#F3F7FC',
     card: darkMode ? '#1a1a2e' : '#ffffff',

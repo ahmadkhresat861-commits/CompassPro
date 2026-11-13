@@ -7,10 +7,12 @@ import { useLang } from '../context/LanguageContext';
 import Captcha from '../components/common/Captcha';
 import { CAPTCHA_SITE_KEY } from '../utils/captcha';
 
+import { useSEO } from '../hooks/useSEO';
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_TIME = 15 * 60 * 1000;
 
 const Login = () => {
+  useSEO({ title: 'Sign in', description: 'Sign in to your CompassPro account to continue learning.', path: '/login', noindex: true });
   const { t } = useLang();
   const [showPw, setShowPw] = useState(false);
   const [fadeIn, setFadeIn] = useState(false);

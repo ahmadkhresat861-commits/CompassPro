@@ -6,7 +6,9 @@ import Avatar from '../components/common/Avatar';
 import Button from '../components/common/Button';
 import DualOrbitLoader from '../components/common/DualOrbitLoader';
 
+import { useSEO } from '../hooks/useSEO';
 const Profile = () => {
+  useSEO({ title: 'My profile', description: 'Manage your CompassPro profile.', path: '/profile', noindex: true });
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);

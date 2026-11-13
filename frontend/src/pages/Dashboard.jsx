@@ -7,7 +7,9 @@ import { useLang } from '../context/LanguageContext';
 import Avatar from '../components/common/Avatar';
 import DualOrbitLoader from '../components/common/DualOrbitLoader';
 
+import { useSEO } from '../hooks/useSEO';
 const Dashboard = () => {
+  useSEO({ title: 'My dashboard', description: 'Your courses, progress and certificates.', path: '/dashboard', noindex: true });
   const navigate = useNavigate();
   const { darkMode } = useLang();
 

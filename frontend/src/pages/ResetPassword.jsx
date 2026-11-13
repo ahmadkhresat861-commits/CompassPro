@@ -6,7 +6,9 @@ import AuthLayout from '../components/layout/AuthLayout';
 import { useLang } from '../context/LanguageContext';
 import { isPwned, isStrongEnough } from '../utils/password';
 
+import { useSEO } from '../hooks/useSEO';
 const ResetPassword = () => {
+  useSEO({ title: 'Choose a new password', description: 'Set a new password for your CompassPro account.', path: '/reset-password', noindex: true });
   const { t } = useLang();
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);

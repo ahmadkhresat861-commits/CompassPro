@@ -23,12 +23,14 @@ function setMetaByAttr(attrName, attrValue, content) {
  *
  * path should be the route path starting with "/", e.g. "/courses".
  */
-export function useSEO({ title, description, path, structuredData }) {
+export function useSEO({ title, description, path, structuredData, noindex = false }) {
   useEffect(() => {
     const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
     document.title = fullTitle;
 
     setMetaByAttr('name', 'description', description);
+    // Private / account pages must not be indexed; every other page resets it.
+    setMetaByAttr('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
     setMetaByAttr('property', 'og:title', fullTitle);
     setMetaByAttr('property', 'og:description', description);
     setMetaByAttr('property', 'og:site_name', SITE_NAME);
@@ -61,5 +63,5 @@ export function useSEO({ title, description, path, structuredData }) {
     } else if (ldTag) {
       ldTag.remove();
     }
-  }, [title, description, path, structuredData]);
+  }, [title, description, path, structuredData, noindex]);
 }
